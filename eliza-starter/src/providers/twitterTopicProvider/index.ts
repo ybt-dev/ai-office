@@ -1,8 +1,6 @@
 import { IAgentRuntime, Provider, State, Memory } from "@elizaos/core";
+import { twitterTopicHandler } from "../../utils/twitter-topic";
 
-export const TABLE_TOPIC_KEY = "twitter/current_topic";
-
-const DEFAULT_TOPIC = "crypto memes";
 
 export class TwitterTopicProvider implements Provider {
     async get(runtime: IAgentRuntime, message: Memory, state?: State): Promise<string> {
@@ -15,7 +13,7 @@ export class TwitterTopicProvider implements Provider {
                 throw new Error("No message content provided");
             }
 
-            const topicFromDB = (await runtime.cacheManager.get<string>(TABLE_TOPIC_KEY)) || DEFAULT_TOPIC;
+            const topicFromDB = twitterTopicHandler.get(runtime);
 
             return `Use this topic: ${topicFromDB} as a main topic for tweet generation`;
         } catch (error) {
