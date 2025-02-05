@@ -18,7 +18,7 @@ import {
   elizaLogger,
   settings,
   IDatabaseAdapter,
-  validateCharacterConfig
+  validateCharacterConfig,
 } from "@elizaos/core";
 import { bootstrapPlugin } from "@elizaos/plugin-bootstrap";
 import { createNodePlugin } from "@elizaos/plugin-node";
@@ -34,10 +34,10 @@ import { producer } from "./characters/producer.ts";
 import { advertiser } from "./characters/advertiser.ts";
 import { influencer } from "./characters/influencer.ts";
 import dexScreenerPlugin from "./plugin/dexScreenerPlugin/src/index.ts";
+import paymentPlugin from "./plugin/paymentPlugin/src/index.ts";
 
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
-
 
 export const wait = (minTime: number = 1000, maxTime: number = 3000) => {
   const waitTime =
@@ -181,7 +181,7 @@ export async function initializeClients(
   // }
 
   if (clientTypes.includes("twitter")) {
-    const twitterClients = await TwitterClientInterface.start(runtime)
+    const twitterClients = await TwitterClientInterface.start(runtime);
     clients.push(twitterClients);
   }
 
@@ -225,7 +225,8 @@ export function createAgent(
       dexScreenerPlugin,
       generateWebSearch,
       bootstrapPlugin,
-      nodePlugin
+      nodePlugin,
+      paymentPlugin,
     ].filter(Boolean),
     providers: [],
     actions: [],
@@ -268,15 +269,17 @@ async function startAgent(character: Character, directClient: DirectClient) {
 
     await runtime.initialize();
 
-    const cookies = runtime.getSetting('TWITTER_COOKIES') || process.env.TWITTER_COOKIES;
-    const username = runtime.getSetting('TWITTER_USERNAME') || process.env.TWITTER_USERNAME;
+    const cookies =
+      runtime.getSetting("TWITTER_COOKIES") || process.env.TWITTER_COOKIES;
+    const username =
+      runtime.getSetting("TWITTER_USERNAME") || process.env.TWITTER_USERNAME;
 
     if (cookies) {
       elizaLogger.log(`Reading cookies from ENV...`);
 
       await runtime.cacheManager.set(
         `twitter/${username}/cookies`,
-        JSON.parse(cookies),
+        JSON.parse(cookies)
       );
     }
 
