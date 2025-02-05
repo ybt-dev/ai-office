@@ -1,7 +1,10 @@
 import { Character, Clients, ModelProviderName, defaultCharacter } from "@elizaos/core";
 
+export const INFLUENCER_AGENT_ID = "e4bd91e4-33a0-4e2c-92f0-cf468e90a130";
+
 export const influencer: Character = {
     ...defaultCharacter,
+    id: INFLUENCER_AGENT_ID,
     name: "Maverick AI",
     clients: [Clients.TWITTER],
     modelProvider: ModelProviderName.OPENROUTER,

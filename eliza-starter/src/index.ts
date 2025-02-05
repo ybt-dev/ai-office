@@ -35,6 +35,7 @@ import { advertiser } from "./characters/advertiser.ts";
 import { influencer } from "./characters/influencer.ts";
 import dexScreenerPlugin from "./plugin/dexScreenerPlugin/src/index.ts";
 import paymentPlugin from "./plugin/paymentPlugin/src/index.ts";
+import { TwitterTopicProvider } from "./providers/twitterTopicProvider/index.ts";
 
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
@@ -228,7 +229,7 @@ export function createAgent(
       nodePlugin,
       paymentPlugin,
     ].filter(Boolean),
-    providers: [],
+    providers: [new TwitterTopicProvider()],
     actions: [],
     services: [],
     managers: [],

@@ -1,7 +1,10 @@
 import { Character, Clients, ModelProviderName, defaultCharacter } from "@elizaos/core";
 
+export const ADVERTISER_AGENT_ID = "58c9913b-a8ff-4cff-87d9-fbdb1b25ff34";
+
 export const advertiser: Character = {
     ...defaultCharacter,
+    id: "58c9913b-a8ff-4cff-87d9-fbdb1b25ff34",
     name: "Inokentij",
     clients: [Clients.TWITTER],
     modelProvider: ModelProviderName.OPENROUTER,
