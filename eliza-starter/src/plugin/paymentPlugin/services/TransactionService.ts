@@ -1,5 +1,5 @@
-import { Service, ServiceType } from "@elizaos/core";
 import { ethers } from "ethers";
+import { Service, ServiceType } from "@elizaos/core";
 
 export type TransactionStatus = "PENDING" | "SUCCESS" | "FAILED";
 
@@ -16,20 +16,9 @@ export interface ITransactionService {
 export class TransactionService implements Service, ITransactionService {
   readonly serviceType: ServiceType = ServiceType.TEXT_GENERATION;
   private readonly provider: ethers.providers.JsonRpcProvider;
-  private readonly usdcContract: ethers.Contract;
-  private readonly USDC_CONTRACT = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
 
   constructor(provider: ethers.providers.JsonRpcProvider) {
     this.provider = provider;
-    this.usdcContract = new ethers.Contract(
-      this.USDC_CONTRACT,
-      [
-        "function transfer(address to, uint256 amount) returns (bool)",
-        "function balanceOf(address account) view returns (uint256)",
-        "event Transfer(address indexed from, address indexed to, uint256 value)",
-      ],
-      provider
-    );
   }
 
   async initialize(): Promise<void> {
@@ -44,8 +33,10 @@ export class TransactionService implements Service, ITransactionService {
 
   async transfer(from: string, to: string, amount: string): Promise<string> {
     const signer = this.provider.getSigner(from);
-    const contractWithSigner = this.usdcContract.connect(signer);
-    const tx = await contractWithSigner.transfer(to, amount);
+    const tx = await signer.sendTransaction({
+      to: to,
+      value: ethers.utils.parseEther(amount),
+    });
     return tx.hash;
   }
 
@@ -55,14 +46,20 @@ export class TransactionService implements Service, ITransactionService {
   }
 
   async getBalance(address: string): Promise<string> {
-    return await this.usdcContract.balanceOf(address);
+    const balance = await this.provider.getBalance(address);
+    return ethers.utils.formatEther(balance);
   }
 
   subscribeToTransfers(
     callback: (from: string, to: string, amount: string) => void
   ): void {
-    this.usdcContract.on("Transfer", (from, to, amount) => {
-      callback(from, to, amount.toString());
+    this.provider.on("block", async (blockNumber) => {
+      const block = await this.provider.getBlockWithTransactions(blockNumber);
+      block.transactions.forEach((tx) => {
+        if (tx.value.gt(0)) {
+          callback(tx.from, tx.to, ethers.utils.formatEther(tx.value));
+        }
+      });
     });
   }
 }
