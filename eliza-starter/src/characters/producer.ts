@@ -1,8 +1,11 @@
 import { Character, Clients, ModelProviderName, defaultCharacter } from "@elizaos/core";
 
+export const PRODUCER_AGENT_ID = "1de943dc-7fbf-4e84-8ae5-ce6b254d395c";
+
 export const producer: Character = {
     ...defaultCharacter,
-    name: "",
+    id: PRODUCER_AGENT_ID,
+    name: "Lex",
     clients: [Clients.TWITTER],
     modelProvider: ModelProviderName.OPENROUTER,
     imageModelProvider: ModelProviderName.TOGETHER,
