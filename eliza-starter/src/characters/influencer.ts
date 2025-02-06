@@ -1,4 +1,7 @@
 import { Character, Clients, ModelProviderName, defaultCharacter } from "@elizaos/core";
+import { imageGenerationPlugin } from "../plugin/imagePlugin/index.ts";
+import dexScreenerPlugin from "../plugin/dexScreenerPlugin/src/index.ts";
+import { bootstrapPlugin } from "@elizaos/plugin-bootstrap";
 
 export const INFLUENCER_AGENT_ID = "e4bd91e4-33a0-4e2c-92f0-cf468e90a130";
 
@@ -9,6 +12,12 @@ export const influencer: Character = {
     clients: [Clients.TWITTER],
     modelProvider: ModelProviderName.OPENROUTER,
     imageModelProvider: ModelProviderName.TOGETHER,
+    plugins: [
+        imageGenerationPlugin,
+        dexScreenerPlugin,
+        bootstrapPlugin,
+    ],
+
     settings: {
         voice: {
             model: "en_US-male-medium",

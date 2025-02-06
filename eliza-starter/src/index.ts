@@ -22,22 +22,20 @@ import {
   IDatabaseAdapter,
   validateCharacterConfig
 } from "@elizaos/core";
-import { bootstrapPlugin } from "@elizaos/plugin-bootstrap";
 import { createNodePlugin } from "@elizaos/plugin-node";
-import { imageGenerationPlugin } from "./plugin/imagePlugin/index.ts";
-import { generateWebSearch } from "@elizaos/core";
 import Database from "better-sqlite3";
 import fs from "fs";
-import readline from "readline";
 import yargs from "yargs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { producer } from "./characters/producer.ts";
 import { advertiser } from "./characters/advertiser.ts";
 import { influencer } from "./characters/influencer.ts";
-import dexScreenerPlugin from "./plugin/dexScreenerPlugin/src/index.ts";
 import { TwitterTopicProvider } from "./providers/twitterTopicProvider/index.ts";
 import { agentsManager } from "./agents/manager/index.ts";
+import { configDotenv } from "dotenv";
+
+configDotenv();
 
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
