@@ -296,9 +296,9 @@ async function startAgent(character: Character, directClient: DirectClient) {
     const clients = await initializeClients(character, runtime);
 
     directClient.registerAgent(runtime);
-    
+
     agentsManager.addAgent(runtime.agentId, runtime);
-    
+
     return clients;
   } catch (error) {
     elizaLogger.error(
