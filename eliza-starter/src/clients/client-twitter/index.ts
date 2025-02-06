@@ -1978,7 +1978,6 @@ Write a prompt. Only include the prompt and nothing else.`;
             elizaLogger.log("IMAGEUSAGE", imageUsage)
 
             const agent = await agentsManager.getAgent(INFLUENCER_AGENT_ID);
-
             elizaLogger.log("Agents ID", agent.agentId);
 
             let mediaFiles = [];
