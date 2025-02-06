@@ -17,7 +17,6 @@ export const influencer: Character = {
         dexScreenerPlugin,
         bootstrapPlugin,
     ],
-
     settings: {
         voice: {
             model: "en_US-male-medium",
