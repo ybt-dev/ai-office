@@ -1573,7 +1573,7 @@ const twitterPostTemplate = `
 
 {{postDirections}}
 
-# Task: Generate a post in the voice and style and perspective of {{agentName}} @{{twitterUserName}} and using {{ GENERATE_IMAGE }} for images.
+# Task: Generate a post in the voice and style and perspective of {{agentName}} @{{twitterUserName}}.
 Write a post that is {{adjective}} about {{topic}} (without mentioning {{topic}} directly), from the perspective of {{agentName}}. Do not add commentary or acknowledge this request, just write the post.
 Your response should be 1, 2, or 3 sentences (choose the length at random).
 Keep your response brief and concise as it MUST be less than {{maxTweetLength}} characters.
@@ -2198,6 +2198,7 @@ Write a prompt. Only include the prompt and nothing else.`;
                 elizaLogger.error("Error sending tweet:", error);
             }
         } catch (error) {
+            elizaLogger.error(error);
             elizaLogger.error("Error generating new tweet:", error);
         }
     }
