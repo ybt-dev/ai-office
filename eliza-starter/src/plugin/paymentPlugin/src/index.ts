@@ -3,7 +3,7 @@ import {
   ProducerService,
   WalletService,
   TransactionService,
-} from "../services";
+} from "../services/index.ts";
 import dotenv from "dotenv";
 import { ethers } from "ethers";
 

@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import CryptoJS from "crypto-js";
 import { Service, ServiceType } from "@elizaos/core";
-import { ITransactionService } from "./TransactionService";
+import { ITransactionService } from "./TransactionService.ts";
 
 export interface IWalletService {
   initialize(): Promise<void>;

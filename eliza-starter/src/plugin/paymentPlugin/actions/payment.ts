@@ -8,8 +8,8 @@ import {
 import {
   TransactionService,
   ITransactionService,
-} from "../services/TransactionService";
-import { WalletService, IWalletService } from "../services/WalletService";
+} from "../services/TransactionService.ts";
+import { WalletService, IWalletService } from "../services/WalletService.ts";
 
 export class PaymentAction implements Action {
   name = "PROCESS_PAYMENT";

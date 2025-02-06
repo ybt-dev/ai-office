@@ -1,6 +1,6 @@
 import { Service, ServiceType } from "@elizaos/core";
-import { ITransactionService } from "./TransactionService";
-import { IWalletService } from "./WalletService";
+import { ITransactionService } from "./TransactionService.ts";
+import { IWalletService } from "./WalletService.ts";
 
 export class ProducerService implements Service {
   readonly serviceType: ServiceType = ServiceType.TEXT_GENERATION;
