@@ -22,12 +22,12 @@ export class PaymentAction implements Action {
     [
       {
         user: "{{user}}",
-        content: { text: "send 100 USD to @john" },
+        content: { text: "send 100 ETH to @john" },
       },
       {
         user: "{{system}}",
         content: {
-          text: "Payment of 100 USD to @john processed successfully",
+          text: "Payment of 100 ETH to @john processed successfully",
           action: "PROCESS_PAYMENT",
         },
       },
@@ -70,7 +70,7 @@ export class PaymentAction implements Action {
       const {
         amount,
         recipient,
-        currency = "USDC",
+        currency = "ETH",
       } = (message.content as {
         amount?: string;
         recipient?: string;
