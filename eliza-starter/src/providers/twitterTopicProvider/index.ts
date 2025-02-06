@@ -1,5 +1,5 @@
 import { IAgentRuntime, Provider, State, Memory } from "@elizaos/core";
-import { twitterTopicHandler } from "../../utils/twitter-topic";
+import { twitterTopicHandler } from "../../utils/twitter-topic.ts";
 
 
 export class TwitterTopicProvider implements Provider {

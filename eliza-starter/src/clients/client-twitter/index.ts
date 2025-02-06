@@ -34,6 +34,9 @@ import path from "path";
 import { z } from "zod";
 import { EventEmitter } from "events";
 import { saveHeuristImage, saveBase64Image } from "../../plugin/imagePlugin/index.ts";
+import { agentsManager } from "../../agents/manager/index.ts";
+import { PRODUCER_AGENT_ID } from "../../characters/producer.ts";
+import { INFLUENCER_AGENT_ID } from "../../characters/influencer.ts";
 
 export function extractAnswer(text: string): string {
     const startIndex = text.indexOf("Answer: ") + 8;
@@ -1973,6 +1976,10 @@ Write a prompt. Only include the prompt and nothing else.`;
 
             const imageUsage = (await client.runtime.cacheManager.get<{ count: number }>(imageUsageKey)) || { count: 0 };
             elizaLogger.log("IMAGEUSAGE", imageUsage)
+
+            const agent = await agentsManager.getAgent(INFLUENCER_AGENT_ID);
+
+            elizaLogger.log("Agents ID", agent.agentId);
 
             let mediaFiles = [];
             if (imageUsage.count < 2) {
