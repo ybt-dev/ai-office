@@ -1,14 +1,22 @@
 import { Character, Clients, ModelProviderName, defaultCharacter } from "@elizaos/core";
+import { imageGenerationPlugin } from "../plugin/imagePlugin/index.ts";
+import dexScreenerPlugin from "../plugin/dexScreenerPlugin/src/index.ts";
+import { bootstrapPlugin } from "@elizaos/plugin-bootstrap";
 
 export const ADVERTISER_AGENT_ID = "58c9913b-a8ff-4cff-87d9-fbdb1b25ff34";
 
 export const advertiser: Character = {
     ...defaultCharacter,
-    id: "58c9913b-a8ff-4cff-87d9-fbdb1b25ff34",
+    id: ADVERTISER_AGENT_ID,
     name: "Inokentij",
     clients: [Clients.TWITTER],
     modelProvider: ModelProviderName.OPENROUTER,
     imageModelProvider: ModelProviderName.TOGETHER,
+    plugins: [
+        imageGenerationPlugin,
+        dexScreenerPlugin,
+        bootstrapPlugin,
+    ],
     settings: {
         voice: {
             model: "en_US-male-medium",
