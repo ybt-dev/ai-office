@@ -1,5 +1,7 @@
 import { PostgresDatabaseAdapter } from "@elizaos/adapter-postgres";
 import { SqliteDatabaseAdapter } from "@elizaos/adapter-sqlite";
+import { MongoClient } from "mongodb";
+import { MongoDBDatabaseAdapter } from "@elizaos/adapter-mongodb";
 import { DirectClient } from "@elizaos/client-direct";
 import { AutoClientInterface } from "@elizaos/client-auto";
 import { TwitterClientInterface } from "./clients/client-twitter/index.ts";
@@ -151,6 +153,12 @@ export function getTokenForProvider(
 }
 
 function initializeDatabase(dataDir: string) {
+  // const DATABASE_URL = "";
+  // CONST DATABASE_NAME = ""
+  // const client = new MongoClient(DATABASE_URL)
+  // const db = new MongoDBDatabaseAdapter(client, DATABASE_NAME);
+  // return db;
+
   if (process.env.POSTGRES_URL) {
     const db = new PostgresDatabaseAdapter({
       connectionString: process.env.POSTGRES_URL,
