@@ -11,6 +11,7 @@ import type {
 } from "viem";
 import * as viemChains from "viem/chains";
 
+// List of supported chains from viemChains
 const _SupportedChainList = Object.keys(viemChains) as Array<
   keyof typeof viemChains
 >;
@@ -128,3 +129,29 @@ export interface TokenPriceResponse {
 export interface TokenListResponse {
   tokens: TokenData[];
 }
+
+// ----------------------------
+// Added MintNFTContent and Schema definitions (without using "solana")
+
+import { z } from "zod";
+import type { Content } from "@elizaos/core";
+
+// Use the existing _SupportedChainList without appending "solana"
+const supportedChainTuple = _SupportedChainList as unknown as [
+  string,
+  ...string[]
+];
+
+export interface MintNFTContent extends Content {
+  collectionAddress: string;
+  chainName: string;
+}
+
+export const MintNFTSchema = z.object({
+  collectionAddress: z.string(),
+  chainName: z.enum([...supportedChainTuple]).nullable(),
+});
+
+export const CreateCollectionSchema = z.object({
+  chainName: z.enum([...supportedChainTuple]).nullable(),
+});

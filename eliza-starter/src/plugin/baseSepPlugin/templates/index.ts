@@ -31,161 +31,44 @@ Remember:
 - The recipient address must be a valid Ethereum address starting with "0x"
 `;
 
-export const bridgeTemplate = `Given the recent messages and wallet information below:
+export const createCollectionTemplate = `Given the recent messages and wallet information below:
 
 {{recentMessages}}
 
 {{walletInfo}}
 
-Extract the following information about the requested token bridge:
-- Token symbol or address to bridge
-- Source chain
-- Destination chain
-- Amount to bridge: Must be a string representing the amount in ether (only number without coin symbol, e.g., "0.1")
-- Destination address (if specified)
+Extract the following information about the requested transfer:
+- chainName to execute on: Must be one of ["ethereum", "base", ...] (like in viem/chains)
 
-Respond with a JSON markdown block containing only the extracted values:
+Respond with a JSON markdown block containing only the extracted values. All fields are required:
 
 \`\`\`json
 {
-    "token": string | null,
-    "fromChain": "ethereum" | "abstract" | "base" | "sepolia" | "bsc" | "arbitrum" | "avalanche" | "polygon" | "optimism" | "cronos" | "gnosis" | "fantom" | "fraxtal" | "klaytn" | "celo" | "moonbeam" | "aurora" | "harmonyOne" | "moonriver" | "arbitrumNova" | "mantle" | "linea" | "scroll" | "filecoin" | "taiko" | "zksync" | "canto" | "alienx" | "gravity" | null,
-    "toChain": "ethereum" | "abstract" | "base" | "sepolia" | "bsc" | "arbitrum" | "avalanche" | "polygon" | "optimism" | "cronos" | "gnosis" | "fantom" | "fraxtal" | "klaytn" | "celo" | "moonbeam" | "aurora" | "harmonyOne" | "moonriver" | "arbitrumNova" | "mantle" | "linea" | "scroll" | "filecoin" | "taiko" | "zksync" | "canto" | "alienx" | "gravity" |  null,
-    "amount": string | null,
-    "toAddress": string | null
+    "chainName": SUPPORTED_CHAINS,
 }
 \`\`\`
+
+Note: Ensure to use the user’s latest instruction to extract data; if it is not within the defined options, use null.
+
 `;
 
-export const swapTemplate = `Given the recent messages and wallet information below:
+export const collectionImageTemplate = `
+Generate a logo with the text "{{collectionName}}", using orange as the main color, with a sci-fi and mysterious background theme
+`;
+
+export const mintNFTTemplate = `Respond with a JSON markdown block containing only the extracted values. Use null for any values that cannot be determined.
+Respond with a JSON markdown block containing only the extracted values. All fields are required:
+\`\`\`json
+{
+    "collectionAddress": "D8j4ubQ3MKwmAqiJw83qT7KQNKjhsuoC7zJJdJa5BkvS",
+    "chainName": SUPPORTED_CHAINS,
+}
+\`\`\`
 
 {{recentMessages}}
 
-{{walletInfo}}
+Given the recent messages, extract the following information about the requested mint nft:
+- collection contract address
 
-Extract the following information about the requested token swap:
-- Input token symbol or address (the token being sold)
-- Output token symbol or address (the token being bought)
-- Amount to swap: Must be a string representing the amount in ether (only number without coin symbol, e.g., "0.1")
-- Chain to execute on
 
-Respond with a JSON markdown block containing only the extracted values. Use null for any values that cannot be determined:
-
-\`\`\`json
-{
-    "inputToken": string | null,
-    "outputToken": string | null,
-    "amount": string | null,
-    "chain": "ethereum" | "abstract" | "base" | "sepolia" | "bsc" | "arbitrum" | "avalanche" | "polygon" | "optimism" | "cronos" | "gnosis" | "fantom" | "klaytn" | "celo" | "moonbeam" | "aurora" | "harmonyOne" | "moonriver" | "arbitrumNova" | "mantle" | "linea" | "scroll" | "filecoin" | "taiko" | "zksync" | "canto" | "alienx" | null,
-    "slippage": number | null
-}
-\`\`\`
-`;
-
-export const proposeTemplate = `Given the recent messages and wallet information below:
-
-{{recentMessages}}
-
-{{walletInfo}}
-
-Extract the following information about the requested proposal:
-- Targets
-- Values
-- Calldatas
-- Description
-- Governor address
-- Chain to execute on
-
-Respond with a JSON markdown block containing only the extracted values. Use null for any values that cannot be determined:
-
-\`\`\`json
-{
-    "targets": string[] | null,
-    "values": string[] | null,
-    "calldatas": string[] | null,
-    "description": string | null,
-    "governor": string | null
-    "chain": "ethereum" | "base" | "sepolia" | "bsc" | "arbitrum" | "avalanche" | "polygon" | "optimism" | "cronos" | "gnosis" | "fantom" | "klaytn" | "celo" | "moonbeam" | "aurora" | "harmonyOne" | "moonriver" | "arbitrumNova" | "mantle" | "linea" | "scroll" | "filecoin" | "taiko" | "zksync" | "canto" | null,
-}
-\`\`\`
-`;
-
-export const voteTemplate = `Given the recent messages and wallet information below:
-
-{{recentMessages}}
-
-{{walletInfo}}
-
-Extract the following information about the requested vote:
-- Proposal ID
-- Support (1 for yes, 2 for no, 3 for abstain)
-- Governor address
-- Chain to execute on
-
-Respond with a JSON markdown block containing only the extracted values. Use null for any values that cannot be determined:
-
-\`\`\`json
-{
-    "proposalId": string | null,
-    "support": number | null,
-    "governor": string | null
-    "chain": "ethereum" | "base" | "sepolia" | "bsc" | "arbitrum" | "avalanche" | "polygon" | "optimism" | "cronos" | "gnosis" | "fantom" | "klaytn" | "celo" | "moonbeam" | "aurora" | "harmonyOne" | "moonriver" | "arbitrumNova" | "mantle" | "linea" | "scroll" | "filecoin" | "taiko" | "zksync" | "canto" | null,
-}
-\`\`\`
-`;
-
-export const queueProposalTemplate = `Given the recent messages and wallet information below:
-
-{{recentMessages}}
-
-{{walletInfo}}
-
-Extract the following information about the requested proposal:
-- Targets
-- Values
-- Calldatas
-- Description
-- Governor address
-- Chain to execute on
-
-Respond with a JSON markdown block containing only the extracted values. Use null for any values that cannot be determined:
-
-\`\`\`json
-{
-    "targets": string[] | null,
-    "values": string[] | null,
-    "calldatas": string[] | null,
-    "description": string | null,
-    "governor": string | null
-    "chain": "ethereum" | "base" | "sepolia" | "bsc" | "arbitrum" | "avalanche" | "polygon" | "optimism" | "cronos" | "gnosis" | "fantom" | "klaytn" | "celo" | "moonbeam" | "aurora" | "harmonyOne" | "moonriver" | "arbitrumNova" | "mantle" | "linea" | "scroll" | "filecoin" | "taiko" | "zksync" | "canto" | null,
-}
-\`\`\`
-`;
-
-export const executeProposalTemplate = `Given the recent messages and wallet information below:
-
-{{recentMessages}}
-
-{{walletInfo}}
-
-Extract the following information about the requested proposal:
-- Targets
-- Values
-- Calldatas
-- Description
-- Governor address
-- Chain to execute on
-
-Respond with a JSON markdown block containing only the extracted values. Use null for any values that cannot be determined:
-
-\`\`\`json
-{
-    "targets": string[] | null,
-    "values": string[] | null,
-    "calldatas": string[] | null,
-    "description": string | null,
-    "governor": string | null
-    "chain": "ethereum" | "base" | "sepolia" | "bsc" | "arbitrum" | "avalanche" | "polygon" | "optimism" | "cronos" | "gnosis" | "fantom" | "klaytn" | "celo" | "moonbeam" | "aurora" | "harmonyOne" | "moonriver" | "arbitrumNova" | "mantle" | "linea" | "scroll" | "filecoin" | "taiko" | "zksync" | "canto" | null,
-}
-\`\`\`
-`;
+Note: Ensure to use the user’s latest instruction to extract data; if it is not within the defined options, use null.`;
