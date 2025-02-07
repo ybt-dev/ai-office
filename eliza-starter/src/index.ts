@@ -37,6 +37,7 @@ import paymentPlugin from "./plugin/paymentPlugin/src/index.ts";
 import { TwitterTopicProvider } from "./providers/twitterTopicProvider/index.ts";
 import { agentsManager } from "./agents/manager/index.ts";
 import { configDotenv } from "dotenv";
+import { processNewStrategy } from "./actions/processNewStrategy/index.ts";
 
 configDotenv();
 
@@ -232,7 +233,7 @@ export function createAgent(
     character,
     plugins: [nodePlugin],
     providers: [new TwitterTopicProvider()],
-    actions: [],
+    actions: [processNewStrategy],
     services: [],
     managers: [],
     cacheManager: cache,

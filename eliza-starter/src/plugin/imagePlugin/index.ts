@@ -93,7 +93,6 @@ var imageGeneration = {
   description: "Generate an image to go along with the message.",
   suppressInitialMessage: true,
   validate: async (runtime, _message) => {
-    elizaLogger.log("START VALIDATION");
     elizaLogger.log("key", runtime.getSetting("TOGETHER_API_KEY"))
 
     await validateImageGenConfig(runtime);
