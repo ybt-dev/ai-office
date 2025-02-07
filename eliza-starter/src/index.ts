@@ -31,9 +31,6 @@ import { fileURLToPath } from "url";
 import { producer } from "./characters/producer.ts";
 import { advertiser } from "./characters/advertiser.ts";
 import { influencer } from "./characters/influencer.ts";
-import dexScreenerPlugin from "./plugin/dexScreenerPlugin/src/index.ts";
-import paymentPlugin from "./plugin/paymentPlugin/src/index.ts";
-
 import { TwitterTopicProvider } from "./providers/twitterTopicProvider/index.ts";
 import { agentsManager } from "./agents/manager/index.ts";
 import { configDotenv } from "dotenv";
