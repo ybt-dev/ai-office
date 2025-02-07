@@ -5,7 +5,6 @@ import {
   defaultCharacter,
 } from "@elizaos/core";
 import { imageGenerationPlugin } from "../plugin/imagePlugin/index.ts";
-import dexScreenerPlugin from "../plugin/dexScreenerPlugin/src/index.ts";
 import { bootstrapPlugin } from "@elizaos/plugin-bootstrap";
 import paymentPlugin from "../plugin/paymentPlugin/src/index.ts";
 
@@ -15,15 +14,10 @@ export const producer: Character = {
   ...defaultCharacter,
   id: PRODUCER_AGENT_ID,
   name: "Lex",
-  clients: [Clients.TWITTER],
+  clients: [],
   modelProvider: ModelProviderName.OPENROUTER,
   imageModelProvider: ModelProviderName.TOGETHER,
-  plugins: [
-    imageGenerationPlugin,
-    dexScreenerPlugin,
-    bootstrapPlugin,
-    paymentPlugin,
-  ],
+  plugins: [imageGenerationPlugin, bootstrapPlugin],
   settings: {
     voice: {
       model: "en_US-male-medium",
