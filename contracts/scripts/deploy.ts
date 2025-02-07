@@ -1,4 +1,4 @@
-import { ethers } from "hardhat";
+import { ethers, run } from "hardhat";
 
 async function main() {
   const name = "My NFT Collection";
@@ -22,7 +22,11 @@ async function main() {
 
   console.log("Verifying contract...");
   try {
-    await run();
+    await run("verify:verify", {
+      address: contractAddress,
+      constructorArguments: [name, symbol, baseURI],
+    });
+    console.log("Contract verified successfully");
   } catch (error) {
     if ((error as Error).message.includes("Already Verified")) {
       console.log("Contract is already verified!");
