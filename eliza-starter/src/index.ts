@@ -44,30 +44,6 @@ const __filename = fileURLToPath(import.meta.url); // get the resolved path to t
 const __dirname = path.dirname(__filename); // get the name of the directory
 
 
-class ExtendedDirectClient extends DirectClient {
-  constructor() {
-      super();
-      this.app.post("/newRoute", async (req: any, res: any) => {
-          await callGenerate();
-          res.json({ message: "New route added successfully" });
-      });
-  }
-}
-const DirectClientInterface: Client = {
-  start: async (_runtime: IAgentRuntime) => {
-      elizaLogger.log("DirectClientInterface start");
-      const client = new ExtendedDirectClient();
-      const serverPort = parseInt(settings.SERVER_PORT || "3000");
-      client.start(serverPort);
-      return client;
-  },
-  stop: async (_runtime: IAgentRuntime, client?: Client) => {
-      if (client instanceof ExtendedDirectClient) {
-          client.stop();
-      }
-  },
-};
-
 export const wait = (minTime: number = 1000, maxTime: number = 3000) => {
   const waitTime =
     Math.floor(Math.random() * (maxTime - minTime + 1)) + minTime;
@@ -210,10 +186,6 @@ export async function initializeClients(
     if (autoClient) clients.push(autoClient);
   }
 
-  if(clientTypes.includes("direct")) {
-    const directClient = await DirectClientInterface.start(runtime);
-    if(directClient) clients.push(directClient)
-  }
   if (clientTypes.includes("telegram")) {
     const telegramClient = await TelegramClientInterface.start(runtime);
     if (telegramClient) clients.push(telegramClient);
