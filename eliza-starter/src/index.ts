@@ -34,7 +34,6 @@ import { influencer } from "./characters/influencer.ts";
 import { TwitterTopicProvider } from "./providers/twitterTopicProvider/index.ts";
 import { agentsManager } from "./agents/manager/index.ts";
 import { configDotenv } from "dotenv";
-import { ProcessNewStrategy } from "./actions/processNewStrategy/index.ts";
 import { TelegramClientInterface } from "@elizaos/client-telegram";
 import { communicateWithAgents } from "./actions/communicate-agent/index.ts";
 import { callGenerate } from "./utils/dialogue-system.ts";
@@ -234,7 +233,7 @@ export function createAgent(
     character,
     plugins: [nodePlugin],
     providers: [new TwitterTopicProvider()],
-    actions: [ new ProcessNewStrategy(), communicateWithAgents ],
+    actions: [ communicateWithAgents ],
     services: [],
     managers: [],
     cacheManager: cache,
