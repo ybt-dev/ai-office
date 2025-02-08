@@ -10,6 +10,8 @@ import { ApiProvider } from "./providers/ApiProvider";
 import SessionsRestApi from "./api/SessionsApi";
 import AgentTeamsRestApi from './api/AgentTeamsApi';
 import AgentsRestApi from "./api/AgentsApi";
+import AgentTeamInteractionsRestApi from "./api/AgentTeamInteractionsApi";
+import AgentMessagesRestApi from "./api/AgentMessagesApi";
 
 import './tailwind.css';
 
@@ -40,7 +42,9 @@ function App() {
     return {
       sessionsApi: new SessionsRestApi(apiClient),
       agentTeamsApi: new AgentTeamsRestApi(apiClient),
+      agentTeamInteractionsApi: new AgentTeamInteractionsRestApi(apiClient),
       agentApi: new AgentsRestApi(apiClient),
+      agentMessagesApi: new AgentMessagesRestApi(apiClient),
     };
   }, []);
 

@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { DefaultError, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useSessionsApi } from '~/providers/ApiProvider';
+import { useSessionsApi } from '@/providers/ApiProvider';
 
 const useCreateSessionMutation = () => {
   const sessionsApi = useSessionsApi();

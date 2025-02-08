@@ -1,124 +1,121 @@
-import { useState } from 'react';
-import { Agent, AgentRole } from "~/api/AgentsApi";
+import { FormEvent, useState, ChangeEvent } from "react";
+import {Agent} from "@/api/AgentsApi";
 
-export interface AgentFormData {
-  agentName: string;
-  agentDescription: string;
-  agentRole: AgentRole;
-  model: string;
-  modelApiKey: string;
+interface AgentEditFormProps {
+  agent: Agent | undefined;
+  onSubmit: (updatedAgent: AgentEditFormProps["agent"]) => void
+  onCancel: () => void
 }
 
-export interface AgentFormProps {
-  existingAgent?: Agent;
-  onSubmit: (agentData: AgentFormData) => void;
-  actionName: string;
-  canEditRole?: boolean;
-}
+const AgentForm = ({ agent, onSubmit, onCancel }: AgentEditFormProps) => {
+  const [formData, setFormData] = useState({
+    name: agent?.name || '',
+    role: agent?.role || '',
+    description: agent?.description || '',
+    model: agent?.model || '',
+    apiKey: agent?.modelApiKey || '',
+  });
 
-const AgentForm = ({ canEditRole, existingAgent, actionName, onSubmit }: AgentFormProps) => {
-  const [agentName, setAgentName] = useState(existingAgent?.name || '');
-  const [agentDescription, setAgentDescription] = useState(existingAgent?.description || '');
-  const [agentRole, setAgentRole] = useState<AgentRole>(existingAgent?.role || AgentRole.Producer);
-  const [model, setModel] = useState(existingAgent?.model || '');
-  const [modelApiKey, setModelApiKey] = useState(existingAgent?.modelApiKey || '');
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-
-    onSubmit({
-      agentName,
-      agentDescription,
-      agentRole,
-      model,
-      modelApiKey,
-    });
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault()
+    onSubmit(formData);
   };
 
   return (
-    <div className="w-full flex items-center justify-center">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-gray-800 p-8 rounded shadow-md w-full"
-      >
-        <div className="mb-4">
-          <label htmlFor="agentName" className="block text-gray-300 mb-2">
-            Agent Name
-          </label>
-          <input
-            type="text"
-            id="agentName"
-            placeholder="Enter agent name"
-            value={agentName}
-            onChange={(e) => setAgentName(e.target.value)}
-            required
-            className="w-full px-4 py-2 border border-gray-600 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+    <form onSubmit={handleSubmit} className="mt-6 rounded-lg bg-gray-800 text-gray-100 overflow-hidden">
+      <div className="border-b border-gray-700 p-6">
+        <h2 className="text-xl font-semibold">Edit Agent Details</h2>
+      </div>
+      <div className="p-6 space-y-4">
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-400">
+              Agent Name
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={formData?.name}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label htmlFor="role" className="block text-sm font-medium text-gray-400">
+              Agent Role
+            </label>
+            <input
+              type="text"
+              id="role"
+              name="role"
+              value={formData?.role}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label htmlFor="description" className="block text-sm font-medium text-gray-400">
+              Agent Description
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              value={formData?.description}
+              onChange={handleChange}
+              rows={3}
+              className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label htmlFor="model" className="block text-sm font-medium text-gray-400">
+              Model (AI model)
+            </label>
+            <input
+              type="text"
+              id="model"
+              name="model"
+              value={formData?.model}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label htmlFor="apiKey" className="block text-sm font-medium text-gray-400">
+              Model API Key
+            </label>
+            <input
+              type="password"
+              id="apiKey"
+              name="apiKey"
+              value={formData?.apiKey}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
         </div>
-        <div className="mb-4">
-          <label htmlFor="agentDescription" className="block text-gray-300 mb-2">
-            Agent Description
-          </label>
-          <textarea
-            id="agentDescription"
-            placeholder="Enter agent description"
-            value={agentDescription}
-            onChange={(e) => setAgentDescription(e.target.value)}
-            required
-            className="w-full px-4 py-2 border border-gray-600 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          ></textarea>
-        </div>
-        {canEditRole && <div className="mb-4">
-          <label htmlFor="agentRole" className="block text-gray-300 mb-2">
-            Agent Role
-          </label>
-          <select
-            id="agentRole"
-            value={agentRole}
-            onChange={(e) => setAgentRole(e.target.value as AgentRole)}
-            className="w-full px-4 py-2 border border-gray-600 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+        <div className="flex justify-end space-x-4 mt-6">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-4 py-2 rounded-md bg-gray-700 text-gray-200 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-800"
           >
-            <option value={AgentRole.Producer}>Producer</option>
-            <option value={AgentRole.Influencer}>Influencer</option>
-            <option value={AgentRole.Adviser}>Advisor</option>
-          </select>
-        </div>}
-        <div className="mb-4">
-          <label htmlFor="model" className="block text-gray-300 mb-2">
-            Model (AI model)
-          </label>
-          <input
-            type="text"
-            id="model"
-            placeholder="Enter AI model"
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
-            required
-            className="w-full px-4 py-2 border border-gray-600 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+          >
+            Save Changes
+          </button>
         </div>
-        <div className="mb-4">
-          <label htmlFor="apiKey" className="block text-gray-300 mb-2">
-            Model API Key
-          </label>
-          <input
-            type="text"
-            id="apiKey"
-            placeholder="Enter API key"
-            value={modelApiKey}
-            onChange={(e) => setModelApiKey(e.target.value)}
-            required
-            className="w-full px-4 py-2 border border-gray-600 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200"
-        >
-          {actionName}
-        </button>
-      </form>
-    </div>
+      </div>
+    </form>
   );
 };
 

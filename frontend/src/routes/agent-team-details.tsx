@@ -1,29 +1,36 @@
-import {Outlet, useNavigate, useParams} from "react-router";
-import TeamManagementPanel from "~/components/TeamManagementPanel";
-import useAgentTeamByIdQuery from "~/hooks/queries/useAgentTeamByIdQuery.ts";
+import { Navigate, Outlet, useNavigate, useParams } from "react-router";
+import useAgentTeamByIdQuery from "@/hooks/queries/useAgentTeamByIdQuery";
+import TeamCategoryId from "@/enums/TeamCategoryId";
+import TeamManagementPanel from "@/components/TeamManagementPanel";
 
 const AgentTeamDetails = () => {
-  const { agentTeamId } = useParams<{ agentTeamId: string }>();
+  const {
+    agentTeamId,
+    category,
+  } = useParams<{ agentTeamId: string, category: TeamCategoryId; }>();
 
   const navigate = useNavigate();
 
   const { data: currentAgentTeam } = useAgentTeamByIdQuery(agentTeamId || '');
 
-  const handleSelectCategory = (category: string) => {
-    navigate(`/agent-teams/${agentTeamId}/${category}`, { relative: 'path' });
+  const handleSelectCategory = (categoryId: TeamCategoryId) => {
+    navigate(`/agent-teams/${agentTeamId}/${categoryId}`);
+  };
+
+  const handleGoBackButtonClick = () => {
+    navigate('/agent-teams');
   };
 
   return (
     <div className="flex flex-grow h-full">
       <TeamManagementPanel
+        selectedCategory={category}
         agentTeamName={currentAgentTeam?.name || ''}
         onSelectCategory={handleSelectCategory}
+        onGoBackButtonClick={handleGoBackButtonClick}
       />
       <div className="flex-grow p-6 overflow-auto border-t border-[#2F343D]">
-        <h1 className="text-3xl font-bold">Agents:</h1>
-        <div className="w-full h-full flex mt-6">
-          <Outlet context={agentTeamId} />
-        </div>
+        <Outlet context={agentTeamId} />
       </div>
     </div>
   );

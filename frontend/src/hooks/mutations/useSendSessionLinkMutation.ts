@@ -1,7 +1,7 @@
 import {toast} from "react-toastify";
 import {useCallback} from "react";
 import { DefaultError, useMutation } from '@tanstack/react-query';
-import { useSessionsApi } from '~/providers/ApiProvider';
+import { useSessionsApi } from '@/providers/ApiProvider';
 
 const useSendSessionLinkMutation = () => {
   const sessionsApi = useSessionsApi();

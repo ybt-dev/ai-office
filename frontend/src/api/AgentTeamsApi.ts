@@ -1,4 +1,4 @@
-import { ApiClient } from "~/api/ApiClient";
+import { ApiClient } from "@/api/ApiClient";
 
 export interface AgentTeam {
   id: string;
@@ -14,10 +14,17 @@ export interface CreateAgentTeamParams {
   strategy: string;
 }
 
+export interface UpdateAgentTeamParams {
+  name?: string;
+  description?: string;
+  strategy?: string;
+}
+
 export interface AgentTeamsApi {
   listAgentTeams(): Promise<AgentTeam[]>;
   createAgentTeam(params: CreateAgentTeamParams): Promise<AgentTeam>;
   getAgentTeamById(id: string): Promise<AgentTeam>;
+  updateAgentTeam(id: string, params: UpdateAgentTeamParams): Promise<AgentTeam>;
 }
 
 export default class AgentTeamsRestApi implements AgentTeamsApi {
@@ -33,5 +40,9 @@ export default class AgentTeamsRestApi implements AgentTeamsApi {
 
   public async getAgentTeamById(id: string) {
     return this.client.makeCall(`/agent-teams/${id}`, 'GET');
+  }
+
+  public async updateAgentTeam(id: string, params: UpdateAgentTeamParams) {
+    return this.client.makeCall(`/agent-teams/${id}`, 'PUT', params);
   }
 }

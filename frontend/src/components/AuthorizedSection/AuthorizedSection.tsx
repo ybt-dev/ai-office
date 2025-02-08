@@ -1,6 +1,6 @@
 import {ReactNode} from "react";
 import { Navigate } from 'react-router';
-import useSession from "~/hooks/useSession";
+import useSession from "@/hooks/useSession";
 
 export interface AuthorizedSectionProps {
   children: ReactNode;

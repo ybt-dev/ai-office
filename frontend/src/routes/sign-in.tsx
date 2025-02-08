@@ -1,5 +1,5 @@
-import LoginForm from "~/components/LoginForm";
-import useSendSessionLinkMutation from "~/hooks/mutations/useSendSessionLinkMutation";
+import LoginForm from "@/components/LoginForm";
+import useSendSessionLinkMutation from "@/hooks/mutations/useSendSessionLinkMutation";
 
 const SignInPage = () => {
   const { mutateAsync: sendSessionLink } = useSendSessionLinkMutation();

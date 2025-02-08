@@ -16,45 +16,45 @@ export interface AgentTeamEntity {
 }
 
 export class MongoAgentTeamEntity implements AgentTeamEntity {
-  constructor(private readonly agentTeamDocument: FlattenMaps<AgentTeam> & { _id: ObjectId }) {}
+  constructor(private readonly document: FlattenMaps<AgentTeam> & { _id: ObjectId }) {}
 
   public getId() {
-    return this.agentTeamDocument._id.toString();
+    return this.document._id.toString();
   }
 
   public getOrganizationId() {
-    return this.agentTeamDocument.organization.toString();
+    return this.document.organization.toString();
   }
 
   public getName() {
-    return this.agentTeamDocument.name;
+    return this.document.name;
   }
 
   public getDescription() {
-    return this.agentTeamDocument.description;
+    return this.document.description;
   }
 
   public getStrategy() {
-    return this.agentTeamDocument.strategy;
+    return this.document.strategy;
   }
 
   public getImageUrl() {
-    return this.agentTeamDocument.imageUrl || '';
+    return this.document.imageUrl || '';
   }
 
   public getCreatedAt() {
-    return this.agentTeamDocument.createdAt;
+    return this.document.createdAt;
   }
 
   public getUpdatedAt() {
-    return this.agentTeamDocument.updatedAt;
+    return this.document.updatedAt;
   }
 
   public getCreatedById() {
-    return this.agentTeamDocument.createdBy.toString();
+    return this.document.createdBy.toString();
   }
 
   public getUpdatedById() {
-    return this.agentTeamDocument.updatedBy.toString();
+    return this.document.updatedBy.toString();
   }
 }

@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
-import { SessionProvider } from "~/providers/SessionProvider";
-import useSessionUserQuery from "~/hooks/queries/useSessionUserQuery";
-import LoadingScreen from "~/components/LoadingScreen";
+import { SessionProvider } from "@/providers/SessionProvider";
+import useSessionUserQuery from "@/hooks/queries/useSessionUserQuery";
+import LoadingScreen from "@/components/LoadingScreen";
 
 export interface AppInitializerProps {
   children: ReactNode;

@@ -1,4 +1,4 @@
-import RequestError from '~/errors/RequestError';
+import RequestError from '@/errors/RequestError';
 
 export type HTTP_METHOD = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 

@@ -1,8 +1,8 @@
 import { useNavigate, Navigate } from "react-router";
-import useCreateSessionMutation from "~/hooks/mutations/useCreateSessionMutation";
-import LoadingScreen from "~/components/LoadingScreen";
-import useQueryParam from "~/hooks/useQueryParam";
-import useAsyncEffect from "~/hooks/useAsyncEffect";
+import useCreateSessionMutation from "@/hooks/mutations/useCreateSessionMutation";
+import LoadingScreen from "@/components/LoadingScreen";
+import useQueryParam from "@/hooks/useQueryParam";
+import useAsyncEffect from "@/hooks/useAsyncEffect";
 
 const VerifySessionPage = () => {
   const sessionToken = useQueryParam('token');

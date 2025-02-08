@@ -1,30 +1,57 @@
-import CategoriesList from "~/components/TeamManagementPanel/CategoriesList/CategoriesList";
-
-const CATEGORIES = ['Conversation', 'Strategy'];
+import { Link } from "react-router";
+import { Settings, Users, MessageSquare } from "lucide-react"
+import TeamCategoryId from "@/enums/TeamCategoryId";
+import CategoriesList, { Category } from "@/components/TeamManagementPanel/CategoriesList";
 
 export interface TeamManagementPanelProps {
   agentTeamName: string;
-  selectedCategory: string;
-  onSelectCategory: (category: string) => void;
+  selectedCategory: TeamCategoryId;
+  onSelectCategory: (categoryId: TeamCategoryId) => void;
+  goBackButtonLink: string;
 }
 
-const TeamManagementPanel = ({ agentTeamName, selectedCategory, onSelectCategory }: TeamManagementPanelProps) => {
+const CATEGORIES: Category<TeamCategoryId>[] = [{
+  id: TeamCategoryId.Agents,
+  name: 'Agents',
+  icon: Users,
+}, {
+  id: TeamCategoryId.Interactions,
+  name: 'Interactions',
+  icon: MessageSquare,
+}, {
+  id: TeamCategoryId.Settings,
+  name: 'Settings',
+  icon: Settings,
+}];
+
+const TeamManagementPanel = ({
+  agentTeamName,
+  selectedCategory,
+  onSelectCategory,
+  goBackButtonLink,
+}: TeamManagementPanelProps) => {
   return (
-    <aside className="flex flex-col justify-between w-80 border-r border-t bg-[#161B21] border-[#2F343D] p-4">
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-2 text-[#777D87] text-center">{agentTeamName} Team</h2>
-        <CategoriesList
+    <div className="flex h-full w-64 flex-col bg-gray-900 min-w-xs text-gray-100">
+      <div className="flex h-16 items-center gap-2 border-b border-gray-800 px-6">
+        <span className="font-semibold text-lg">{agentTeamName}</span>
+      </div>
+      <nav className="flex-1 space-y-1 px-4 py-4">
+        <CategoriesList<TeamCategoryId>
+          categories={CATEGORIES}
+          selectedCategoryId={selectedCategory}
           selectedCategory={selectedCategory}
           onSelectCategory={onSelectCategory}
         />
+      </nav>
+      <div className="border-t border-gray-800 p-4">
+        <Link
+          to={goBackButtonLink}
+          className="flex w-full items-center justify-center rounded-md border border-gray-700 bg-gray-800 px-4 py-2 text-sm font-medium text-gray-200 transition-colors hover:bg-gray-700 hover:text-white"
+        >
+          Go Back
+        </Link>
       </div>
-      <button
-        onClick={() => {}}
-        className="mb-4 px-3 py-3 font-bold bg-blue-500 text-white rounded hover:bg-blue-600"
-      >
-        Go Back
-      </button>
-    </aside>
+    </div>
   );
 };
 

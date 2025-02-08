@@ -1,8 +1,8 @@
 import { useCallback } from 'react';
 import { DefaultError, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from "react-toastify";
-import { Agent, CreateAgentParams } from '~/api/AgentsApi';
-import { useAgentsApi } from '~/providers/ApiProvider';
+import { Agent, CreateAgentParams } from '@/api/AgentsApi';
+import { useAgentsApi } from '@/providers/ApiProvider';
 
 const useCreateAgentMutation = () => {
   const agentsApi = useAgentsApi();

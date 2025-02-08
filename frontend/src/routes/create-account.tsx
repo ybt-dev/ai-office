@@ -1,5 +1,5 @@
-import CreateOrganizationForm from "~/components/CreateOrganizationForm";
-import AgentForm from "~/components/AgentForm";
+import CreateOrganizationForm from "@/components/CreateOrganizationForm";
+import AgentForm from "@/components/AgentForm";
 
 const CreateAccount = () => {
   return (

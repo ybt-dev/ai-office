@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { AgentTeam } from "~/api/AgentTeamsApi";
-import useListAgentTeamsQuery from "~/hooks/queries/useListAgentTeamsQuery";
-import useCreateAgentTeamMutation from "~/hooks/mutations/useCreateAgentTeamMutation";
-import AgentTeamsList from "~/components/AgentTeamsList";
-import AgentTeamForm, { AgentTeamFormData } from "~/components/AgentTeamForm";
-import Popup from "~/components/Popup";
+import { AgentTeam } from "@/api/AgentTeamsApi";
+import useListAgentTeamsQuery from "@/hooks/queries/useListAgentTeamsQuery";
+import useCreateAgentTeamMutation from "@/hooks/mutations/useCreateAgentTeamMutation";
+import AgentTeamsGrid from "@/components/AgentTeamsGrid";
+import AgentTeamForm, { AgentTeamFormData } from "@/components/AgentTeamForm";
+import Popup from "@/components/Popup";
 
 const AgentTeamsPage = () => {
   const [
@@ -39,48 +39,25 @@ const AgentTeamsPage = () => {
     navigate(`/agent-teams/${agentTeam.id}`);
   };
 
-  const renderContent = () => {
-    if (!agentTeams) {
-      return (
-        <p>Loading...</p>
-      );
-    }
-
-    if (agentTeams.length === 0) {
-      return (
-        <div className="flex flex-col items-center justify-center h-64">
-          <p className="mb-4 text-lg">No Agent Teams</p>
-          <button
-            onClick={showCreateAgentTeamPopup}
-            className="bg-green-500 hover:bg-green-600 transition px-6 py-3 rounded"
-          >
-            Create Agent Team
-          </button>
-        </div>
-      );
-    }
-
-    return (
-      <AgentTeamsList
-        agentTeams={agentTeams}
-        onEditAgentTeamClick={handleEditAgentTeamClick}
-      />
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-[#0A0712] p-8 text-white">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">Agent Teams</h1>
+    <div className="min-h-screen px-8 text-white">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-white">Agent Teams:</h1>
         <button
           onClick={showCreateAgentTeamPopup}
-          className="bg-green-500 hover:bg-green-600 transition px-4 py-2 rounded"
+          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800"
         >
           Add Agent Team
         </button>
       </div>
-      {renderContent()}
+
+      <AgentTeamsGrid
+        agentTeams={agentTeams ?? null}
+        onEditAgentTeamClick={handleEditAgentTeamClick}
+      />
+
       <Popup
+        title="Create New Team"
         isOpen={displayCreateAgentTeamPopup}
         onClose={closeCreateAgentTeamPopup}
       >

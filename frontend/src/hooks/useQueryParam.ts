@@ -1,4 +1,4 @@
-import {useQueryParams} from "~/hooks/useQueryParams";
+import {useQueryParams} from "@/hooks/useQueryParams";
 
 const useQueryParam = (key: string): string | null => {
   const params = useQueryParams();

@@ -1,5 +1,5 @@
 import { Route, Routes } from 'react-router';
-import AuthorizedSection from "~/components/AuthorizedSection";
+import AuthorizedSection from "@/components/AuthorizedSection";
 import Home from './routes/home';
 import AgentTeamDetails from "./routes/agent-team-details";
 import SignInPage from "./routes/sign-in";
@@ -8,8 +8,9 @@ import AgentTeamsPage from "./routes/agent-teams";
 import CreateAccount from "./routes/create-account";
 import Agents from "./routes/agents";
 import AgentDetails from "./routes/agent-details";
-import TeamConversation from "./routes/team-conversation";
 import TeamSettings from "./routes/team-settings";
+import TeamInteractions from "./routes/team-interactions";
+import TeamInteractionDetails from "./routes/team-interaction-details";
 
 const Routing = () => {
   return (
@@ -26,7 +27,10 @@ const Routing = () => {
         <Route path="agents" element={(<Agents />)}>
           <Route path=":agentId" element={(<AgentDetails />)} />
         </Route>
-        <Route path="conversation" element={(<TeamConversation />)} />
+        <Route path="interactions">
+          <Route index element={<TeamInteractions />} />
+          <Route path=":interactionId" element={(<TeamInteractionDetails />)} />
+        </Route>
         <Route path="settings" element={(<TeamSettings />)} />
       </Route>
       <Route

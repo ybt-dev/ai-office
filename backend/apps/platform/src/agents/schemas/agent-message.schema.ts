@@ -2,15 +2,18 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { ObjectId } from 'mongodb';
 
-export type AgentConversationDocument = HydratedDocument<AgentConversation>;
+export type AgentMessageDocument = HydratedDocument<AgentMessage>;
 
 @Schema({ timestamps: true })
-export class AgentConversation {
+export class AgentMessage {
   @Prop({ required: true, type: mongoose.Schema.Types.ObjectId })
   sourceAgent: ObjectId;
 
   @Prop({ required: true, type: mongoose.Schema.Types.ObjectId })
   targetAgent: ObjectId;
+
+  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId })
+  interaction: ObjectId;
 
   @Prop({ required: true, type: mongoose.Schema.Types.ObjectId })
   team: ObjectId;
@@ -28,6 +31,6 @@ export class AgentConversation {
   updatedAt: Date;
 }
 
-export const AgentConversationSchema = SchemaFactory.createForClass(AgentConversation);
+export const AgentMessageSchema = SchemaFactory.createForClass(AgentMessage);
 
-AgentConversationSchema.index({ organization: 1, team: 1 }, { unique: true });
+AgentMessageSchema.index({ organization: 1, interaction: 1 });
