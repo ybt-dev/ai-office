@@ -30,8 +30,8 @@ import * as viemChains from "viem/chains";
 import { DeriveKeyProvider, TEEMode } from "@elizaos/plugin-tee";
 import NodeCache from "node-cache";
 import * as path from "node:path";
-import { AES, enc } from "crypto-js";
-
+import pkg from "crypto-js";
+const { AES, enc } = pkg;
 import type { SupportedChain } from "../types";
 
 export class WalletProvider {

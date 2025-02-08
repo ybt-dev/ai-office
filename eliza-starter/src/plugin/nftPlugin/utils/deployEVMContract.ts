@@ -1,6 +1,18 @@
 import { encodeAbiParameters } from "viem";
-import { compileWithImports } from "./generateERC721ContractCode.ts";
-import CustomERC721 from "../contract/CustomERC721.sol";
+import { compileWithImports } from "./generateERC721ContractCode.js";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { dirname } from "node:path";
+
+// Load the Solidity contract content
+function loadContractSource() {
+  const currentDir = dirname(fileURLToPath(import.meta.url));
+  const contractPath = path.resolve(currentDir, "../contract/CustomERC721.sol");
+  return fs.readFileSync(contractPath, "utf8");
+}
+
+const CustomERC721 = loadContractSource();
 
 // 动态生成 ERC-721 合约代码
 export function generateERC721ContractCode(NFTContractName) {
@@ -8,8 +20,8 @@ export function generateERC721ContractCode(NFTContractName) {
 }
 
 // 使用 Solidity 编译器生成 ABI 和 Bytecode
-export function compileContract(contractName, sourceCode) {
-  const res = compileWithImports(contractName, sourceCode);
+export async function compileContract(contractName, sourceCode) {
+  const res = await compileWithImports(contractName, sourceCode);
   const { abi, bytecode, metadata } = res;
   return { abi, bytecode, metadata };
 }

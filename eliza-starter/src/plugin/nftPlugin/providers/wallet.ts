@@ -30,7 +30,7 @@ import * as viemChains from "viem/chains";
 import { DeriveKeyProvider, TEEMode } from "@elizaos/plugin-tee";
 import NodeCache from "node-cache";
 import * as path from "node:path";
-import { AES, enc } from "crypto-js";
+import pkg from "crypto-js";
 
 import type { SupportedChain } from "../types/index.ts";
 
@@ -304,6 +304,7 @@ const decryptPrivateKey = (encryptedPrivateKey: string): string => {
     throw new Error("WALLET_ENCRYPTION_KEY environment variable is not set");
   }
 
+  const { AES, enc } = pkg;
   const bytes = AES.decrypt(encryptedPrivateKey, encryptionKey);
   return bytes.toString(enc.Utf8);
 };

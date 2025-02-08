@@ -101,50 +101,53 @@ export async function createCollectionMetadata({
   return null;
 }
 
-export async function createCollection({
-  runtime,
-  collectionName,
-  fee,
-}: {
-  runtime: IAgentRuntime;
-  collectionName: string;
-  fee?: number;
-}) {
-  const collectionInfo = await createCollectionMetadata({
-    runtime,
-    collectionName,
-    fee,
-  });
+export const createCollection = async (
+  runtime: IAgentRuntime,
+  collectionName: string,
+  fee?: number
+) => {
+  try {
+    const collectionInfo = await createCollectionMetadata({
+      runtime,
+      collectionName,
+      fee,
+    });
 
-  if (!collectionInfo) return null;
+    if (!collectionInfo) return null;
 
-  // Initialize wallet provider for Base Sepolia
-  const walletProvider = await initWalletProvider(runtime);
-  const walletClient = walletProvider.getWalletClient("baseSepolia");
-  const publicClient = walletProvider.getPublicClient("baseSepolia");
+    // Initialize wallet provider for Base Sepolia
+    const walletProvider = await initWalletProvider(runtime);
+    const walletClient = walletProvider.getWalletClient("baseSepolia");
+    const publicClient = walletProvider.getPublicClient("baseSepolia");
 
-  // Generate and compile the ERC721 contract
-  const contractCode = generateERC721ContractCode(collectionName);
-  const { abi, bytecode } = compileContract(collectionName, contractCode);
+    // Generate and compile the ERC721 contract
+    const contractCode = generateERC721ContractCode(collectionName);
+    const { abi, bytecode } = await compileContract(
+      collectionName,
+      contractCode
+    );
 
-  // Deploy the contract
-  const contractAddress = await deployContract({
-    walletClient,
-    publicClient,
-    abi,
-    bytecode,
-    args: [
-      collectionInfo.name,
-      collectionInfo.symbol,
-      collectionInfo.maxSupply,
-      collectionInfo.fee,
-    ],
-  });
+    // Deploy the contract
+    const contractAddress = await deployContract({
+      walletClient,
+      publicClient,
+      abi,
+      bytecode,
+      args: [
+        collectionInfo.name,
+        collectionInfo.symbol,
+        collectionInfo.maxSupply,
+        collectionInfo.fee,
+      ],
+    });
 
-  return {
-    network: "baseSepolia",
-    address: contractAddress,
-    link: `https://sepolia.basescan.org/address/${contractAddress}`,
-    collectionInfo,
-  };
-}
+    return {
+      network: "baseSepolia",
+      address: contractAddress,
+      link: `https://sepolia.basescan.org/address/${contractAddress}`,
+      collectionInfo,
+    };
+  } catch (error) {
+    // ... existing error handling ...
+  }
+};

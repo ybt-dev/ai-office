@@ -22,7 +22,6 @@ import {
   encodeConstructorArguments,
   generateERC721ContractCode,
 } from "../utils/deployEVMContract.ts";
-import { verifyEVMContract } from "../utils/verifyEVMContract.ts";
 
 const nftCollectionGeneration: Action = {
   name: "GENERATE_COLLECTION",
@@ -33,21 +32,10 @@ const nftCollectionGeneration: Action = {
     "MAKE_COLLECTION",
     "GENERATE_COLLECTION",
   ],
-  description: "Generate an NFT collection on Base Sepolia",
+  description: "Generate an NFT collection for the message",
   validate: async (runtime: IAgentRuntime, _message: Memory) => {
-    const awsAccessKeyIdOk = !!runtime.getSetting("AWS_ACCESS_KEY_ID");
-    const awsSecretAccessKeyOk = !!runtime.getSetting("AWS_SECRET_ACCESS_KEY");
-    const awsRegionOk = !!runtime.getSetting("AWS_REGION");
-    const awsS3BucketOk = !!runtime.getSetting("AWS_S3_BUCKET");
     const evmPrivateKeyOk = !!runtime.getSetting("EVM_PRIVATE_KEY");
-
-    return (
-      awsAccessKeyIdOk &&
-      awsSecretAccessKeyOk &&
-      awsRegionOk &&
-      awsS3BucketOk &&
-      evmPrivateKeyOk
-    );
+    return evmPrivateKeyOk;
   },
   handler: async (
     runtime: IAgentRuntime,
@@ -60,24 +48,44 @@ const nftCollectionGeneration: Action = {
       elizaLogger.log("Composing state for message:", message);
       const state = await runtime.composeState(message);
 
-      // Generate collection metadata
-      const collectionInfo = await createCollectionMetadata({
-        runtime,
-        collectionName: runtime.character.name,
-        fee: 0, // No royalty fees
+      // Compose transfer context
+      const context = composeContext({
+        state,
+        template: createCollectionTemplate,
       });
 
-      if (!collectionInfo) {
-        throw new Error("Failed to generate collection metadata");
-      }
+      // Get list of supported chains from viem
+      const chains = viemChains;
+      const _SupportedChainList = Object.keys(viemChains) as Array<
+        keyof typeof viemChains
+      >;
+      const supportedChains = _SupportedChainList as unknown as [
+        string,
+        ...string[]
+      ];
 
-      // Setup Base Sepolia connection
+      // Add chains to context
+      const contextWithChains = context.replace(
+        "SUPPORTED_CHAINS",
+        supportedChains.map((item) => (item ? `"${item}"` : item)).join("|")
+      );
+
+      const res = await generateObject({
+        runtime,
+        context: contextWithChains,
+        modelClass: ModelClass.LARGE,
+        schema: CreateCollectionSchema,
+      });
+
+      const content = res.object as {
+        chainName: (typeof supportedChains)[number];
+      };
+
+      // Setup wallet and clients
       const privateKey = runtime.getSetting("EVM_PRIVATE_KEY") as `0x${string}`;
-      if (!privateKey) {
-        throw new Error("EVM private key not found");
-      }
+      if (!privateKey) throw new Error("EVM private key not found");
 
-      const chain = viemChains.baseSepolia;
+      const chain = viemChains[content.chainName];
       const provider = http(chain.rpcUrls.default.http[0]);
       const account = privateKeyToAccount(privateKey);
 
@@ -94,19 +102,26 @@ const nftCollectionGeneration: Action = {
 
       // Generate and deploy contract
       const contractName = runtime.character.name.replace(/[^a-zA-Z0-9]/g, "_");
-      const sourceCode = generateERC721ContractCode(contractName);
-      const { abi, bytecode, metadata } = compileContract(
-        contractName,
-        sourceCode
-      );
-      elizaLogger.log("Contract compiled successfully");
+      const contractSymbol = `${contractName.toUpperCase()[0]}`;
+      const contractMaxSupply = 5000;
+      const royalty = 0;
+      const params = [contractName, contractSymbol, contractMaxSupply, royalty];
 
-      const params = [
-        collectionInfo.name,
-        collectionInfo.symbol,
-        collectionInfo.maxSupply,
-        collectionInfo.fee,
-      ];
+      const sourceCode = generateERC721ContractCode(contractName);
+      const compiledContract = await compileContract(contractName, sourceCode);
+
+      if (
+        !compiledContract ||
+        !compiledContract.abi ||
+        !compiledContract.bytecode
+      ) {
+        throw new Error(
+          "Contract compilation failed or produced invalid output"
+        );
+      }
+
+      const { abi, bytecode } = compiledContract;
+      elizaLogger.log("Contract compiled successfully");
 
       const contractAddress = await deployContract({
         walletClient,
@@ -115,22 +130,16 @@ const nftCollectionGeneration: Action = {
         bytecode,
         args: params,
       });
-      elizaLogger.log(`Contract deployed at: ${contractAddress}`);
 
-      // Verify contract on Base Sepolia explorer
-      const constructorArgs = encodeConstructorArguments(abi, params);
-      await verifyEVMContract({
-        contractAddress,
-        sourceCode,
-        metadata,
-        constructorArgs,
-        apiEndpoint: `${chain.blockExplorers.default.url}/api`,
-      });
-      elizaLogger.log("Contract verified successfully");
+      if (!contractAddress) {
+        throw new Error("Contract deployment failed");
+      }
+
+      elizaLogger.log(`Contract deployed at: ${contractAddress}`);
 
       if (callback) {
         callback({
-          text: `Collection created successfully! 🎉\nView on Base Sepolia: ${chain.blockExplorers.default.url}/address/${contractAddress}\nContract Address: ${contractAddress}`,
+          text: `Collection created successfully! 🎉\nView on ${chain.name}: ${chain.blockExplorers.default.url}/address/${contractAddress}\nContract Address: ${contractAddress}`,
           attachments: [],
         });
       }
@@ -145,30 +154,18 @@ const nftCollectionGeneration: Action = {
     [
       {
         user: "{{user1}}",
-        content: { text: "Generate a collection on Base" },
+        content: { text: "Generate a collection on Ethereum" },
       },
       {
         user: "{{agentName}}",
         content: {
-          text: "Here's your new NFT collection on Base Sepolia.",
+          text: "Here's the collection you requested.",
           action: "GENERATE_COLLECTION",
         },
       },
     ],
-    [
-      {
-        user: "{{user1}}",
-        content: { text: "Create a collection on Base Sepolia" },
-      },
-      {
-        user: "{{agentName}}",
-        content: {
-          text: "Your collection has been created on Base Sepolia.",
-          action: "GENERATE_COLLECTION",
-        },
-      },
-    ],
+    // ... Add more examples for EVM chains ...
   ],
-};
+} as Action;
 
 export default nftCollectionGeneration;

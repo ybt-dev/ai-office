@@ -1,14 +1,11 @@
 export * from "../actions/transfer.ts";
-export * from "../../nftPlugin/actions/mintNft.ts";
-export * from "../../nftPlugin/actions/mintNft.ts";
+
 export * from "../providers/wallet.ts";
 export * from "../types/index.ts";
 
 import type { Plugin } from "@elizaos/core";
 import { transferAction } from "../actions/transfer.ts";
 import { evmWalletProvider } from "../providers/wallet.ts";
-import nftCollectionGeneration from "../../nftPlugin/actions/nftCollectionGeneration.ts";
-import mintNFTAction from "../../nftPlugin/actions/mintNft.ts";
 
 export const baseSepPlugin: Plugin = {
   name: "baseSep",
@@ -16,7 +13,7 @@ export const baseSepPlugin: Plugin = {
   providers: [evmWalletProvider],
   evaluators: [],
   services: [],
-  actions: [transferAction, nftCollectionGeneration, mintNFTAction],
+  actions: [transferAction],
 };
 
 export default baseSepPlugin;
