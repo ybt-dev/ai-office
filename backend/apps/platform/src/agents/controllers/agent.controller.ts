@@ -33,6 +33,8 @@ export default class AgentController {
       description: body.description,
       createdById: session.userId,
       organizationId: session.organizationId,
+      walletAddress: body.walletAddress,
+      encryptedPrivateKey: body.encryptedPrivateKey,
     });
   }
 }

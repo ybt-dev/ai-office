@@ -1,7 +1,7 @@
-import { IsIn, IsNotEmpty, IsObject, IsString } from 'class-validator';
-import { IsIdentifier } from '@libs/validation/class-validators';
-import { AnyObject } from '@libs/types';
-import { AgentRole } from '@apps/platform/agents/enums';
+import { IsIn, IsNotEmpty, IsObject, IsString } from "class-validator";
+import { IsIdentifier } from "@libs/validation/class-validators";
+import { AnyObject } from "@libs/types";
+import { AgentRole } from "@apps/platform/agents/enums";
 
 export interface AgentDto {
   id: string;
@@ -52,4 +52,10 @@ export class CreateAgentBodyDto {
 
   @IsString()
   description: string;
+
+  @IsString()
+  walletAddress: string;
+
+  @IsString()
+  encryptedPrivateKey: string;
 }
