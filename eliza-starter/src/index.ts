@@ -36,7 +36,7 @@ import { agentsManager } from "./agents/manager/index.ts";
 import { configDotenv } from "dotenv";
 import { TelegramClientInterface } from "@elizaos/client-telegram";
 import { communicateWithAgents } from "./actions/communicate-agent/index.ts";
-import { callGenerate } from "./utils/dialogue-system.ts";
+import { loopDBHandler } from "./utils/dialogue-system.ts";
 
 configDotenv();
 
@@ -319,7 +319,7 @@ const startAgents = async () => {
       await startAgent(character, directClient as DirectClient);
     }
 
-    await callGenerate();
+    await loopDBHandler();
   } catch (error) {
     elizaLogger.error("Error starting agents:", error);
   }

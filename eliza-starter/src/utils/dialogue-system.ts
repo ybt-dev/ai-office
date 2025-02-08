@@ -151,7 +151,26 @@ const extractRequestForProducer = (messageState: string) => {
     return match ? match[1] : NOT_FOUND;
 }
 
-export const callGenerate = async () => {
+const checkDatabaseForChanges = (): boolean => {
+    // check DB for changes
+    return false;
+}
+
+export const loopDBHandler = async () => {
+    elizaLogger.log("Starting loopDBHandler");
+
+    setInterval(async () => {
+        elizaLogger.log("Checking for database changes...");
+        
+        const hasChanges = checkDatabaseForChanges();
+        if (hasChanges) {
+            await conversationHandler();
+        }
+    }, 120000);
+};
+
+
+export const conversationHandler = async () => {
     try {
     elizaLogger.log("Start conversation func")
     const producerRuntime = await agentsManager.getAgent(PRODUCER_AGENT_ID);
