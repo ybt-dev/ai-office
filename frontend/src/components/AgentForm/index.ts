@@ -1,1 +1,1 @@
-export { default, type AgentEditFormProps } from './AgentForm';
+export { default, type AgentFormData } from './AgentForm';

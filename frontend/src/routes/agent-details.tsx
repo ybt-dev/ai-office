@@ -1,30 +1,48 @@
 import { useParams } from "react-router";
 import { useState } from "react";
+import { AgentFormData } from "@/components/AgentForm";
 import useUpdateAgentMutation from "@/hooks/mutations/useUpdateAgentMutation";
 import useAgentByIdQuery from "@/hooks/queries/useAgentByIdQuery";
-import AgentForm from "@/components/AgentForm";
 import AgentDetailsOverview from "@/components/AgentDetailsOverview";
+import EditAgentForm from "@/components/EditAgentForm";
 
 const AgentDetails = () => {
-  const [showEditMode, setShowEditMode] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   const { agentId } = useParams<{ agentId: string; }>();
 
   const { data: agent } = useAgentByIdQuery(agentId || '');
 
-  const { mutateAsync: updatedAgent } = useUpdateAgentMutation();
+  const { mutateAsync: updateAgent } = useUpdateAgentMutation();
+
+  const handleUpdateAgent = async (data: AgentFormData) => {
+    if (!agentId) {
+      return;
+    }
+
+    await updateAgent({
+      id: agentId,
+      name: data.name,
+      description: data.description,
+      modelApiKey: data.modelApiKey,
+      model: data.model,
+    });
+
+    setIsEditMode(false);
+  };
 
   return (
-    <div className="h-full text-white">
-      {showEditMode && agent ? (
-        <AgentForm
+    <div className="h-full w-2/3">
+      {isEditMode && agent ? (
+        <EditAgentForm
           agent={agent}
-          onSubmit={() => {}}
+          onCancel={() => setIsEditMode(false)}
+          onSubmit={handleUpdateAgent}
         />
       ) : (
         <AgentDetailsOverview
           agent={agent ?? null}
-          onEditButtonClick={() => setShowEditMode(true)}
+          onEditButtonClick={() => setIsEditMode(true)}
         />
       )}
     </div>

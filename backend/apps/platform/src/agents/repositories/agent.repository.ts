@@ -29,10 +29,21 @@ interface CreateAgentEntityParams {
   updatedBy?: string | null;
 }
 
+export interface UpdateAgentEntityParams {
+  name?: string;
+  model?: string;
+  modelApiKey?: string;
+  config?: AnyObject;
+  description?: string;
+  imageUrl?: string;
+  updatedBy?: string | null;
+}
+
 export interface AgentRepository {
   findMany(filter: IFindAgentTeamFilter): Promise<AgentEntity[]>;
   findByIdAndOrganizationId(id: string, organizationId: string): Promise<AgentEntity | null>;
   createOne(params: CreateAgentEntityParams): Promise<AgentEntity>;
+  updateOneById(id: string, params: UpdateAgentEntityParams): Promise<AgentEntity | null>;
 }
 
 @Injectable()
@@ -84,5 +95,28 @@ export class MongoAgentRepository implements AgentRepository {
     });
 
     return new MongoAgentEntity(team);
+  }
+
+  public async updateOneById(id: string, params: UpdateAgentEntityParams) {
+    const agent = await this.agentModel
+      .findOneAndUpdate(
+        {
+          _id: new ObjectId(id),
+        },
+        {
+          $set: {
+            ...params,
+            updatedAt: new Date(),
+          },
+        },
+        {
+          new: true,
+          lean: true,
+          session: this.transactionsManager.getCurrentTransaction()?.getSession(),
+        },
+      )
+      .exec();
+
+    return agent && new MongoAgentEntity(agent);
   }
 }

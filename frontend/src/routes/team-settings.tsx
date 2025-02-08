@@ -1,43 +1,48 @@
 import { useState } from "react";
 import { useParams } from "react-router";
+import { AgentTeamFormData } from "@/components/AgentTeamForm";
 import useAgentTeamByIdQuery from "@/hooks/queries/useAgentTeamByIdQuery";
-import AgentTeamForm from "@/components/AgentTeamForm";
+import useUpdateAgentTeamMutation from "@/hooks/mutations/useUpdateAgentTeamMutation";
 import AgentTeamSettingsOverview from "@/components/AgentTeamSettingsOverview";
+import EditAgentTeamForm from "@/components/EditAgentTeamForm";
 
 const TeamSettings = () => {
-  const [showEditMode, setShowEditMode] = useState(false);
+  const [editMode, setEditMode] = useState(false);
 
   const { agentTeamId } = useParams<{ agentTeamId: string }>();
 
   const { data: agentTeam } = useAgentTeamByIdQuery(agentTeamId || '');
+  const { mutateAsync: updateAgentTeam } = useUpdateAgentTeamMutation();
 
-  const renderContent = () => {
-    if (!agentTeam) {
-      return (
-        <div>Loading...</div>
-      );
+  const handleSubmitEditAgentTeamForm = async (data: AgentTeamFormData) => {
+    if (!agentTeamId) {
+      return;
     }
 
-    if (showEditMode) {
-      return (
-        <AgentTeamForm
-          existingAgentTeam={agentTeam}
-          onSubmit={() => {}}
-        />
-      );
-    }
+    await updateAgentTeam({
+      id: agentTeamId,
+      name: data.name,
+      description: data.description,
+      strategy: data.strategy,
+    });
 
-    return (
-      <AgentTeamSettingsOverview
-        agentTeam={agentTeam}
-        onEditButtonClick={() => setShowEditMode(true)}
-      />
-    );
+    setEditMode(false);
   };
 
   return (
-    <div className="w-full">
-      {renderContent()}
+    <div className="w-2/3">
+      {editMode && agentTeam ? (
+        <EditAgentTeamForm
+          agentTeam={agentTeam}
+          onSubmit={handleSubmitEditAgentTeamForm}
+          onCancel={() => setEditMode(false)}
+        />
+      ) : (
+        <AgentTeamSettingsOverview
+          agentTeam={agentTeam ?? null}
+          onEditButtonClick={() => setEditMode(true)}
+        />
+      )}
     </div>
   );
 };

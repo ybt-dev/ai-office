@@ -46,9 +46,19 @@ export class CreateAgentBodyDto {
   @IsNotEmpty()
   modelApiKey: string;
 
-  @IsNotEmpty()
-  @IsObject()
-  config: AnyObject;
+  @IsString()
+  description: string;
+}
+
+export class UpdateAgentBodyDto {
+  @IsString()
+  name: string;
+
+  @IsString()
+  model: string;
+
+  @IsString()
+  modelApiKey: string;
 
   @IsString()
   description: string;

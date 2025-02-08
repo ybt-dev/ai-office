@@ -2,11 +2,12 @@ import {useState} from "react";
 import { Plus } from "lucide-react"
 import { Outlet, useNavigate, useOutletContext, useParams } from "react-router";
 import { Agent } from "@/api/AgentsApi";
+import { AgentFormData } from "@/components/AgentForm";
 import useListAgentsByTeamIdQuery from "@/hooks/queries/useListAgentsByTeamIdQuery";
 import useCreateAgentMutation from "@/hooks/mutations/useCreateAgentMutation";
 import AgentsList from "@/components/AgentsList";
 import Popup from "@/components/Popup";
-import AgentForm, { AgentFormData } from "@/components/AgentForm";
+import CreateAgentForm from "@/components/CreateAgentForm";
 
 const Agents = () => {
   const teamId = useOutletContext<string>();
@@ -16,7 +17,6 @@ const Agents = () => {
   const navigate = useNavigate();
 
   const { data: agents } = useListAgentsByTeamIdQuery(teamId);
-
   const { mutateAsync: createAgent } = useCreateAgentMutation();
 
   const [displayCreateAgentPopup, setDisplayCreateAgentPopup] = useState(false);
@@ -26,11 +26,11 @@ const Agents = () => {
 
   const handleCreateAgentSubmit = async (data: AgentFormData) => {
     await createAgent({
-      name: data.agentName,
-      description: data.agentDescription,
+      name: data.name,
+      description: data.description,
       modelApiKey: data.modelApiKey,
       model: data.model,
-      role: data.agentRole,
+      role: data.role,
       config: {},
       teamId,
     });
@@ -60,7 +60,7 @@ const Agents = () => {
       />
       <Outlet key={selectedAgentId} />
       <Popup title="Create New Agent" isOpen={displayCreateAgentPopup} onClose={hideCreateAgentPopup}>
-        <AgentForm onSubmit={handleCreateAgentSubmit} actionName="Create Agent" />
+        <CreateAgentForm onSubmit={handleCreateAgentSubmit} />
       </Popup>
     </div>
   );

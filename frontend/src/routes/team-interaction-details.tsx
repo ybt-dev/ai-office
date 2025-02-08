@@ -1,4 +1,5 @@
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
+import {ArrowLeft} from "lucide-react";
 import useListLatestAgentMessagesQuery from "@/hooks/queries/useListLatestAgentMessagesQuery";
 import useAgentTeamInteractionByIdQuery from "@/hooks/queries/useAgentTeamInteractionByIdQuery";
 import AgentMessagesList from "@/components/AgentMessagesList/AgentMessagesList";
@@ -25,7 +26,7 @@ const TeamInteractionDetails = () => {
         <h1 className="text-2xl font-bold text-white">{agentTeamInteraction.title}</h1>
         <div className="bg-gray-800/50 rounded-lg p-4">
           <h2 className="text-lg font-semibold text-white mb-2">Initial Request:</h2>
-          <p className="text-gray-300">{agentTeamInteraction.requestContent}</p>
+          <p className="text-gray-300 whitespace-pre-wrap">{agentTeamInteraction.requestContent}</p>
         </div>
       </>
     );
@@ -33,6 +34,10 @@ const TeamInteractionDetails = () => {
 
   return (
     <div className="flex flex-col h-full">
+      <Link to=".." className="flex items-center text-blue-500 hover:text-blue-400 mb-4">
+        <ArrowLeft className="h-5 w-5 mr-2" />
+        Back to Interactions
+      </Link>
       <div className="flex flex-col gap-6 mb-4">
         {renderMessageDetails()}
       </div>

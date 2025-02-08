@@ -51,7 +51,6 @@ const TeamInteractions = () => {
         interactions={agentTeamInteractions ?? null}
         getAgentTeamInteractionsLink={getAgentTeamInteractionsLink}
       />
-      <Outlet />
       <Popup
         isOpen={displayCreateAgentTeamInteractionPopup}
         onClose={hideAgentTeamInteractionPopup}

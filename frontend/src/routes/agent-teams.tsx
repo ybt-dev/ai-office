@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { AgentTeam } from "@/api/AgentTeamsApi";
+import { AgentTeamFormData } from "@/components/AgentTeamForm";
 import useListAgentTeamsQuery from "@/hooks/queries/useListAgentTeamsQuery";
 import useCreateAgentTeamMutation from "@/hooks/mutations/useCreateAgentTeamMutation";
 import AgentTeamsGrid from "@/components/AgentTeamsGrid";
-import AgentTeamForm, { AgentTeamFormData } from "@/components/AgentTeamForm";
 import Popup from "@/components/Popup";
+import CreateAgentTeamForm from "@/components/CreateAgentTeamForm";
 
 const AgentTeamsPage = () => {
   const [
@@ -40,7 +41,7 @@ const AgentTeamsPage = () => {
   };
 
   return (
-    <div className="min-h-screen px-8 text-white">
+    <div className="min-h-screen p-8">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-white">Agent Teams:</h1>
         <button
@@ -61,7 +62,7 @@ const AgentTeamsPage = () => {
         isOpen={displayCreateAgentTeamPopup}
         onClose={closeCreateAgentTeamPopup}
       >
-        <AgentTeamForm onSubmit={handleSubmitCreateAgentForm} />
+        <CreateAgentTeamForm onSubmit={handleSubmitCreateAgentForm} />
       </Popup>
     </div>
   );

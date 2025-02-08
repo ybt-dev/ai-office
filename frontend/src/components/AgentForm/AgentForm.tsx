@@ -1,37 +1,51 @@
-import { FormEvent, useState, ChangeEvent } from "react";
-import {Agent} from "@/api/AgentsApi";
+import { FormEvent, useState, ReactNode } from "react";
+import { AgentRole } from "@/api/AgentsApi";
+import { tailwindClsx } from "@/utils";
 
-interface AgentEditFormProps {
-  agent: Agent | undefined;
-  onSubmit: (updatedAgent: AgentEditFormProps["agent"]) => void
-  onCancel: () => void
+export interface AgentFormData {
+  name: string;
+  role: AgentRole;
+  description: string;
+  model: string;
+  modelApiKey: string;
 }
 
-const AgentForm = ({ agent, onSubmit, onCancel }: AgentEditFormProps) => {
-  const [formData, setFormData] = useState({
-    name: agent?.name || '',
-    role: agent?.role || '',
-    description: agent?.description || '',
-    model: agent?.model || '',
-    apiKey: agent?.modelApiKey || '',
-  });
+interface AgentFormProps {
+  className?: string;
+  innerContainerClassName?: string;
+  header?: ReactNode;
+  initialData?: AgentFormData;
+  onSubmit: (data: AgentFormData) => void;
+  children: (data: AgentFormData) => ReactNode;
+  hideRoleInput?: boolean;
+}
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+const AgentForm = ({ className, innerContainerClassName, header, initialData, onSubmit, children, hideRoleInput }: AgentFormProps) => {
+  const [name, setName] = useState(initialData?.name || '');
+  const [role, setRole] = useState(initialData?.role || '');
+  const [description, setDescription] = useState(initialData?.description || '');
+  const [model, setModel] = useState(initialData?.model || '');
+  const [modelApiKey, setModelApiKey] = useState(initialData?.modelApiKey || '');
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault()
-    onSubmit(formData);
+  const handleSubmit = (event: FormEvent) => {
+    event.preventDefault()
+
+    onSubmit({
+      name,
+      role: role as AgentRole,
+      description,
+      model,
+      modelApiKey,
+    });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-6 rounded-lg bg-gray-800 text-gray-100 overflow-hidden">
-      <div className="border-b border-gray-700 p-6">
-        <h2 className="text-xl font-semibold">Edit Agent Details</h2>
-      </div>
-      <div className="p-6 space-y-4">
+    <form
+      onSubmit={handleSubmit}
+      className={tailwindClsx('rounded-lg bg-gray-800 text-gray-100 overflow-hidden', className)}
+    >
+      {header}
+      <div className={tailwindClsx('space-y-4', innerContainerClassName)}>
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-400">
@@ -41,12 +55,12 @@ const AgentForm = ({ agent, onSubmit, onCancel }: AgentEditFormProps) => {
               type="text"
               id="name"
               name="name"
-              value={formData?.name}
-              onChange={handleChange}
+              value={name}
+              onChange={(event) => setName(event.target.value)}
               className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
-          <div>
+          {!hideRoleInput && <div>
             <label htmlFor="role" className="block text-sm font-medium text-gray-400">
               Agent Role
             </label>
@@ -54,11 +68,11 @@ const AgentForm = ({ agent, onSubmit, onCancel }: AgentEditFormProps) => {
               type="text"
               id="role"
               name="role"
-              value={formData?.role}
-              onChange={handleChange}
+              value={role}
+              onChange={(event) => setRole(event.target.value)}
               className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
-          </div>
+          </div>}
           <div className="md:col-span-2">
             <label htmlFor="description" className="block text-sm font-medium text-gray-400">
               Agent Description
@@ -66,8 +80,8 @@ const AgentForm = ({ agent, onSubmit, onCancel }: AgentEditFormProps) => {
             <textarea
               id="description"
               name="description"
-              value={formData?.description}
-              onChange={handleChange}
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
               rows={3}
               className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
@@ -80,8 +94,8 @@ const AgentForm = ({ agent, onSubmit, onCancel }: AgentEditFormProps) => {
               type="text"
               id="model"
               name="model"
-              value={formData?.model}
-              onChange={handleChange}
+              value={model}
+              onChange={(event) => setModel(event.target.value)}
               className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
@@ -93,27 +107,19 @@ const AgentForm = ({ agent, onSubmit, onCancel }: AgentEditFormProps) => {
               type="password"
               id="apiKey"
               name="apiKey"
-              value={formData?.apiKey}
-              onChange={handleChange}
+              value={modelApiKey}
+              onChange={(event) => setModelApiKey(event.target.value)}
               className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
         </div>
-        <div className="flex justify-end space-x-4 mt-6">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-4 py-2 rounded-md bg-gray-700 text-gray-200 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-800"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800"
-          >
-            Save Changes
-          </button>
-        </div>
+        {children({
+          name,
+          role: role as AgentRole,
+          description,
+          model,
+          modelApiKey,
+        })}
       </div>
     </form>
   );

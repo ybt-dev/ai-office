@@ -6,7 +6,7 @@ import { AgentTeamInteractionStatus } from "@apps/platform/agents/enums";
 
 export type AgentTeamInteractionDocument = HydratedDocument<AgentTeamInteraction>;
 
-@Schema({ timestamps: true, minimize: false })
+@Schema({ timestamps: true, minimize: false, collection: 'agent_team_interactions' })
 export class AgentTeamInteraction {
   @Prop({ required: true, type: mongoose.Schema.Types.String })
   title: string;

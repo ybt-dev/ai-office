@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { AnyObject } from '@libs/types';
+import { InjectTransactionsManager } from "@libs/transactions/decorators";
+import { TransactionsManager } from "@libs/transactions/managers";
 import { AgentRepository, AgentTeamRepository } from '@apps/platform/agents/repositories';
 import {
   InjectAgentRepository,
@@ -15,10 +17,18 @@ export interface CreateAgentParams {
   organizationId: string;
   model: string;
   modelApiKey: string;
-  config: AnyObject;
   teamId: string;
   name: string;
   createdById: string;
+  description?: string;
+}
+
+export interface UpdateAgentParams {
+  model?: string;
+  modelApiKey?: string;
+  config?: AnyObject;
+  name?: string;
+  updatedById?: string | null;
   description?: string;
 }
 
@@ -27,6 +37,7 @@ export interface AgentService {
   get(id: string, organizationId: string): Promise<AgentDto | null>;
   getIfExist(id: string, organizationId: string): Promise<AgentDto>;
   create(params: CreateAgentParams): Promise<AgentDto>;
+  update(id: string, organizationId: string, params: UpdateAgentParams): Promise<AgentDto>;
 }
 
 @Injectable()
@@ -35,6 +46,7 @@ export class DefaultAgentService implements AgentService {
     @InjectAgentRepository() private readonly agentRepository: AgentRepository,
     @InjectAgentTeamRepository() private readonly agentTeamRepository: AgentTeamRepository,
     @InjectAgentEntityToDtoMapper() private agentEntityToDtoMapper: AgentEntityToDtoMapper,
+    @InjectTransactionsManager() private transactionsManager: TransactionsManager,
   ) {}
 
   public async listForTeam(teamId: string, organizationId: string) {
@@ -75,7 +87,7 @@ export class DefaultAgentService implements AgentService {
       team: params.teamId,
       model: params.model,
       modelApiKey: params.modelApiKey,
-      config: params.config,
+      config: {},
       imageUrl: '',
       description: params.description,
       organization: params.organizationId,
@@ -84,5 +96,26 @@ export class DefaultAgentService implements AgentService {
     });
 
     return this.agentEntityToDtoMapper.mapOne(agentEntity);
+  }
+
+  public async update(id: string, organizationId: string, params: UpdateAgentParams) {
+    return this.transactionsManager.useTransaction(async () => {
+      await this.getIfExist(id, organizationId);
+
+      const updatedAgentEntity = await this.agentRepository.updateOneById(id, {
+        ...(params.name ? { name: params.name } : {}),
+        ...(params.model ? { model: params.model } : {}),
+        ...(params.modelApiKey ? { modelApiKey: params.modelApiKey } : {}),
+        ...(params.config ? { config: params.config } : {}),
+        ...(params.description !== undefined ? { description: params.description } : {}),
+        updatedBy: params.updatedById,
+      });
+
+      if (!updatedAgentEntity) {
+        throw new NotFoundException('Agent not found.');
+      }
+
+      return this.agentEntityToDtoMapper.mapOne(updatedAgentEntity);
+    });
   }
 }

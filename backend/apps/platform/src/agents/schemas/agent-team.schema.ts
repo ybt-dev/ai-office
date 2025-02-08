@@ -4,7 +4,7 @@ import { ObjectId } from 'mongodb';
 
 export type AgentTeamDocument = HydratedDocument<AgentTeam>;
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, collection: 'agent_teams' })
 export class AgentTeam {
   @Prop({ required: true, type: mongoose.Schema.Types.String })
   name: string;
@@ -36,4 +36,4 @@ export class AgentTeam {
 
 export const AgentTeamSchema = SchemaFactory.createForClass(AgentTeam);
 
-AgentTeamSchema.index({ organization: 1 }, { unique: true });
+AgentTeamSchema.index({ organization: 1 });

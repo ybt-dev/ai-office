@@ -3,7 +3,7 @@ import { Link } from "react-router";
 export interface AgentTeamInteractionsListItemProps {
   interactionId: string;
   title: string;
-  lastMessage: string;
+  requestContent: string;
   date: string | Date;
   getAgentTeamInteractionsLink: (interactionId: string) => string;
 }
@@ -11,7 +11,7 @@ export interface AgentTeamInteractionsListItemProps {
 const AgentTeamInteractionsListItem = ({
   interactionId,
   title,
-  lastMessage,
+  requestContent,
   date,
   getAgentTeamInteractionsLink,
 }: AgentTeamInteractionsListItemProps) => {
@@ -19,7 +19,7 @@ const AgentTeamInteractionsListItem = ({
     <Link to={getAgentTeamInteractionsLink(interactionId)}>
       <div className="bg-gray-800/50 rounded-lg p-4 hover:bg-gray-800/70 transition-colors">
         <h2 className="text-lg font-semibold text-white mb-2">{title}</h2>
-        <p className="text-gray-400 mb-2">{lastMessage}</p>
+        <p className="text-gray-400 mb-2 whitespace-pre-wrap">{requestContent}</p>
         <p className="text-sm text-gray-500">{date}</p>
       </div>
     </Link>

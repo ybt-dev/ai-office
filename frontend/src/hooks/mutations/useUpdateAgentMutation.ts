@@ -11,7 +11,7 @@ const useUpdateAgentMutation = () => {
 
   const handleMutationSuccess = useCallback(async (agent: Agent) => {
     await queryClient.invalidateQueries({ queryKey: ['agents', { teamId: agent.teamId }] });
-    await queryClient.invalidateQueries({ queryKey: ['agents', agent.teamId] });
+    await queryClient.invalidateQueries({ queryKey: ['agents', agent.id] });
 
     toast('Agent was updated successfully!');
   }, [queryClient]);

@@ -4,7 +4,7 @@ import { ObjectId } from 'mongodb';
 
 export type AgentMessageDocument = HydratedDocument<AgentMessage>;
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, collection: 'agent_messages' })
 export class AgentMessage {
   @Prop({ required: true, type: mongoose.Schema.Types.ObjectId })
   sourceAgent: ObjectId;

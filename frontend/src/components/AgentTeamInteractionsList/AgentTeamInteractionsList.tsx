@@ -23,6 +23,7 @@ const AgentTeamInteractionsList = ({ interactions, getAgentTeamInteractionsLink 
             interactionId={interaction.id}
             key={interaction.id}
             title={interaction.title}
+            requestContent={interaction.requestContent}
             date={interaction.createdAt}
             getAgentTeamInteractionsLink={getAgentTeamInteractionsLink}
           />
