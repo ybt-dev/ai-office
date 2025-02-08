@@ -4,7 +4,6 @@ import { MongoClient } from "mongodb";
 import { MongoDBDatabaseAdapter } from "@elizaos/adapter-mongodb";
 import { DirectClient } from "@elizaos/client-direct";
 import { AutoClientInterface } from "@elizaos/client-auto";
-import { TwitterClientInterface } from "./clients/client-twitter/index.ts";
 import {
   DbCacheAdapter,
   defaultCharacter,
@@ -21,6 +20,7 @@ import {
   settings,
   IDatabaseAdapter,
   validateCharacterConfig,
+  Client,
 } from "@elizaos/core";
 import { createNodePlugin } from "@elizaos/plugin-node";
 import Database from "better-sqlite3";
@@ -34,12 +34,38 @@ import { influencer } from "./characters/influencer.ts";
 import { TwitterTopicProvider } from "./providers/twitterTopicProvider/index.ts";
 import { agentsManager } from "./agents/manager/index.ts";
 import { configDotenv } from "dotenv";
-import { processNewStrategy } from "./actions/processNewStrategy/index.ts";
+import { TelegramClientInterface } from "@elizaos/client-telegram";
+import { communicateWithAgents } from "./actions/communicate-agent/index.ts";
+import { callGenerate } from "./utils/dialogue-system.ts";
 
 configDotenv();
 
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
+
+class ExtendedDirectClient extends DirectClient {
+  constructor() {
+    super();
+    this.app.post("/newRoute", async (req: any, res: any) => {
+      await callGenerate();
+      res.json({ message: "New route added successfully" });
+    });
+  }
+}
+const DirectClientInterface: Client = {
+  start: async (_runtime: IAgentRuntime) => {
+    elizaLogger.log("DirectClientInterface start");
+    const client = new ExtendedDirectClient();
+    const serverPort = parseInt(settings.SERVER_PORT || "3000");
+    client.start(serverPort);
+    return client;
+  },
+  stop: async (_runtime: IAgentRuntime, client?: Client) => {
+    if (client instanceof ExtendedDirectClient) {
+      client.stop();
+    }
+  },
+};
 
 export const wait = (minTime: number = 1000, maxTime: number = 3000) => {
   const waitTime =
@@ -183,15 +209,19 @@ export async function initializeClients(
     if (autoClient) clients.push(autoClient);
   }
 
-  // if (clientTypes.includes("telegram")) {
-  //   const telegramClient = await TelegramClientInterface.start(runtime);
-  //   if (telegramClient) clients.push(telegramClient);
-  // }
-
-  if (clientTypes.includes("twitter")) {
-    const twitterClients = await TwitterClientInterface.start(runtime);
-    clients.push(twitterClients);
+  if (clientTypes.includes("direct")) {
+    const directClient = await DirectClientInterface.start(runtime);
+    if (directClient) clients.push(directClient);
   }
+  if (clientTypes.includes("telegram")) {
+    const telegramClient = await TelegramClientInterface.start(runtime);
+    if (telegramClient) clients.push(telegramClient);
+  }
+
+  // if (clientTypes.includes("twitter")) {
+  //   const twitterClients = await TwitterClientInterface.start(runtime)
+  //   clients.push(twitterClients);
+  // }
 
   if (character.plugins?.length > 0) {
     for (const plugin of character.plugins) {
@@ -230,7 +260,7 @@ export function createAgent(
     character,
     plugins: [nodePlugin],
     providers: [new TwitterTopicProvider()],
-    actions: [processNewStrategy],
+    actions: [communicateWithAgents],
     services: [],
     managers: [],
     cacheManager: cache,
@@ -307,7 +337,8 @@ const startAgents = async () => {
 
   let charactersArg = args.characters || args.character;
 
-  let characters = [producer, advertiser, influencer];
+  // let characters = [producer, advertiser, influencer];
+  let characters = [influencer, producer];
   console.log("charactersArg", charactersArg);
   if (charactersArg) {
     characters = await loadCharacters(charactersArg);
@@ -317,6 +348,8 @@ const startAgents = async () => {
     for (const character of characters) {
       await startAgent(character, directClient as DirectClient);
     }
+
+    await callGenerate();
   } catch (error) {
     elizaLogger.error("Error starting agents:", error);
   }

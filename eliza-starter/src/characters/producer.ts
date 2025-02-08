@@ -14,7 +14,7 @@ export const producer: Character = {
   ...defaultCharacter,
   id: PRODUCER_AGENT_ID,
   name: "Lex",
-  clients: [],
+  clients: [Clients.DIRECT],
   modelProvider: ModelProviderName.OPENROUTER,
   imageModelProvider: ModelProviderName.TOGETHER,
   plugins: [imageGenerationPlugin, bootstrapPlugin, baseSepPlugin],
@@ -26,6 +26,9 @@ export const producer: Character = {
     imageSettings: {
       hideWatermark: true,
       modelId: "together",
+    },
+    secrets: {
+      SERVER_PORT: "3000",
     },
   },
 

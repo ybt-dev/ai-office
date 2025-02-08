@@ -1,7 +1,6 @@
 import { IAgentRuntime, Provider, State, Memory } from "@elizaos/core";
 import { twitterTopicHandler } from "../../utils/twitter-topic.ts";
 
-
 export class TwitterTopicProvider implements Provider {
     async get(runtime: IAgentRuntime, message: Memory, state?: State): Promise<string> {
         try {
@@ -13,7 +12,7 @@ export class TwitterTopicProvider implements Provider {
                 throw new Error("No message content provided");
             }
 
-            const topicFromDB = twitterTopicHandler.get(runtime);
+            const topicFromDB = await twitterTopicHandler.get(runtime);
 
             return `Use this topic: ${topicFromDB} as a main topic for tweet generation`;
         } catch (error) {
