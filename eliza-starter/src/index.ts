@@ -1,5 +1,3 @@
-import { PostgresDatabaseAdapter } from "@elizaos/adapter-postgres";
-import { SqliteDatabaseAdapter } from "@elizaos/adapter-sqlite";
 import { MongoClient } from "mongodb";
 import { MongoDBDatabaseAdapter } from "@elizaos/adapter-mongodb";
 import { DirectClient } from "@elizaos/client-direct";
@@ -23,7 +21,6 @@ import {
   Client
 } from "@elizaos/core";
 import { createNodePlugin } from "@elizaos/plugin-node";
-import Database from "better-sqlite3";
 import fs from "fs";
 import yargs from "yargs";
 import path from "path";
@@ -154,24 +151,13 @@ export function getTokenForProvider(
 }
 
 function initializeDatabase(dataDir: string) {
-  // const DATABASE_URL = "";
-  // CONST DATABASE_NAME = ""
-  // const client = new MongoClient(DATABASE_URL)
-  // const db = new MongoDBDatabaseAdapter(client, DATABASE_NAME);
-  // return db;
-
-  if (process.env.POSTGRES_URL) {
-    const db = new PostgresDatabaseAdapter({
-      connectionString: process.env.POSTGRES_URL,
-    });
-    return db;
-  } else {
-    const filePath =
-      process.env.SQLITE_FILE ?? path.resolve(dataDir, "db.sqlite");
-    // ":memory:";
-    const db = new SqliteDatabaseAdapter(new Database(filePath));
-    return db;
-  }
+  const DATABASE_URL = process.env.MONGODB_URL || "";
+  const DATABASE_NAME = process.env.MONGODB_NAME || "ai-office";
+  
+  const client = new MongoClient(DATABASE_URL);
+  const db = new MongoDBDatabaseAdapter(client, DATABASE_NAME);
+  
+  return db;
 }
 
 export async function initializeClients(
@@ -301,21 +287,21 @@ async function startAgent(character: Character, directClient: DirectClient) {
   }
 }
 
+async function getAgents() {
+  const agents: Character[] = [];
+  
+  // load from DB agents
+  agents.push(influencer, producer, advertiser)
+  return agents;
+}
+
 const startAgents = async () => {
   const directClient = new DirectClient();
-  const args = parseArguments();
+  
+  const agents = await getAgents();
 
-  let charactersArg = args.characters || args.character;
-
-  // let characters = [producer, advertiser, influencer];
-  let characters = [influencer, producer]
-  console.log("charactersArg", charactersArg);
-  if (charactersArg) {
-    characters = await loadCharacters(charactersArg);
-  }
-  console.log("characters", characters);
   try {
-    for (const character of characters) {
+    for (const character of agents) {
       await startAgent(character, directClient as DirectClient);
     }
 
