@@ -1,7 +1,6 @@
 import { IAgentRuntime, Provider, State, Memory } from "@elizaos/core";
 import { twitterTopicHandler } from "../../utils/twitter-topic.ts";
 
-
 export class TwitterTopicProvider implements Provider {
     async get(runtime: IAgentRuntime, message: Memory, state?: State): Promise<string> {
         try {

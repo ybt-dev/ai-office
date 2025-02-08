@@ -20,7 +20,7 @@ You have a team with the following agents:
 
 # The text above is system information about you.
 
-User prompt: "Hey, Lex. We have an idea, to write some posts on twitter about Liverpool and we need audience. Also need some advertisement strategy Can you help us with that?".
+User prompt: "{{userPrompt}}"
 
 Your task:
 1. Read the user prompt.
@@ -30,15 +30,32 @@ Your task:
    where:
      - <agentId> is the identifier of the chosen agent.
      - <request details> is your request to an agent.
-4. If you need to call few agents, do that in the column.
-5. Then, on a new line, provide a final answer for the user explaining what action has been taken.
-
+4. If you need to call multiple agents, do that in separate lines.
+5. Extract the main topic for Twitter posts from the user prompt.
+6. Generate a detailed marketing strategy for the influencer, including:
+   - **Target audience**: Who should be reached?
+   - **Content strategy**: What type of posts should be created?
+   - **Hashtag and engagement tactics**: How to optimize reach?
+   - **Collaboration and partnerships**: Are there relevant influencers or brands to work with?
+   - **Monetization opportunities**: How can the influencer maximize revenue?
+7. Include the marketing strategy in your communication with the influencer.
+8. Then, on a new line, provide a final answer for the user explaining what action has been taken.
 
 For example, your response may look like:
 
-COMMUNICATE_WITH_AGENTS agentId "Hey Agent, I have a request from user for project advertisement. I prepared strategy for you..."
+COMMUNICATE_WITH_AGENTS influencer-id "User wants to create Twitter posts about Liverpool, build an audience, and develop an advertisement strategy. Here is a suggested marketing strategy:
 
-Final answer: I have forwarded your request to our advertiser agent, who will assist you with advertising your coin shortly.
+**Target audience**: Liverpool FC fans, football enthusiasts, betting communities, and sports bloggers.
+
+**Content strategy**: Engage with match highlights, player performance analysis, fan polls, and memes to increase engagement.
+
+**Hashtag and engagement tactics**: Use trending hashtags such as #LiverpoolFC, #YNWA, and #PremierLeague. Engage with followers by responding to comments and retweeting user-generated content.
+
+**Collaboration and partnerships**: Work with Liverpool fan pages, football analysts, and sports betting platforms to gain visibility.
+
+**Monetization opportunities**: Explore affiliate partnerships with sports betting websites, promote football merchandise, and offer sponsored posts."
+
+Final answer: I have forwarded your request to our influencer agent along with a marketing strategy tailored to your needs. The agent will assist you in executing the plan effectively.
 `;
 
 const influencerResponseTemplate = `
@@ -51,62 +68,39 @@ const influencerResponseTemplate = `
 
 {{actions}}
 
-You are a part of  team with the following agents:
+You are a part of a team with the following agents:
 -> producer: "producer-id"
 
 # The text above is system information about you.
 
-User Prompt: Use this markething strategy for your twitter post.
+Producers Prompt: "{{producersPrompt}}"
 
 Your task:
-1. Read the user prompt.
-2. Output your response exactly in the following format:
-   COMMUNICATE_WITH_AGENTS <agentId> <request details>
-   where:
-     - <agentId> is the identifier of the chosen agent.
-     - <request details> is your request to an agent.
-3. If you need to call few agents to provide more info, do that in the column.
-4. If you response don't need additional info, add "Additional Question: false" in the column
-5. Then, on a new line, provide a final answer for the user explaining what action has been taken.
+1. Read the producer's prompt and analyze the provided marketing strategy.
+2. Generate a set of Twitter posts based on the given topic and strategy.
+3. Ensure that the posts align with:
+   - **Target audience**: Writing style and interests.
+   - **Content strategy**: Tone, format, and structure.
+   - **Hashtag and engagement tactics**: Optimization for reach.
+   - **Collaboration and partnerships**: Mentioning relevant accounts if necessary.
+   - **Monetization opportunities**: If applicable, include subtle promotions or CTA.
+4. If additional information is needed, communicate with the producer using the format:
+5. If no additional information is required, include: "Additional Question: false"
+6. Then, on a new line, provide a final answer for the user explaining what action has been taken.
 
 For example, your response may look like:
-COMMUNICATE_WITH_AGENTS agentId "Hey Agent, I need some more information from your strategy..."
 
-Additional Question: yes
-Final answer: Yes, I can do it, but wait for additional information.
-`;
+**Scenario 1: Need more details**
+COMMUNICATE_WITH_AGENTS producer-id "Hey Producer, could you clarify if we should focus more on match predictions or player analysis?" 
 
-const advertiserResponseTemplate = `
-# About {{agentName}}:
-{{bio}}
-{{lore}}
-{{topics}}
+Additional Question: true 
+Final answer: I have reviewed the marketing strategy but need clarification on content focus. Reaching out to the producer now.
 
-{{providers}}
+**Scenario 2: Ready to proceed**
 
-{{actions}}
+Additional Question: false 
 
-You are a part of  team with the following agents:
--> producer: "producer-id"
--> influencer: "influencer-id"
-
-# The text above is system information about you.
-
-Your task:
-1. Read the user prompt.
-3. Output your response exactly in the following format:
-   COMMUNICATE_WITH_AGENTS <agentId> <request details>
-   where:
-     - <agentId> is the identifier of the chosen agent.
-     - <request details> is your request to an agent.
-4. If you need to call few agents to provide more info, do that in the column.
-5. Then, on a new line, provide a final answer for the user explaining what action has been taken.
-
-For example, your response may look like:
-COMMUNICATE_WITH_AGENTS agentId "Hey Agent, I need some more information about strategy..."
-
-Final answer: Yes, I can do it, but wait for additional information.
-Additional Answer: yes
+Final answer: I will generate  Twitter posts based on the marketing strategy and engaging with the audience.
 `;
 
 const createContextForLLM = async (
@@ -138,13 +132,6 @@ const createContextForLLM = async (
     return context;
 }
 
-
-const exampleResponse =`
-  COMMUNICATE_WITH_AGENTS producer-id "User requested to use a specific marketing strategy for a Twitter post. Could you please provide the details of the marketing strategy to proceed?"
-  
-  Additional Question: false
-  Final answer: I've reached out to the producer for the marketing strategy details needed for your Twitter post
-  `;
 const extractAdditional = (messageState: string) => {
     const regex= /Additional Question: (true|false)/;
     const match = messageState.match(regex);
@@ -152,8 +139,9 @@ const extractAdditional = (messageState: string) => {
 }
 
 const extractRequestForInfluencer = (messageState: string) => {
-    const regex = /COMMUNICATE_WITH_AGENTS\s+influencer-id\s+"(.*?)"/;
+    const regex = /COMMUNICATE_WITH_AGENTS\s+influencer-id\s+"([\s\S]*?)"/m;
     const match = messageState.match(regex);
+    elizaLogger.log("match", match)
     return match ? match[1] : NOT_FOUND;
 };
 
@@ -214,9 +202,3 @@ export const callGenerate = async () => {
         elizaLogger.error("ERROR", e)
     }
 }
-
-/**
- * Задачи на завтра:
- * -> обновить общение между ИИ
- * -> сохранять общение в БД
- */
