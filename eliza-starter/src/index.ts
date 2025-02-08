@@ -34,7 +34,10 @@ import { influencer } from "./characters/influencer.ts";
 import { TwitterTopicProvider } from "./providers/twitterTopicProvider/index.ts";
 import { agentsManager } from "./agents/manager/index.ts";
 import { configDotenv } from "dotenv";
-import { processNewStrategy } from "./actions/processNewStrategy/index.ts";
+import { ProcessNewStrategy } from "./actions/processNewStrategy/index.ts";
+import { TelegramClientInterface } from "@elizaos/client-telegram";
+import { communicateWithAgents } from "./actions/communicate-agent/index.ts";
+import { callGenerate } from "./utils/dialogue-system.ts";
 
 configDotenv();
 
@@ -184,15 +187,15 @@ export async function initializeClients(
     if (autoClient) clients.push(autoClient);
   }
 
-  // if (clientTypes.includes("telegram")) {
-  //   const telegramClient = await TelegramClientInterface.start(runtime);
-  //   if (telegramClient) clients.push(telegramClient);
-  // }
-
-  if (clientTypes.includes("twitter")) {
-    const twitterClients = await TwitterClientInterface.start(runtime)
-    clients.push(twitterClients);
+  if (clientTypes.includes("telegram")) {
+    const telegramClient = await TelegramClientInterface.start(runtime);
+    if (telegramClient) clients.push(telegramClient);
   }
+
+  // if (clientTypes.includes("twitter")) {
+  //   const twitterClients = await TwitterClientInterface.start(runtime)
+  //   clients.push(twitterClients);
+  // }
 
   if (character.plugins?.length > 0) {
     for (const plugin of character.plugins) {
@@ -231,7 +234,7 @@ export function createAgent(
     character,
     plugins: [nodePlugin],
     providers: [new TwitterTopicProvider()],
-    actions: [processNewStrategy],
+    actions: [ new ProcessNewStrategy(), communicateWithAgents ],
     services: [],
     managers: [],
     cacheManager: cache,
@@ -288,7 +291,6 @@ async function startAgent(character: Character, directClient: DirectClient) {
     directClient.registerAgent(runtime);
     
     agentsManager.addAgent(runtime.agentId, runtime);
-    
     return clients;
   } catch (error) {
     elizaLogger.error(
@@ -306,7 +308,8 @@ const startAgents = async () => {
 
   let charactersArg = args.characters || args.character;
 
-  let characters = [producer, advertiser, influencer];
+  // let characters = [producer, advertiser, influencer];
+  let characters = [advertiser, producer]
   console.log("charactersArg", charactersArg);
   if (charactersArg) {
     characters = await loadCharacters(charactersArg);
@@ -316,6 +319,8 @@ const startAgents = async () => {
     for (const character of characters) {
       await startAgent(character, directClient as DirectClient);
     }
+
+    await callGenerate();
   } catch (error) {
     elizaLogger.error("Error starting agents:", error);
   }
