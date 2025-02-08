@@ -13,7 +13,7 @@ export class TwitterTopicProvider implements Provider {
                 throw new Error("No message content provided");
             }
 
-            const topicFromDB = twitterTopicHandler.get(runtime);
+            const topicFromDB = await twitterTopicHandler.get(runtime);
 
             return `Use this topic: ${topicFromDB} as a main topic for tweet generation`;
         } catch (error) {
