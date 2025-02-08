@@ -8,7 +8,7 @@ export const influencer: Character = {
     ...defaultCharacter,
     id: INFLUENCER_AGENT_ID,
     name: "Maverick AI",
-    clients: [Clients.TWITTER],
+    clients: [Clients.TELEGRAM],
     modelProvider: ModelProviderName.OPENROUTER,
     imageModelProvider: ModelProviderName.TOGETHER,
     plugins: [
@@ -23,7 +23,12 @@ export const influencer: Character = {
         imageSettings: {
             hideWatermark: true,
             modelId: "together"
-        }
+        },
+        // secrets: {
+        //     TWITTER_USERNAME: "kitsuragi_57259",
+        //     TWITTER_PASSWORD: "Y_6%YT!7YuzgGq(",
+        //     TWITTER_EMAIL: "kitsuragi1510@proton.me"
+        // }
     },
     bio: ["A charismatic crypto influencer with deep expertise in marketing, advertising, and social media growth. Known for his sharp wit, insightful analysis, and ability to break down complex crypto trends into engaging, digestible content.", "Has a strong background in finance and economics, allowing him to provide unique perspectives on market movements and trends.", "Passionate about decentralized finance and the potential it holds for the future of the financial industry."],
     lore: [

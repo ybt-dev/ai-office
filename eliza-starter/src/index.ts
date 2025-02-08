@@ -308,7 +308,7 @@ const startAgents = async () => {
   let charactersArg = args.characters || args.character;
 
   // let characters = [producer, advertiser, influencer];
-  let characters = [advertiser, producer]
+  let characters = [influencer, producer]
   console.log("charactersArg", charactersArg);
   if (charactersArg) {
     characters = await loadCharacters(charactersArg);

@@ -8,7 +8,7 @@ export const advertiser: Character = {
     ...defaultCharacter,
     id: ADVERTISER_AGENT_ID,
     name: "Inokentij",
-    clients: [Clients.TWITTER],
+    clients: [Clients.TELEGRAM],
     modelProvider: ModelProviderName.OPENROUTER,
     imageModelProvider: ModelProviderName.TOGETHER,
     plugins: [
