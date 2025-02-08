@@ -7,7 +7,7 @@ import {
   publicActions,
   walletActions,
 } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
+import { privateKeyToAccount, generatePrivateKey } from "viem/accounts";
 import {
   type IAgentRuntime,
   type Provider,
@@ -30,6 +30,7 @@ import * as viemChains from "viem/chains";
 import { DeriveKeyProvider, TEEMode } from "@elizaos/plugin-tee";
 import NodeCache from "node-cache";
 import * as path from "node:path";
+import { AES, enc } from "crypto-js";
 
 import type { SupportedChain } from "../types";
 
@@ -297,9 +298,18 @@ const genChainsFromRuntime = (
   return chains;
 };
 
+const decryptPrivateKey = (encryptedPrivateKey: string): string => {
+  const encryptionKey = process.env.WALLET_ENCRYPTION_KEY;
+  if (!encryptionKey) {
+    throw new Error("WALLET_ENCRYPTION_KEY environment variable is not set");
+  }
+
+  const bytes = AES.decrypt(encryptedPrivateKey, encryptionKey);
+  return bytes.toString(enc.Utf8);
+};
+
 export const initWalletProvider = async (runtime: IAgentRuntime) => {
   const teeMode = runtime.getSetting("TEE_MODE") || TEEMode.OFF;
-
   const chains = genChainsFromRuntime(runtime);
 
   if (teeMode !== TEEMode.OFF) {
@@ -320,11 +330,32 @@ export const initWalletProvider = async (runtime: IAgentRuntime) => {
       chains
     );
   } else {
-    const privateKey = runtime.getSetting("EVM_PRIVATE_KEY") as `0x${string}`;
-    if (!privateKey) {
-      throw new Error("EVM_PRIVATE_KEY is missing");
+    try {
+      const encryptedPrivateKey = runtime.getSetting(
+        "ENCRYPTED_EVM_PRIVATE_KEY"
+      );
+      let privateKey: `0x${string}`;
+
+      if (encryptedPrivateKey) {
+        privateKey = `0x${decryptPrivateKey(
+          encryptedPrivateKey
+        )}` as `0x${string}`;
+      } else {
+        privateKey = generatePrivateKey();
+      }
+
+      const walletProvider = new WalletProvider(
+        privateKey,
+        runtime.cacheManager,
+        chains
+      );
+      // Always set to baseSepolia regardless of the original chain
+      walletProvider.switchChain("baseSepolia");
+      return walletProvider;
+    } catch (error) {
+      console.error("Error initializing wallet provider:", error);
+      throw error;
     }
-    return new WalletProvider(privateKey, runtime.cacheManager, chains);
   }
 };
 
