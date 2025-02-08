@@ -9,8 +9,11 @@ import {
   ModelClass,
   type State,
 } from "@elizaos/core";
-import { mintNFTTemplate } from "../templates/index.ts";
-import { type MintNFTContent, MintNFTSchema } from "../types/index.ts";
+import { mintNFTTemplate } from "../../baseSepPlugin/templates/index.ts";
+import {
+  type MintNFTContent,
+  MintNFTSchema,
+} from "../../baseSepPlugin/types/index.ts";
 import * as viemChains from "viem/chains";
 import { createPublicClient, createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";

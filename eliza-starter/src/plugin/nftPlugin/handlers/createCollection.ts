@@ -17,9 +17,9 @@ import {
   generateERC721ContractCode,
   compileContract,
   deployContract,
-} from "../utils/deployEVMContract";
-import { initWalletProvider } from "../providers/wallet";
-import { collectionImageTemplate } from "../templates/index.ts";
+} from "../utils/deployEVMContract.ts";
+import { initWalletProvider } from "../../baseSepPlugin/providers/wallet.ts";
+import { collectionImageTemplate } from "../../baseSepPlugin/templates/index.ts";
 
 export async function createCollectionMetadata({
   runtime,

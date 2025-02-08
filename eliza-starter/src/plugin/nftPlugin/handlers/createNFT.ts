@@ -16,7 +16,10 @@ import {
   saveHeuristImage,
 } from "@elizaos/plugin-image-generation";
 import { ethers } from "ethers";
-import { WalletProvider, initWalletProvider } from "../providers/wallet";
+import {
+  WalletProvider,
+  initWalletProvider,
+} from "../../baseSepPlugin/providers/wallet";
 import { baseSepolia } from "viem/chains";
 
 const nftTemplate = `

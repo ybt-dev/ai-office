@@ -32,7 +32,7 @@ import NodeCache from "node-cache";
 import * as path from "node:path";
 import { AES, enc } from "crypto-js";
 
-import type { SupportedChain } from "../types";
+import type { SupportedChain } from "../types/index.ts";
 
 export class WalletProvider {
   private cache: NodeCache;

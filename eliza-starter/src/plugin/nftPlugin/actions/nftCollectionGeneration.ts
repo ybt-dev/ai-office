@@ -15,6 +15,7 @@ import { createCollectionTemplate } from "../templates/index.ts";
 import * as viemChains from "viem/chains";
 import { createPublicClient, createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
+
 import {
   compileContract,
   deployContract,

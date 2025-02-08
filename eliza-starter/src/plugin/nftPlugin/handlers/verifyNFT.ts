@@ -1,5 +1,5 @@
 import type { IAgentRuntime } from "@elizaos/core";
-import { WalletProvider } from "../providers/wallet";
+import { WalletProvider } from "../../baseSepPlugin/providers/wallet";
 
 export async function verifyNFT({
   runtime,

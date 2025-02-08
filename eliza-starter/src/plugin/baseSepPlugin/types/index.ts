@@ -71,16 +71,6 @@ export interface TransferParams {
   amount: string;
   data?: `0x${string}`;
 }
-
-export interface BridgeParams {
-  fromChain: SupportedChain;
-  toChain: SupportedChain;
-  fromToken: Address;
-  toToken: Address;
-  amount: string;
-  toAddress?: Address;
-}
-
 // Plugin configuration
 export interface EvmPluginConfig {
   rpcUrl?: {
@@ -129,29 +119,3 @@ export interface TokenPriceResponse {
 export interface TokenListResponse {
   tokens: TokenData[];
 }
-
-// ----------------------------
-// Added MintNFTContent and Schema definitions (without using "solana")
-
-import { z } from "zod";
-import type { Content } from "@elizaos/core";
-
-// Use the existing _SupportedChainList without appending "solana"
-const supportedChainTuple = _SupportedChainList as unknown as [
-  string,
-  ...string[]
-];
-
-export interface MintNFTContent extends Content {
-  collectionAddress: string;
-  chainName: string;
-}
-
-export const MintNFTSchema = z.object({
-  collectionAddress: z.string(),
-  chainName: z.enum([...supportedChainTuple]).nullable(),
-});
-
-export const CreateCollectionSchema = z.object({
-  chainName: z.enum([...supportedChainTuple]).nullable(),
-});
