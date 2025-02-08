@@ -1,0 +1,38 @@
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Session } from '@apps/platform/sessions/decorators';
+import { SessionData } from '@apps/platform/sessions/types';
+import { SessionGuard } from '@apps/platform/sessions/guards';
+import { AgentService } from '@apps/platform/agents/services';
+import { InjectAgentService } from '@apps/platform/agents/decorators';
+import { CreateAgentBodyDto, ListAgentsQueryDto } from '@apps/platform/agents/dto';
+
+@Controller('/agents')
+@UseGuards(SessionGuard)
+export default class AgentController {
+  constructor(@InjectAgentService() private readonly agentService: AgentService) {}
+
+  @Get('/')
+  public listAgents(@Session() session: SessionData, @Query() query: ListAgentsQueryDto) {
+    return this.agentService.listForTeam(query.teamId, session.organizationId);
+  }
+
+  @Get('/:id')
+  public getAgentById(@Session() session: SessionData, @Param('id') id: string) {
+    return this.agentService.getIfExist(id, session.organizationId);
+  }
+
+  @Post('/')
+  public createAgent(@Session() session: SessionData, @Body() body: CreateAgentBodyDto) {
+    return this.agentService.create({
+      name: body.name,
+      teamId: body.teamId,
+      role: body.role,
+      model: body.model,
+      config: body.config,
+      modelApiKey: body.modelApiKey,
+      description: body.description,
+      createdById: session.userId,
+      organizationId: session.organizationId,
+    });
+  }
+}
