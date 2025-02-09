@@ -14,6 +14,7 @@ import {
   IDatabaseCacheAdapter,
   ModelProviderName,
   settings,
+
   stringToUuid,
 } from "@elizaos/core";
 import {createNodePlugin} from "@elizaos/plugin-node";
@@ -32,7 +33,6 @@ configDotenv();
 
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
-
 
 export const wait = (minTime: number = 1000, maxTime: number = 3000) => {
   const waitTime =
@@ -191,21 +191,24 @@ async function startAgent(character: Character, organizationId: string, role: st
 
     await runtime.initialize();
 
-    const cookies = runtime.getSetting('TWITTER_COOKIES') || process.env.TWITTER_COOKIES;
-    const username = runtime.getSetting('TWITTER_USERNAME') || process.env.TWITTER_USERNAME;
+    const cookies =
+      runtime.getSetting("TWITTER_COOKIES") || process.env.TWITTER_COOKIES;
+    const username =
+      runtime.getSetting("TWITTER_USERNAME") || process.env.TWITTER_USERNAME;
 
     if (cookies) {
       elizaLogger.log(`Reading cookies from ENV...`);
 
       await runtime.cacheManager.set(
         `twitter/${username}/cookies`,
-        JSON.parse(cookies),
+        JSON.parse(cookies)
       );
     }
 
     const clients = await initializeClients(character, runtime);
 
     directClient.registerAgent(runtime);
+
 
     agentsManager.addAgent(runtime.agentId, runtime, organizationId, role);
     return clients;
@@ -245,6 +248,7 @@ async function addAgentHandler() {
         })
       }
     }
+
 
     return agents;
   } catch (e) {

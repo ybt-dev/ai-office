@@ -8,6 +8,9 @@ pnpm-debug.log*
 lerna-debug.log*
 .yarn
 
+/.yarn
+yarn.lock
+
 node_modules
 dist
 dist-ssr
