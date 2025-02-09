@@ -103,7 +103,7 @@ const AgentForm = ({
                 type="text"
                 id="twitterCookie"
                 name="twitterCookie"
-                value={modelApiKey}
+                value={twitterCookie}
                 onChange={(event) => setTwitterCookie(event.target.value)}
                 className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />

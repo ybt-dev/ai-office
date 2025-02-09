@@ -1,3 +1,5 @@
+import WalletConnection from '@/components/WalletConnection';
+
 const Home = () => {
   return (
     <div className="flex h-screen justify-center">
@@ -10,7 +12,13 @@ const Home = () => {
           </h3>
         </div>
         <div className="flex flex-col">
-          <button className="p-4 rounded text-white text-bold bg-[#482F8A]">Join AI Office</button>
+          <WalletConnection>
+            {(isConnected, isOpen, address, setIsOpen) => (
+              <button onClick={() => setIsOpen(true)} className="p-4 rounded text-white text-bold bg-[#482F8A]">
+                Join AI Office
+              </button>
+            )}
+          </WalletConnection>
         </div>
       </div>
       <img className="fixed bottom-0 h-full" src="/grid.png" alt="grid" />

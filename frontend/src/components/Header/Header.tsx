@@ -1,4 +1,8 @@
-import Wallet from '@/components/Wallet';
+import WalletConnection from '@/components/WalletConnection';
+
+const truncateAddress = (address: string) => {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+};
 
 const Header = () => {
   return (
@@ -10,7 +14,16 @@ const Header = () => {
         </div>
         <div className="flex items-center">
           <div className="flex items-center gap-4">
-            <Wallet />
+            <WalletConnection>
+              {(isConnected, isOpen, address, setIsOpen) => (
+                <button
+                  onClick={() => setIsOpen(!isOpen)}
+                  className="px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors duration-200 ease-in-out"
+                >
+                  {isConnected && address ? truncateAddress(address) : 'Connect Wallet'}
+                </button>
+              )}
+            </WalletConnection>
           </div>
         </div>
       </div>

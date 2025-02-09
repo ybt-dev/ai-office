@@ -1,13 +1,18 @@
-import { useState } from 'react';
-import { useConnect, useAccount } from 'wagmi';
+import { ReactNode, useState } from 'react';
 import { useNavigate } from 'react-router';
+import { useAccount, useConnect } from 'wagmi';
 import WalletOption from './WalletOption';
 
-function truncateAddress(address: string) {
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+export interface WalletConnectionProps {
+  children: (
+    isConnected: boolean,
+    isOpen: boolean,
+    address: string | undefined,
+    setIsOpen: (isOpen: boolean) => void,
+  ) => ReactNode;
 }
 
-const Wallet = () => {
+const WalletConnection = ({ children }: WalletConnectionProps) => {
   const navigate = useNavigate();
   const { connectors, connect } = useConnect();
   const { isConnected, address } = useAccount();
@@ -16,13 +21,7 @@ const Wallet = () => {
 
   return (
     <div className="relative">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors duration-200 ease-in-out"
-      >
-        {isConnected ? truncateAddress(address!) : 'Connect Wallet'}
-      </button>
-
+      {children(isConnected, isOpen, address, (open) => setIsOpen(open))}
       {isOpen && (
         <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5">
           <div className="py-1" role="menu">
@@ -53,4 +52,4 @@ const Wallet = () => {
   );
 };
 
-export default Wallet;
+export default WalletConnection;
