@@ -1,6 +1,14 @@
-import {composeContext, elizaLogger, generateText, IAgentRuntime, Memory, ModelClass} from "@elizaos/core";
-import {agentsManager} from "../agents/manager/index.ts";
-import {initializeDatabase} from "../index.ts";
+import {
+  Character,
+  composeContext,
+  elizaLogger,
+  generateText,
+  IAgentRuntime,
+  Memory,
+  ModelClass,
+} from "@elizaos/core";
+import { agentsManager } from "../agents/manager/index.ts";
+import { initializeDatabase } from "../index.ts";
 
 const NOT_FOUND = "Request not found";
 
@@ -103,93 +111,132 @@ Final answer: I will generate  Twitter posts based on the marketing strategy and
 `;
 
 const createContextForLLM = async (
-    userPrompt: string,
-    userId: `${string}-${string}-${string}-${string}-${string}`,
-    agentRuntime: IAgentRuntime,
-    template: string
+  userPrompt: string,
+  userId: `${string}-${string}-${string}-${string}-${string}`,
+  agentRuntime: IAgentRuntime,
+  template: string
 ) => {
-    const message: Memory = {
-        userId: userId,
-        agentId: agentRuntime.agentId,
-        roomId: userId,
-        content: {
-            text: userPrompt
-        }
-    }
-    const state = await agentRuntime.composeState(message);
+  const message: Memory = {
+    userId: userId,
+    agentId: agentRuntime.agentId,
+    roomId: userId,
+    content: {
+      text: userPrompt,
+    },
+  };
+  const state = await agentRuntime.composeState(message);
 
-
-    return composeContext({
-        state,
-        template: template
-    });
-}
+  return composeContext({
+    state,
+    template: template,
+  });
+};
 
 const extractAdditional = (messageState: string) => {
-    const regex= /Additional Question: (true|false)/;
-    const match = messageState.match(regex);
-    return match ? match[1] : NOT_FOUND;
-}
+  const regex = /Additional Question: (true|false)/;
+  const match = messageState.match(regex);
+  return match ? match[1] : NOT_FOUND;
+};
 
 const extractRequestForInfluencer = (messageState: string) => {
-    const regex = /COMMUNICATE_WITH_AGENTS\s+influencer-id\s+"([\s\S]*?)"/m;
-    const match = messageState.match(regex);
-    elizaLogger.log("match", match)
-    return match ? match[1] : NOT_FOUND;
+  const regex = /COMMUNICATE_WITH_AGENTS\s+influencer-id\s+"([\s\S]*?)"/m;
+  const match = messageState.match(regex);
+  elizaLogger.log("match", match);
+  return match ? match[1] : NOT_FOUND;
 };
 
 const extractRequestForProducer = (messageState: string) => {
-    const regex = /COMMUNICATE_WITH_AGENTS\s+producer-id\s+"(.*?)"/;
-    const match = messageState.match(regex);
-    return match ? match[1] : NOT_FOUND;
-}
-
-const getListOfInteraction = async () => {
-    const { client } = initializeDatabase();
-    const database = client.db("ai-office");
-
-    return (await database.collection("agent_team_interactions").find().toArray());
-}
-
-export const loopDBHandler = async () => {
-    elizaLogger.log("Starting loopDBHandler");
-
-    setInterval(async () => {
-        elizaLogger.log("Checking for database changes...");
-
-        const list = await getListOfInteraction();
-        if (list.length > 0) {
-            for(const item of list) {
-                await conversationHandler(item._id.toString(), item.organization.toString(), item.requestContent);
-            }
-        }
-
-    }, 30000);
+  const regex = /COMMUNICATE_WITH_AGENTS\s+producer-id\s+"(.*?)"/;
+  const match = messageState.match(regex);
+  return match ? match[1] : NOT_FOUND;
 };
 
+const getListOfInteraction = async () => {
+  const { client } = initializeDatabase();
+  const database = client.db("ai-office");
 
-export const conversationHandler = async (interactionId: string, organisationId: string, requestContent: string) => {
+  return await database.collection("agent_team_interactions").find().toArray();
+};
+
+export const loopDBHandler = async () => {
+  elizaLogger.log("Starting loopDBHandler");
+
+  setInterval(async () => {
     try {
+      elizaLogger.log("Checking for database changes...");
+
+      const list = await getListOfInteraction();
+      if (list.length > 0) {
+        elizaLogger.log(`Found ${list.length} interactions to process`);
+        for (const item of list) {
+          await conversationHandler(
+            item._id.toString(),
+            item.organization.toString(),
+            item.requestContent
+          ).catch((error) => {
+            elizaLogger.error(
+              `Error processing interaction ${item._id}:`,
+              error
+            );
+          });
+        }
+      }
+    } catch (error) {
+      elizaLogger.error("Error in loopDBHandler:", error);
+      // Don't let the interval die on error
+    }
+  }, 30000);
+};
+interface ExtendedCharacter extends Character {
+  organizationId?: string;
+  role?: string;
+}
+
+export const conversationHandler = async (
+  interactionId: string,
+  organisationId: string,
+  requestContent: string
+) => {
+  try {
     elizaLogger.log("Start Conversation");
+    elizaLogger.log("Organization ID:", organisationId);
 
+    // Log all available agents and their roles
+    const allAgents = agentsManager.getAllAgents();
+    elizaLogger.log(
+      "Available agents:",
+      allAgents.map((agent) => ({
+        id: agent.agentId,
+        name: agent.character.name,
+        role: (agent.character as ExtendedCharacter).role,
+        orgId: (agent.character as ExtendedCharacter).organizationId,
+      }))
+    );
 
-    const all = agentsManager.getAllAgents();
-    // console.log("all agents from manager", all); - тут работает
-    const res = agentsManager.getAgentByRole(organisationId, 'producer');
+    // Also add logging for the specific lookup
+    elizaLogger.log("Looking for producer in organization:", organisationId);
+    const producerRuntime = agentsManager.getAgentByRole(
+      organisationId,
+      "producer"
+    );
+    elizaLogger.log(
+      "Found producer:",
+      producerRuntime ? producerRuntime.agentId : "not found"
+    );
 
-    elizaLogger.log("All agents", all); // - тут не работает
-    elizaLogger.log("agentsManager.getAgentByRole(organisationId, producer)", res);
-
-    const producerRuntime =  agentsManager.getAgentByRole(organisationId, "producer");
-
-    elizaLogger.log("producerRuntime", producerRuntime);
-
-    const influencerRuntime =  agentsManager.getAgentByRole(organisationId, "influencer");
-
-    elizaLogger.log("influencerRuntime", influencerRuntime);
+    const influencerRuntime = agentsManager.getAgentByRole(
+      organisationId,
+      "influencer"
+    );
+    if (!influencerRuntime) {
+      elizaLogger.error(
+        `Influencer agent not found for organization ${organisationId}. Skipping conversation.`
+      );
+      return null;
+    }
 
     let isFinishConversation = false;
-    let userPrompt = requestContent
+    let userPrompt = requestContent;
 
     // while(!isFinishConversation) {
     //     const producerContext = await createContextForLLM(userPrompt, influencerRuntime.agentId, producerRuntime, mainProducerResponseTemplate);
@@ -228,9 +275,14 @@ export const conversationHandler = async (interactionId: string, organisationId:
     //     }
     // }
 
-    elizaLogger.log("IsConverestionIsFinished", isFinishConversation)
+    elizaLogger.log("IsConverestionIsFinished", isFinishConversation);
     return null;
-    } catch (e) {
-        elizaLogger.error("ERROR", e)
-    }
-}
+  } catch (e) {
+    elizaLogger.error(
+      "Conversation Handler Error:",
+      e instanceof Error ? e.message : String(e)
+    );
+    // Instead of rethrowing, we'll return null to prevent the process from crashing
+    return null;
+  }
+};
