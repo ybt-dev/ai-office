@@ -1,7 +1,11 @@
+import {Db, ObjectId} from "mongodb";
 import {composeContext, elizaLogger, generateText, IAgentRuntime, Memory, ModelClass} from "@elizaos/core";
 import {agentsManager} from "../agents/manager/index.ts";
+import EventEmitter from 'node:events';
 
 const NOT_FOUND = "Request not found";
+
+const eventEmitter = new EventEmitter();
 
 const mainProducerResponseTemplate = `
 # About {{agentName}}:
@@ -120,114 +124,108 @@ const createContextForLLM = async (
 
     return composeContext({
         state,
-        template: template
+        template,
     });
 }
 
-const extractAdditional = (messageState: string) => {
-    const regex= /Additional Question: (true|false)/;
-    const match = messageState.match(regex);
-    return match ? match[1] : NOT_FOUND;
-}
+const extractRequestForAgent = (messageState: string) => {
+    const regex = /COMMUNICATE_WITH_AGENTS\s+([\w-]+)\s+"([^"]+)"/g;
+    const matches = [...messageState.matchAll(regex)];
 
-const extractRequestForInfluencer = (messageState: string) => {
-    const regex = /COMMUNICATE_WITH_AGENTS\s+influencer-id\s+"([\s\S]*?)"/m;
-    const match = messageState.match(regex);
-    elizaLogger.log("match", match)
-    return match ? match[1] : NOT_FOUND;
+    return matches.map((match) => ({
+        agentId: match[1],
+        content: match[2],
+    }));
 };
 
-const extractRequestForProducer = (messageState: string) => {
-    const regex = /COMMUNICATE_WITH_AGENTS\s+producer-id\s+"(.*?)"/;
-    const match = messageState.match(regex);
-    return match ? match[1] : NOT_FOUND;
-}
+export const sendInteractionToProducer = async (
+  interactionId: string,
+  organizationId: string,
+  content: string,
+) => {
+    const producerAgent =  agentsManager.getAgentByRole(organizationId, "producer");
 
-const getListOfInteraction = async () => {
-    // INTERACTION will come from event;
-    return [];
-}
+    const producerContext = await createContextForLLM(
+      content,
+      producerAgent.agentId,
+      producerAgent,
+      mainProducerResponseTemplate,
+    );
 
-export const loopDBHandler = async () => {
-    elizaLogger.log("Starting loopDBHandler");
+    const respondFromProducer = await generateText({
+        runtime: producerAgent,
+        context: producerContext,
+        modelClass: ModelClass.LARGE
+    });
 
-    setInterval(async () => {
-        elizaLogger.log("Checking for database changes...");
+    const extractedRequests = extractRequestForAgent(respondFromProducer);
 
-        const list = await getListOfInteraction();
-        if (list.length > 0) {
-            for(const item of list) {
-                await conversationHandler(item._id.toString(), item.organization.toString(), item.requestContent);
-            }
-        }
-
-    }, 30000);
-};
-
-
-export const conversationHandler = async (interactionId: string, organisationId: string, requestContent: string) => {
-    try {
-    elizaLogger.log("Start Conversation");
-
-
-    const all = agentsManager.getAllAgents();
-    // console.log("all agents from manager", all); - тут работает
-    const res = agentsManager.getAgentByRole(organisationId, 'producer');
-
-    elizaLogger.log("All agents", all); // - тут не работает
-    elizaLogger.log("agentsManager.getAgentByRole(organisationId, producer)", res);
-
-    const producerRuntime =  agentsManager.getAgentByRole(organisationId, "producer");
-
-    elizaLogger.log("producerRuntime", producerRuntime);
-
-    const influencerRuntime =  agentsManager.getAgentByRole(organisationId, "influencer");
-
-    elizaLogger.log("influencerRuntime", influencerRuntime);
-
-    let isFinishConversation = false;
-    let userPrompt = requestContent
-
-    // while(!isFinishConversation) {
-    //     const producerContext = await createContextForLLM(userPrompt, influencerRuntime.agentId, producerRuntime, mainProducerResponseTemplate);
-    //
-    //     const respondFromProducer = await generateText({
-    //         runtime: producerRuntime,
-    //         context: producerContext,
-    //         modelClass: ModelClass.LARGE
-    //     });
-    //     elizaLogger.log("RespondFromProducer", respondFromProducer)
-    //     const extractedRequest = extractRequestForInfluencer(respondFromProducer);
-    //     elizaLogger.log("ExtractedRequest", extractedRequest)
-    //     if(extractedRequest !== NOT_FOUND) {
-    //
-    //         const inflContext = await createContextForLLM(extractedRequest, producerRuntime.agentId, influencerRuntime, influencerResponseTemplate);
-    //
-    //         const respondFromInfluencer = await generateText({
-    //             runtime: influencerRuntime,
-    //             context: inflContext,
-    //             modelClass: ModelClass.LARGE
-    //         });
-    //
-    //         elizaLogger.log("RepondFromInfluencer", respondFromInfluencer)
-    //
-    //         const additional = extractAdditional(respondFromInfluencer);
-    //         elizaLogger.log("Additional Info from response", additional)
-    //
-    //         if(additional !== NOT_FOUND && additional === "true") {
-    //             userPrompt = respondFromInfluencer;
-    //             continue
-    //         } else {
-    //             isFinishConversation = true;
-    //         }
-    //     } else {
-    //         isFinishConversation = true;
-    //     }
-    // }
-
-    elizaLogger.log("IsConverestionIsFinished", isFinishConversation)
-    return null;
-    } catch (e) {
-        elizaLogger.error("ERROR", e)
+    for (const request of extractedRequests) {
+        eventEmitter.emit(
+          'agentConversation',
+          interactionId,
+          producerAgent.agentId,
+          request.agentId,
+          request.content,
+        );
     }
 }
+
+const sendRequestToAgent = async (
+  interactionId: string,
+  fromAgentId: string,
+  toAgentId: string,
+  content: string,
+) => {
+    const targetAgent = agentsManager.getAgent(toAgentId);
+    const fromAgent = agentsManager.getAgent(fromAgentId);
+
+    const context = await createContextForLLM(
+      content,
+      targetAgent.agentId,
+      targetAgent,
+      // replace to template
+      mainProducerResponseTemplate,
+    );
+
+    const respondFromProducer = await generateText({
+        runtime: targetAgent,
+        context,
+        modelClass: ModelClass.LARGE
+    });
+
+    const extractedRequests = extractRequestForAgent(respondFromProducer);
+
+    for (const request of extractedRequests) {
+        eventEmitter.emit(
+          'agentConversation',
+          interactionId,
+          targetAgent.agentId,
+          request.agentId,
+          request.content,
+        );
+    }
+};
+
+export const subscribeToAgentConversation = (database: Db) => {
+    eventEmitter.on('agentConversation', async (interactionId: string, fromAgentId: string, toAgentId: string, content: string) => {
+        try {
+            await sendRequestToAgent(interactionId, fromAgentId, toAgentId, content);
+
+            const agent = agentsManager.getAgent(toAgentId);
+
+            await database.collection('agent_messages').insertOne({
+                interaction: new ObjectId(interactionId),
+                sourceAgent: new ObjectId(fromAgentId),
+                targetAgent: new ObjectId(toAgentId),
+                team: new ObjectId(agent.character.teamId),
+                organization: new ObjectId(agent.character.organizationId),
+                content,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            });
+        } catch (error) {
+            elizaLogger.error("Error sending request to agent: ", error);
+        }
+    });
+};

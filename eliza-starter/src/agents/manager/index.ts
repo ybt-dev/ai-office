@@ -6,6 +6,7 @@ export interface AiOfficeAgentRuntime extends ElizaAgentRuntime {
 
 export interface AiOfficeCharacter extends ElizaCharacter {
   organizationId: string;
+  teamId: string;
   role: string;
 }
 

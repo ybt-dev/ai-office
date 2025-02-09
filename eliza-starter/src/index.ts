@@ -26,6 +26,7 @@ import {configDotenv} from "dotenv";
 import {TelegramClientInterface} from "@elizaos/client-telegram";
 import {communicateWithAgents} from "./actions/communicate-agent/index.ts";
 import {AgentConfiguration, generateCharacter} from "./utils/character-generator.ts";
+import {sendInteractionToProducer, subscribeToAgentConversation} from "./utils/dialogue-system.ts";
 //import TwitterClientInterface from "./clients/client-twitter";
 
 const expressApp = express();
@@ -245,6 +246,8 @@ const initializeAgentsSystem = async () => {
 
   const database = databaseClient.db(databaseName);
 
+  subscribeToAgentConversation(database);
+
   const agentConfigurations = await database.collection('agents').find<{
     _id: ObjectId;
     name: string;
@@ -265,6 +268,7 @@ const initializeAgentsSystem = async () => {
       id: agentConfiguration._id.toString(),
       name: agentConfiguration.name,
       role: agentConfiguration.role,
+      teamId: agentConfiguration.team.toString(),
       organizationId: agentConfiguration.organization.toString(),
       description: agentConfiguration.description,
       model: agentConfiguration.model,
@@ -309,10 +313,8 @@ const initializeAgentsSystem = async () => {
     bodyParser.json({}),
     async (request, response) => {
       const {
-        title,
         requestContent,
         interactionId,
-        teamId,
         organizationId,
       } = request.body as {
         title: string;
@@ -322,7 +324,13 @@ const initializeAgentsSystem = async () => {
         organizationId: string;
       };
 
-      // TODO initializa interaction with agents.
+      sendInteractionToProducer(
+        interactionId,
+        organizationId,
+        requestContent,
+      ).catch((error) => {
+        elizaLogger.error("Error sending interaction to producer:", error);
+      });
 
       response.status(200).send({ status: 'OK' });
     },

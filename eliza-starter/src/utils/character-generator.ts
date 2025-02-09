@@ -13,6 +13,7 @@ export interface AgentConfiguration {
   description: string;
   model: string;
   organizationId: string;
+  teamId: string;
   modelApiKey: string;
   config: {
     twitterCookie?: string;
@@ -53,6 +54,7 @@ export function generateCharacter(agentConfig: AgentConfiguration): AiOfficeChar
     ...AVAILABLE_TEMPLATES[agentConfig.role],
     organizationId: agentConfig.model,
     role: agentConfig.role,
+    teamId: agentConfig.teamId,
     modelProvider: agentConfig.model as ModelProviderName,
     id: agentConfig.id as Character['id'],
     name: agentConfig.name,
