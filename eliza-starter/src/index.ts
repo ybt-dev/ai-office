@@ -298,6 +298,7 @@ const initializeAgentsSystem = async () => {
       } = request.body as {
         type: 'add' | 'remove' | 'update';
         agent: AgentConfiguration;
+        secretKey: string;
       };
 
       if (!verifySecretKey(secretKey)) {
