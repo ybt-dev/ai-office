@@ -135,10 +135,14 @@ export class DefaultAgentService implements AgentService {
       return this.agentEntityToDtoMapper.mapOne(agentEntity);
     });
 
-    await this.elizaApi.sendAgentsChange({
-      type: 'add',
-      agent: createdAgent,
-    });
+    try {
+      await this.elizaApi.sendAgentsChange({
+        type: 'add',
+        agent: createdAgent,
+      });
+    } catch (error) {
+      console.error(error);
+    }
 
     return createdAgent;
   }
@@ -165,11 +169,14 @@ export class DefaultAgentService implements AgentService {
 
       return this.agentEntityToDtoMapper.mapOne(updatedAgentEntity);
     });
-
-    await this.elizaApi.sendAgentsChange({
-      type: 'update',
-      agent: updatedAgent,
-    });
+    try {
+      await this.elizaApi.sendAgentsChange({
+        type: 'update',
+        agent: updatedAgent,
+      });
+    } catch (error) {
+      console.error(error);
+    }
 
     return updatedAgent;
   }

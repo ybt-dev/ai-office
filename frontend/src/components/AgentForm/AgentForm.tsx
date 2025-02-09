@@ -173,7 +173,7 @@ const AgentForm = ({
             />
           </div>
           <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-400">
+            <label htmlFor="model" className="block text-sm font-medium text-gray-400">
               Model (AI Model)
             </label>
             <input
@@ -182,7 +182,7 @@ const AgentForm = ({
               list="modelOptions"
               id="model"
               name="model"
-              value={role}
+              value={model}
               onChange={(event) => setModel(event.target.value as AgentModelProvider)}
               className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
