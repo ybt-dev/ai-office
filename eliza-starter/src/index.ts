@@ -27,7 +27,7 @@ import {TelegramClientInterface} from "@elizaos/client-telegram";
 import {communicateWithAgents} from "./actions/communicate-agent/index.ts";
 import {AgentConfiguration, generateCharacter} from "./utils/character-generator.ts";
 import {sendInteractionToProducer, subscribeToAgentConversation} from "./utils/dialogue-system.ts";
-//import TwitterClientInterface from "./clients/client-twitter";
+import TwitterClientInterface from "./clients/client-twitter/index.ts";
 
 const expressApp = express();
 
@@ -119,9 +119,9 @@ export async function initializeClients(
   }
 
   if (clientTypes.includes("twitter")) {
-     //const twitterClients = await TwitterClientInterface.start(runtime)
+     const twitterClients = await TwitterClientInterface.start(runtime)
 
-     //clients.push(twitterClients);
+     clients.push(twitterClients);
   }
 
   if (clientTypes.includes("direct")) {

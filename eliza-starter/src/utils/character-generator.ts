@@ -1,4 +1,4 @@
-import { Character, ModelProviderName } from "@elizaos/core";
+import {Character, Clients, ModelProviderName} from "@elizaos/core";
 import { advertiser } from "../characters/advertiser.ts";
 import { influencer } from "../characters/influencer.ts";
 import { producer } from "../characters/producer.ts";
@@ -58,6 +58,7 @@ export function generateCharacter(agentConfig: AgentConfiguration): AiOfficeChar
     modelProvider: agentConfig.model as ModelProviderName,
     id: agentConfig.id as Character['id'],
     name: agentConfig.name,
+    clients: [agentConfig.role !== "producer" && Clients.TWITTER],
     settings: {
       secrets: {
         TWITTER_COOKIES: agentConfig.config.twitterCookie,
