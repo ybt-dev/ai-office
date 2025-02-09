@@ -18,14 +18,15 @@ const mainProducerResponseTemplate = `
 {{actions}}
 
 You have a team with the following agents:
--> influencer: "influencer-id"
+-> influencer: {{influencer_id}}
+-> advertiser: {{advertiser_id}}
 
 # The text above is system information about you.
 
-User prompt: "{{userPrompt}}"
+{{request_origin}} prompt: "{{request_prompt}}"
 
 Your task:
-1. Read the user prompt.
+1. Read the {{request_origin}} prompt.
 2. Determine the most appropriate agent to handle this request. 
 3. Output your response exactly in the following format:
    COMMUNICATE_WITH_AGENTS <agentId> <request details>
@@ -71,14 +72,14 @@ const influencerResponseTemplate = `
 {{actions}}
 
 You are a part of a team with the following agents:
--> producer: "producer-id"
+-> producer: {{producer_id}}
 
 # The text above is system information about you.
 
-Producers Prompt: "{{producersPrompt}}"
+{{request_origin}} prompt: "{{request_prompt}}"
 
 Your task:
-1. Read the producer's prompt and analyze the provided marketing strategy.
+1. Read the {{request_origin}} prompt and analyze the provided marketing strategy.
 2. Generate a set of Twitter posts based on the given topic and strategy.
 3. Ensure that the posts align with:
    - **Target audience**: Writing style and interests.
@@ -102,25 +103,35 @@ Final answer: I have reviewed the marketing strategy but need clarification on c
 
 Additional Question: false 
 
-Final answer: I will generate  Twitter posts based on the marketing strategy and engaging with the audience.
+Final answer: I will generate Twitter posts based on the marketing strategy and engaging with the audience.
 `;
 
+const getTemplateByRole = (role: string) => {
+    switch (role) {
+        case "producer":
+            return mainProducerResponseTemplate;
+        case "influencer":
+            return influencerResponseTemplate;
+        default:
+            return NOT_FOUND;
+    }
+}
+
 const createContextForLLM = async (
-    userPrompt: string,
+    prompt: string,
     userId: `${string}-${string}-${string}-${string}-${string}`,
     agentRuntime: IAgentRuntime,
-    template: string
+    template: string,
+    additionalKeys?: Record<string, unknown>,
 ) => {
     const message: Memory = {
         userId: userId,
         agentId: agentRuntime.agentId,
         roomId: userId,
-        content: {
-            text: userPrompt
-        }
+        content: { text: prompt }
     }
-    const state = await agentRuntime.composeState(message);
 
+    const state = await agentRuntime.composeState(message, additionalKeys);
 
     return composeContext({
         state,
@@ -145,11 +156,20 @@ export const sendInteractionToProducer = async (
 ) => {
     const producerAgent =  agentsManager.getAgentByRole(organizationId, "producer");
 
+    const influencer = agentsManager.getAgentByRole(organizationId, "influencer");
+    const advertiser = agentsManager.getAgentByRole(organizationId, "advertiser");
+
     const producerContext = await createContextForLLM(
       content,
       producerAgent.agentId,
       producerAgent,
       mainProducerResponseTemplate,
+      {
+          influencer_id: influencer.agentId,
+          advertiser_id: advertiser.agentId,
+          request_origin: 'Platform User',
+          request_prompt: content,
+      },
     );
 
     const respondFromProducer = await generateText({
@@ -180,12 +200,25 @@ const sendRequestToAgent = async (
     const targetAgent = agentsManager.getAgent(toAgentId);
     const fromAgent = agentsManager.getAgent(fromAgentId);
 
+    const producer = agentsManager.getAgentByRole(targetAgent.character.organizationId, "producer");
+    const advertiser = agentsManager.getAgentByRole(targetAgent.character.organizationId, "advertiser");
+    const influencer = agentsManager.getAgentByRole(targetAgent.character.organizationId, "influencer");
+
     const context = await createContextForLLM(
       content,
       targetAgent.agentId,
       targetAgent,
-      // replace to template
-      mainProducerResponseTemplate,
+      getTemplateByRole(targetAgent.character.role),
+      producer.agentId === targetAgent.agentId ? {
+          influencer_id: influencer.agentId,
+          advertiser_id: advertiser.agentId,
+          request_origin: fromAgent.character.role,
+          request_prompt: content,
+      } : {
+          producer_id: producer.agentId,
+          request_origin: fromAgent.character.role,
+          request_prompt: content,
+      },
     );
 
     const respondFromProducer = await generateText({
@@ -220,9 +253,9 @@ export const subscribeToAgentConversation = (database: Db) => {
                 targetAgent: new ObjectId(toAgentId),
                 team: new ObjectId(agent.character.teamId),
                 organization: new ObjectId(agent.character.organizationId),
-                content,
                 createdAt: new Date(),
                 updatedAt: new Date(),
+                content,
             });
         } catch (error) {
             elizaLogger.error("Error sending request to agent: ", error);
