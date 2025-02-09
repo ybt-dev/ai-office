@@ -7,9 +7,7 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="mb-4 md:mb-0">
             <h3 className="typography-h6">Office AI</h3>
-            <p className="typography-body2">
-              Empowering your business with AI solutions
-            </p>
+            <p className="typography-body2">Empowering your business with AI solutions</p>
           </div>
           <div className="flex space-x-4">
             <a href="/privacy" className="typography-body2 hover:text-gray-400">

@@ -1,26 +1,21 @@
-import { useMemo } from "react";
-import { BrowserRouter } from "react-router";
-import {
-  MutationCache,
-  QueryCache,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
-import { toast, ToastContainer } from "react-toastify";
-import { RestApiClient } from "./api/ApiClient";
-import Header from "./components/Header";
-import Routing from "./Routing";
-import AppInitializer from "./AppInitializer";
-import { ApiProvider } from "./providers/ApiProvider";
-import SessionsRestApi from "./api/SessionsApi";
-import AgentTeamsRestApi from "./api/AgentTeamsApi";
-import AgentsRestApi from "./api/AgentsApi";
-import AgentTeamInteractionsRestApi from "./api/AgentTeamInteractionsApi";
-import AgentMessagesRestApi from "./api/AgentMessagesApi";
-import { WagmiProvider } from "wagmi";
-import { config } from "../config";
+import { useMemo } from 'react';
+import { BrowserRouter } from 'react-router';
+import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { toast, ToastContainer } from 'react-toastify';
+import { RestApiClient } from './api/ApiClient';
+import Header from './components/Header';
+import Routing from './Routing';
+import AppInitializer from './AppInitializer';
+import { ApiProvider } from './providers/ApiProvider';
+import SessionsRestApi from './api/SessionsApi';
+import AgentTeamsRestApi from './api/AgentTeamsApi';
+import AgentsRestApi from './api/AgentsApi';
+import AgentTeamInteractionsRestApi from './api/AgentTeamInteractionsApi';
+import AgentMessagesRestApi from './api/AgentMessagesApi';
+import { WagmiProvider } from 'wagmi';
+import { config } from '../config';
 
-import "./tailwind.css";
+import './tailwind.css';
 
 function App() {
   const queryClient = useMemo(() => {

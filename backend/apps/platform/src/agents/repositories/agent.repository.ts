@@ -57,23 +57,17 @@ export class MongoAgentRepository implements AgentRepository {
   ) {}
 
   public async exists(filter: IFindAgentTeamFilter) {
-    const count = await this.agentModel
-      .countDocuments(this.mapFilterToQuery(filter))
-      .exec();
+    const count = await this.agentModel.countDocuments(this.mapFilterToQuery(filter)).exec();
 
     return count > 0;
   }
 
   public async findMany(filter: IFindAgentTeamFilter) {
     const agents = await this.agentModel
-      .find(
-        this.mapFilterToQuery(filter),
-        undefined,
-        {
-          lean: true,
-          session: this.transactionsManager.getCurrentTransaction()?.getSession(),
-        },
-      )
+      .find(this.mapFilterToQuery(filter), undefined, {
+        lean: true,
+        session: this.transactionsManager.getCurrentTransaction()?.getSession(),
+      })
       .exec();
 
     return agents.map((team) => new MongoAgentEntity(team));

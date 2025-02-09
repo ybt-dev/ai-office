@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import {toast} from "react-toastify";
+import { toast } from 'react-toastify';
 import { AgentTeam, CreateAgentTeamParams } from '@/api/AgentTeamsApi';
 import { DefaultError, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAgentTeamsApi } from '@/providers/ApiProvider';

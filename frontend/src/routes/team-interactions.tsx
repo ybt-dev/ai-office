@@ -1,12 +1,12 @@
-import {useState} from "react";
-import { useOutletContext } from "react-router";
-import { Plus } from "lucide-react";
-import { AgentTeamInteractionFormData } from "@/components/AgentTeamInteractionForm";
-import useCreateAgentTeamInteractionMutation from "@/hooks/mutations/useCreateAgentTeamInteractionMutation";
-import AgentTeamInteractionsList from "@/components/AgentTeamInteractionsList";
-import useListAgentTeamInteractionsQuery from "@/hooks/queries/useListAgentTeamInteractionsQuery.ts";
-import Popup from "@/components/Popup";
-import CreateAgentTeamInteractionForm from "@/components/CreateAgentTeamInteractionForm";
+import { useState } from 'react';
+import { useOutletContext } from 'react-router';
+import { Plus } from 'lucide-react';
+import { AgentTeamInteractionFormData } from '@/components/AgentTeamInteractionForm';
+import useCreateAgentTeamInteractionMutation from '@/hooks/mutations/useCreateAgentTeamInteractionMutation';
+import AgentTeamInteractionsList from '@/components/AgentTeamInteractionsList';
+import useListAgentTeamInteractionsQuery from '@/hooks/queries/useListAgentTeamInteractionsQuery.ts';
+import Popup from '@/components/Popup';
+import CreateAgentTeamInteractionForm from '@/components/CreateAgentTeamInteractionForm';
 
 const TeamInteractions = () => {
   const [displayCreateAgentTeamInteractionPopup, setDisplayCreateAgentTeamInteractionPopup] = useState(false);

@@ -1,5 +1,3 @@
-const useCreateOrganizationMutation = () => {
-
-};
+const useCreateOrganizationMutation = () => {};
 
 export default useCreateOrganizationMutation;

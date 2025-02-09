@@ -1,11 +1,11 @@
-import { Navigate, Outlet, useNavigate, useParams } from "react-router";
-import { useMatch } from "react-router";
-import TeamCategoryId from "@/enums/TeamCategoryId";
-import useAgentTeamByIdQuery from "@/hooks/queries/useAgentTeamByIdQuery";
-import TeamManagementPanel from "@/components/TeamManagementPanel";
+import { Navigate, Outlet, useNavigate, useParams } from 'react-router';
+import { useMatch } from 'react-router';
+import TeamCategoryId from '@/enums/TeamCategoryId';
+import useAgentTeamByIdQuery from '@/hooks/queries/useAgentTeamByIdQuery';
+import TeamManagementPanel from '@/components/TeamManagementPanel';
 
 const AgentTeamDetails = () => {
-  const { agentTeamId } = useParams<{ agentTeamId: string, category: TeamCategoryId; }>();
+  const { agentTeamId } = useParams<{ agentTeamId: string; category: TeamCategoryId }>();
 
   const navigate = useNavigate();
 
@@ -15,14 +15,10 @@ const AgentTeamDetails = () => {
     navigate(`/agent-teams/${agentTeamId}/${categoryId}`);
   };
 
-  const {
-    params: { category } = {},
-  } = useMatch('/agent-teams/:teamId/:category/*') || {};
+  const { params: { category } = {} } = useMatch('/agent-teams/:teamId/:category/*') || {};
 
   if (!category) {
-    return (
-      <Navigate to={`/agent-teams/${agentTeamId}/${TeamCategoryId.Agents}`} />
-    );
+    return <Navigate to={`/agent-teams/${agentTeamId}/${TeamCategoryId.Agents}`} />;
   }
 
   return (

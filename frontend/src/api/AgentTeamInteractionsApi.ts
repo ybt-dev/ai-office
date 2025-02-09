@@ -1,4 +1,4 @@
-import { ApiClient } from "./ApiClient";
+import { ApiClient } from './ApiClient';
 
 export interface AgentTeamInteraction {
   id: string;

@@ -36,10 +36,10 @@ export class Agent {
   imageUrl?: string;
 
   @Prop({ required: false, type: mongoose.Schema.Types.ObjectId })
-  createdBy: Object;
+  createdBy: ObjectId;
 
   @Prop({ required: false, type: mongoose.Schema.Types.ObjectId })
-  updatedBy: Object;
+  updatedBy: ObjectId;
 
   @Prop({ required: false, type: mongoose.Schema.Types.Date })
   createdAt: Date;

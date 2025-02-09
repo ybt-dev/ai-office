@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import mongoose from 'mongoose';
 import { ObjectId } from 'mongodb';
-import { AgentTeamInteractionStatus } from "@apps/platform/agents/enums";
+import { AgentTeamInteractionStatus } from '@apps/platform/agents/enums';
 
 export type AgentTeamInteractionDocument = HydratedDocument<AgentTeamInteraction>;
 

@@ -109,7 +109,7 @@ export class RestApiClient implements ApiClient {
   private async getErrorResponseBody(response: FetchResponse) {
     try {
       return await response.json();
-    } catch (err) {
+    } catch {
       throw new RequestError(response.statusText, response.status);
     }
   }

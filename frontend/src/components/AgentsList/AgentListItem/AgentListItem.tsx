@@ -1,4 +1,4 @@
-import { AgentRole } from "@/api/AgentsApi";
+import { AgentRole } from '@/api/AgentsApi';
 
 export interface AgentListItemProps {
   name: string;
@@ -26,7 +26,7 @@ const AgentListItem = ({ name, role, imageSrc, onClick, isSelected }: AgentListI
   return (
     <div
       className={`cursor-pointer rounded-lg bg-gray-800 transition-all w-48 h-48 hover:bg-gray-750 ${
-        isSelected ? "ring-2 ring-blue-500" : ""
+        isSelected ? 'ring-2 ring-blue-500' : ''
       }`}
       onClick={onClick}
     >
@@ -42,8 +42,7 @@ const AgentListItem = ({ name, role, imageSrc, onClick, isSelected }: AgentListI
         </div>
       </div>
     </div>
-  )
+  );
 };
 
 export default AgentListItem;
-

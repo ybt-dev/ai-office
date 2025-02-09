@@ -1,5 +1,5 @@
-import { Agent } from "@/api/AgentsApi";
-import Skeleton from "@/components/Skeleton";
+import { Agent } from '@/api/AgentsApi';
+import Skeleton from '@/components/Skeleton';
 
 export interface AgentDetailsOverviewProps {
   agent: Agent | null;
@@ -23,43 +23,23 @@ const AgentDetailsOverview = ({ agent, onEditButtonClick }: AgentDetailsOverview
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <h3 className="text-sm font-medium text-gray-400">Agent Name</h3>
-            {agent ? (
-              <p className="mt-1 text-lg">{agent.name}</p>
-            ) : (
-              <Skeleton className="mt-1 h-10" />
-            )}
+            {agent ? <p className="mt-1 text-lg">{agent.name}</p> : <Skeleton className="mt-1 h-10" />}
           </div>
           <div>
             <h3 className="text-sm font-medium text-gray-400">Agent Role</h3>
-            {agent ? (
-              <p className="mt-1 text-lg">{agent.role}</p>
-            ) : (
-              <Skeleton className="mt-1 h-10" />
-            )}
+            {agent ? <p className="mt-1 text-lg">{agent.role}</p> : <Skeleton className="mt-1 h-10" />}
           </div>
           <div>
             <h3 className="text-sm font-medium text-gray-400">Agent Description</h3>
-            {agent ? (
-              <p className="mt-1 text-lg">{agent.description}</p>
-            ) : (
-              <Skeleton className="mt-1 h-24" />
-            )}
+            {agent ? <p className="mt-1 text-lg">{agent.description}</p> : <Skeleton className="mt-1 h-24" />}
           </div>
           <div>
             <h3 className="text-sm font-medium text-gray-400">Model (AI model)</h3>
-            {agent ? (
-              <p className="mt-1 text-lg">{agent.model}</p>
-            ) : (
-              <Skeleton className="mt-1 h-10" />
-            )}
+            {agent ? <p className="mt-1 text-lg">{agent.model}</p> : <Skeleton className="mt-1 h-10" />}
           </div>
           <div className="md:col-span-2">
             <h3 className="text-sm font-medium text-gray-400">Model API Key</h3>
-            {agent ? (
-              <p className="mt-1 text-lg">{agent.modelApiKey}</p>
-            ) : (
-              <Skeleton className="mt-1 h-10" />
-            )}
+            {agent ? <p className="mt-1 text-lg">{agent.modelApiKey}</p> : <Skeleton className="mt-1 h-10" />}
           </div>
         </div>
       </div>

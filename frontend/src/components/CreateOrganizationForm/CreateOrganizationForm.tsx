@@ -31,9 +31,7 @@ const CreateOrganizationForm = ({ onSubmit }: CreateOrganizationFormProps) => {
   return (
     <div className="h-screen flex items-center justify-center">
       <form onSubmit={handleSubmit} className="bg-gray-800 p-8 rounded shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-semibold mb-6 text-center text-white">
-          Create Organization
-        </h2>
+        <h2 className="text-2xl font-semibold mb-6 text-center text-white">Create Organization</h2>
         <div className="flex mb-4 space-x-4">
           <div className="flex-1">
             <label htmlFor="firstName" className="block text-gray-300 mb-2">

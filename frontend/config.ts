@@ -1,6 +1,6 @@
-import { http, createConfig } from "wagmi";
-import { baseSepolia } from "wagmi/chains";
-import { metaMask } from "wagmi/connectors";
+import { http, createConfig } from 'wagmi';
+import { baseSepolia } from 'wagmi/chains';
+import { metaMask } from 'wagmi/connectors';
 
 export const config = createConfig({
   chains: [baseSepolia],

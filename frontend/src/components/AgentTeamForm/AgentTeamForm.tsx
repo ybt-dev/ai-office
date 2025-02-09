@@ -1,5 +1,5 @@
-import { FormEvent, ReactNode, useState } from "react";
-import { tailwindClsx } from "@/utils";
+import { FormEvent, ReactNode, useState } from 'react';
+import { tailwindClsx } from '@/utils';
 
 export interface AgentTeamFormData {
   name: string;
@@ -16,7 +16,14 @@ export interface AgentTeamFormProps {
   children: (data: AgentTeamFormData) => ReactNode;
 }
 
-const AgentTeamForm = ({ className, innerContainerClassName, header, initialData, onSubmit, children }: AgentTeamFormProps) => {
+const AgentTeamForm = ({
+  className,
+  innerContainerClassName,
+  header,
+  initialData,
+  onSubmit,
+  children,
+}: AgentTeamFormProps) => {
   const [name, setName] = useState(initialData?.name || '');
   const [description, setDescription] = useState(initialData?.description || '');
   const [strategy, setStrategy] = useState(initialData?.strategy || '');
@@ -84,7 +91,7 @@ const AgentTeamForm = ({ className, innerContainerClassName, header, initialData
       {children({
         name,
         description,
-        strategy
+        strategy,
       })}
     </form>
   );

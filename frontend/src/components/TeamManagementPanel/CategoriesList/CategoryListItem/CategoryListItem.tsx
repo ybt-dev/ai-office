@@ -19,7 +19,7 @@ const CategoryListItem = <CategoryId,>({
     <li
       onClick={() => onSelect(categoryId)}
       className={`group flex items-center gap-x-3 rounded-md px-3 py-2 text-sm font-medium transition-colors cursor-pointer ${
-        isSelected ? "bg-blue-600 text-white" : "text-gray-400 hover:bg-gray-800 hover:text-white"
+        isSelected ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'
       }`}
     >
       <Icon className="h-5 w-5" />

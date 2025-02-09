@@ -1,5 +1,5 @@
-import {IsIdentifier} from "@libs/validation/class-validators";
-import {IsNotEmpty} from "class-validator";
+import { IsIdentifier } from '@libs/validation/class-validators';
+import { IsNotEmpty } from 'class-validator';
 
 export interface AgentMessageDto {
   id: string;

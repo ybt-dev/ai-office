@@ -1,11 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import {AgentMessageRepository } from '@apps/platform/agents/repositories';
-import {AgentMessageEntityToDtoMapper} from '@apps/platform/agents/entities-mappers';
+import { AgentMessageRepository } from '@apps/platform/agents/repositories';
+import { AgentMessageEntityToDtoMapper } from '@apps/platform/agents/entities-mappers';
 import { AgentMessageDto } from '@apps/platform/agents/dto';
-import {
-  InjectAgentMessageRepository,
-  InjectAgentMessageEntityToDtoMapper,
-} from '@apps/platform/agents/decorators';
+import { InjectAgentMessageRepository, InjectAgentMessageEntityToDtoMapper } from '@apps/platform/agents/decorators';
 
 export interface AgentMessageService {
   listByInteractionId(interactionId: string, organizationId: string): Promise<AgentMessageDto[]>;

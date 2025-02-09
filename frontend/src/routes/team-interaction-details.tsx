@@ -1,29 +1,29 @@
-import { Link, useParams } from "react-router";
-import {useMemo} from "react";
-import {ArrowLeft} from "lucide-react";
-import {Agent} from "@/api/AgentsApi";
-import useListLatestAgentMessagesQuery from "@/hooks/queries/useListLatestAgentMessagesQuery";
-import useAgentTeamInteractionByIdQuery from "@/hooks/queries/useAgentTeamInteractionByIdQuery";
-import AgentMessagesList from "@/components/AgentMessagesList/AgentMessagesList";
-import Skeleton from "@/components/Skeleton";
-import useListAgentsByTeamIdQuery from "@/hooks/queries/useListAgentsByTeamIdQuery";
+import { Link, useParams } from 'react-router';
+import { useMemo } from 'react';
+import { ArrowLeft } from 'lucide-react';
+import { Agent } from '@/api/AgentsApi';
+import useListLatestAgentMessagesQuery from '@/hooks/queries/useListLatestAgentMessagesQuery';
+import useAgentTeamInteractionByIdQuery from '@/hooks/queries/useAgentTeamInteractionByIdQuery';
+import AgentMessagesList from '@/components/AgentMessagesList/AgentMessagesList';
+import Skeleton from '@/components/Skeleton';
+import useListAgentsByTeamIdQuery from '@/hooks/queries/useListAgentsByTeamIdQuery';
 
 const TeamInteractionDetails = () => {
-  const {
-    interactionId,
-    agentTeamId,
-  } = useParams<{ interactionId: string; agentTeamId: string; }>();
+  const { interactionId, agentTeamId } = useParams<{ interactionId: string; agentTeamId: string }>();
 
   const { data: messages } = useListLatestAgentMessagesQuery(interactionId || '');
   const { data: agents } = useListAgentsByTeamIdQuery(agentTeamId || '');
   const { data: agentTeamInteraction } = useAgentTeamInteractionByIdQuery(interactionId || '');
 
   const agentsPool = useMemo(() => {
-    return (agents || []).reduce((pool, agent) => {
-      pool[agent.id] = agent;
+    return (agents || []).reduce(
+      (pool, agent) => {
+        pool[agent.id] = agent;
 
-      return pool;
-    }, {} as Record<string, Agent>);
+        return pool;
+      },
+      {} as Record<string, Agent>,
+    );
   }, [agents]);
 
   const renderMessageDetails = () => {
@@ -53,16 +53,9 @@ const TeamInteractionDetails = () => {
         <ArrowLeft className="h-5 w-5 mr-2" />
         Back to Interactions
       </Link>
-      <div className="flex flex-col gap-6 mb-4">
-        {renderMessageDetails()}
-      </div>
-      <AgentMessagesList
-        agentsPool={agentsPool}
-        messages={messages ?? null}
-      />
-      {messages && !messages.length && (
-        <p className="text-white">No messages found.</p>
-      )}
+      <div className="flex flex-col gap-6 mb-4">{renderMessageDetails()}</div>
+      <AgentMessagesList agentsPool={agentsPool} messages={messages ?? null} />
+      {messages && !messages.length && <p className="text-white">No messages found.</p>}
     </div>
   );
 };

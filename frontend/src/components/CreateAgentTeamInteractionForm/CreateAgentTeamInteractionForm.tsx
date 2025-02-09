@@ -1,4 +1,4 @@
-import AgentTeamInteractionForm, { AgentTeamInteractionFormData } from "@/components/AgentTeamInteractionForm";
+import AgentTeamInteractionForm, { AgentTeamInteractionFormData } from '@/components/AgentTeamInteractionForm';
 
 export interface CreateAgentTeamInteractionFormProps {
   onSubmit: (data: AgentTeamInteractionFormData) => void;

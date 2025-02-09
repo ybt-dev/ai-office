@@ -1,4 +1,4 @@
-import { WalletOptions } from "../Wallet/wallet-options";
+import { WalletOptions } from '../Wallet/wallet-options';
 
 function ConnectWallet() {
   return (

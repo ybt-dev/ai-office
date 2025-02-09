@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { useParams } from "react-router";
-import { AgentTeamFormData } from "@/components/AgentTeamForm";
-import useAgentTeamByIdQuery from "@/hooks/queries/useAgentTeamByIdQuery";
-import useUpdateAgentTeamMutation from "@/hooks/mutations/useUpdateAgentTeamMutation";
-import AgentTeamSettingsOverview from "@/components/AgentTeamSettingsOverview";
-import EditAgentTeamForm from "@/components/EditAgentTeamForm";
+import { useState } from 'react';
+import { useParams } from 'react-router';
+import { AgentTeamFormData } from '@/components/AgentTeamForm';
+import useAgentTeamByIdQuery from '@/hooks/queries/useAgentTeamByIdQuery';
+import useUpdateAgentTeamMutation from '@/hooks/mutations/useUpdateAgentTeamMutation';
+import AgentTeamSettingsOverview from '@/components/AgentTeamSettingsOverview';
+import EditAgentTeamForm from '@/components/EditAgentTeamForm';
 
 const TeamSettings = () => {
   const [editMode, setEditMode] = useState(false);
@@ -38,10 +38,7 @@ const TeamSettings = () => {
           onCancel={() => setEditMode(false)}
         />
       ) : (
-        <AgentTeamSettingsOverview
-          agentTeam={agentTeam ?? null}
-          onEditButtonClick={() => setEditMode(true)}
-        />
+        <AgentTeamSettingsOverview agentTeam={agentTeam ?? null} onEditButtonClick={() => setEditMode(true)} />
       )}
     </div>
   );

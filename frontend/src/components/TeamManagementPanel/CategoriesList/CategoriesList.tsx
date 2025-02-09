@@ -1,5 +1,5 @@
-import { ComponentType } from "react";
-import CategoryListItem from "./CategoryListItem";
+import { ComponentType } from 'react';
+import CategoryListItem from './CategoryListItem';
 
 export interface Category<CategoryId> {
   id: CategoryId;

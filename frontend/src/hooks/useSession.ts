@@ -8,10 +8,7 @@ const useSession = () => {
     throw new Error('Session value is not provided.');
   }
 
-  return [
-    sessionValue.sessionUser,
-    sessionValue.refetch,
-  ] as const;
+  return [sessionValue.sessionUser, sessionValue.refetch] as const;
 };
 
 export default useSession;

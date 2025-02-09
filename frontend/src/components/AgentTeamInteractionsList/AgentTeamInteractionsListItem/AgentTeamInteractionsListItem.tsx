@@ -1,5 +1,5 @@
-import { Link } from "react-router";
-import { timeAgo } from "@/globals";
+import { Link } from 'react-router';
+import { timeAgo } from '@/globals';
 
 export interface AgentTeamInteractionsListItemProps {
   interactionId: string;

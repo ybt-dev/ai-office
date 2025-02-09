@@ -1,4 +1,4 @@
-import { tailwindClsx } from "@/utils";
+import { tailwindClsx } from '@/utils';
 
 interface SkeletonProps {
   className?: string;
@@ -10,7 +10,12 @@ interface SkeletonProps {
 const Skeleton = ({ className, width, height, circle = false }: SkeletonProps) => {
   return (
     <div
-      className={tailwindClsx('animate-pulse bg-gray-700/50', circle && 'rounded-full', !circle && 'rounded-md', className)}
+      className={tailwindClsx(
+        'animate-pulse bg-gray-700/50',
+        circle && 'rounded-full',
+        !circle && 'rounded-md',
+        className,
+      )}
       style={{
         width: width,
         height: height,

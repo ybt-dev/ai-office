@@ -7,7 +7,7 @@ import { TransactionsManager } from '@libs/transactions/managers';
 import { MongodbTransaction } from '@libs/mongodb-transactions';
 import { AgentTeamInteraction } from '@apps/platform/agents/schemas';
 import { AgentTeamInteractionEntity, MongoAgentTeamInteractionEntity } from '@apps/platform/agents/entities';
-import { AgentTeamInteractionStatus } from "@apps/platform/agents/enums";
+import { AgentTeamInteractionStatus } from '@apps/platform/agents/enums';
 
 export interface FindAgentTeamInteractionFilter {
   teamId?: string;
@@ -37,13 +37,19 @@ export class MongoAgentTeamInteractionRepository implements AgentTeamInteraction
   ) {}
 
   public async findMany(filter: FindAgentTeamInteractionFilter) {
-    const agentTeamInteractionDocuments = await this.model.find({
-      ...(filter.teamId ? { team: new ObjectId(filter.teamId) } : {}),
-      organization: new ObjectId(filter.organizationId),
-    }, undefined, {
-      lean: true,
-      session: this.transactionsManager.getCurrentTransaction()?.getSession(),
-    }).exec();
+    const agentTeamInteractionDocuments = await this.model
+      .find(
+        {
+          ...(filter.teamId ? { team: new ObjectId(filter.teamId) } : {}),
+          organization: new ObjectId(filter.organizationId),
+        },
+        undefined,
+        {
+          lean: true,
+          session: this.transactionsManager.getCurrentTransaction()?.getSession(),
+        },
+      )
+      .exec();
 
     return agentTeamInteractionDocuments.map((agentTeamInteractionDocument) => {
       return new MongoAgentTeamInteractionEntity(agentTeamInteractionDocument);
@@ -51,12 +57,19 @@ export class MongoAgentTeamInteractionRepository implements AgentTeamInteraction
   }
 
   public async findByIdAndOrganizationId(id: string, organizationId: string) {
-    const agentTeamInteractionDocument = await this.model.findOne({
-      _id: new ObjectId(id),
-    }, undefined, {
-      lean: true,
-      session: this.transactionsManager.getCurrentTransaction()?.getSession(),
-    }).exec();
+    const agentTeamInteractionDocument = await this.model
+      .findOne(
+        {
+          _id: new ObjectId(id),
+          organization: new ObjectId(organizationId),
+        },
+        undefined,
+        {
+          lean: true,
+          session: this.transactionsManager.getCurrentTransaction()?.getSession(),
+        },
+      )
+      .exec();
 
     return agentTeamInteractionDocument && new MongoAgentTeamInteractionEntity(agentTeamInteractionDocument);
   }

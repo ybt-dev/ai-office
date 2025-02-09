@@ -1,5 +1,5 @@
-import { ApiClient } from "./ApiClient";
-import { User } from "./UsersApi";
+import { ApiClient } from './ApiClient';
+import { User } from './UsersApi';
 
 export interface SessionsApi {
   sendSessionLink(email: string): Promise<void>;

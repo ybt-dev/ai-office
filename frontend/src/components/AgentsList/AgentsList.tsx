@@ -1,5 +1,5 @@
-import { Agent } from "@/api/AgentsApi";
-import AgentListItem, { AgentListItemSkeleton} from "./AgentListItem";
+import { Agent } from '@/api/AgentsApi';
+import AgentListItem, { AgentListItemSkeleton } from './AgentListItem';
 
 export interface AgentListProps {
   agents: Agent[] | null;
@@ -12,11 +12,8 @@ const SKELETON_AGENTS_COUNT = 3;
 const AgentsList = ({ selectedAgentId, agents, onAgentClick }: AgentListProps) => {
   return (
     <div className="flex gap-5 shrink-0">
-      {!agents && (
-        Array.from({ length: SKELETON_AGENTS_COUNT }).map((_, index) => (
-          <AgentListItemSkeleton key={index} />
-        ))
-      )}
+      {!agents &&
+        Array.from({ length: SKELETON_AGENTS_COUNT }).map((_, index) => <AgentListItemSkeleton key={index} />)}
       {agents?.map((agent) => {
         const isSelected = agent.id === selectedAgentId;
 

@@ -1,7 +1,7 @@
 import { FlattenMaps } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { AgentTeamInteraction } from '@apps/platform/agents/schemas';
-import { AgentTeamInteractionStatus } from "@apps/platform/agents/enums";
+import { AgentTeamInteractionStatus } from '@apps/platform/agents/enums';
 
 export interface AgentTeamInteractionEntity {
   getId(): string;

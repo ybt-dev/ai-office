@@ -1,13 +1,13 @@
-import { useState} from "react";
-import { Plus } from "lucide-react"
-import { Outlet, useNavigate, useOutletContext, useParams } from "react-router";
-import { Agent } from "@/api/AgentsApi";
-import { AgentFormData } from "@/components/AgentForm";
-import useListAgentsByTeamIdQuery from "@/hooks/queries/useListAgentsByTeamIdQuery";
-import useCreateAgentMutation from "@/hooks/mutations/useCreateAgentMutation";
-import AgentsList from "@/components/AgentsList";
-import Popup from "@/components/Popup";
-import CreateAgentForm from "@/components/CreateAgentForm";
+import { useState } from 'react';
+import { Plus } from 'lucide-react';
+import { Outlet, useNavigate, useOutletContext, useParams } from 'react-router';
+import { Agent } from '@/api/AgentsApi';
+import { AgentFormData } from '@/components/AgentForm';
+import useListAgentsByTeamIdQuery from '@/hooks/queries/useListAgentsByTeamIdQuery';
+import useCreateAgentMutation from '@/hooks/mutations/useCreateAgentMutation';
+import AgentsList from '@/components/AgentsList';
+import Popup from '@/components/Popup';
+import CreateAgentForm from '@/components/CreateAgentForm';
 
 const Agents = () => {
   const teamId = useOutletContext<string>();
@@ -55,11 +55,7 @@ const Agents = () => {
           New Agent
         </button>
       </div>
-      <AgentsList
-        selectedAgentId={selectedAgentId || null}
-        agents={agents ?? null}
-        onAgentClick={handleAgentClick}
-      />
+      <AgentsList selectedAgentId={selectedAgentId || null} agents={agents ?? null} onAgentClick={handleAgentClick} />
       {agents && !agents.length ? (
         <div className="text-center text-gray-400 m-auto">
           No agents found. Click the "New Agent" button to create one.

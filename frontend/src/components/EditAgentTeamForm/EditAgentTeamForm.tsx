@@ -1,5 +1,5 @@
-import { AgentTeam } from "@/api/AgentTeamsApi";
-import AgentTeamForm, { AgentTeamFormData } from "@/components/AgentTeamForm";
+import { AgentTeam } from '@/api/AgentTeamsApi';
+import AgentTeamForm, { AgentTeamFormData } from '@/components/AgentTeamForm';
 
 export interface EditAgentTeamFormProps {
   agentTeam: AgentTeam;

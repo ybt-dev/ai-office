@@ -1,6 +1,6 @@
-import { IsString, IsNotEmpty, IsOptional, IsIn } from 'class-validator';
+import { IsString, IsNotEmpty } from 'class-validator';
 import { IsIdentifier } from '@libs/validation/class-validators';
-import {AgentTeamInteractionStatus} from "@apps/platform/agents/enums";
+import { AgentTeamInteractionStatus } from '@apps/platform/agents/enums';
 
 export interface AgentTeamInteractionDto {
   id: string;

@@ -1,4 +1,4 @@
-import Skeleton from "@/components/Skeleton";
+import Skeleton from '@/components/Skeleton';
 
 const AgentListItemSkeleton = () => {
   return (
@@ -11,8 +11,7 @@ const AgentListItemSkeleton = () => {
         </div>
       </div>
     </div>
-  )
+  );
 };
 
 export default AgentListItemSkeleton;
-

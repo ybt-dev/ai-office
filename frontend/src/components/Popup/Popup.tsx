@@ -1,29 +1,29 @@
-import { ReactNode, useEffect } from "react";
-import { X } from "lucide-react";
+import { ReactNode, useEffect } from 'react';
+import { X } from 'lucide-react';
 
 export interface PopupProps {
-  isOpen: boolean
-  onClose: () => void
-  title: string
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
   children: ReactNode;
 }
 
 const Popup = ({ isOpen, onClose, title, children }: PopupProps) => {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose()
-    }
+      if (e.key === 'Escape') onClose();
+    };
 
     if (isOpen) {
-      document.addEventListener("keydown", handleEscape)
-      document.body.style.overflow = "hidden"
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
     }
 
     return () => {
-      document.removeEventListener("keydown", handleEscape)
-      document.body.style.overflow = "unset"
-    }
-  }, [isOpen, onClose])
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) {
     return null;
@@ -45,6 +45,6 @@ const Popup = ({ isOpen, onClose, title, children }: PopupProps) => {
       </div>
     </div>
   );
-}
+};
 
 export default Popup;

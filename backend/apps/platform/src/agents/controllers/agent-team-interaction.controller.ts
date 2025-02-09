@@ -4,7 +4,7 @@ import { SessionData } from '@apps/platform/sessions/types';
 import { SessionGuard } from '@apps/platform/sessions/guards';
 import { AgentTeamInteractionService } from '@apps/platform/agents/services';
 import { CreateAgentTeamInteractionBodyDto, ListAgentTeamInteractionsQueryDto } from '@apps/platform/agents/dto';
-import { InjectAgentTeamInteractionService } from "@apps/platform/agents/decorators";
+import { InjectAgentTeamInteractionService } from '@apps/platform/agents/decorators';
 
 @Controller('/agent-team-interactions')
 @UseGuards(SessionGuard)

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
-import { InjectTransactionsManager } from "@libs/transactions/decorators";
-import { TransactionsManager } from "@libs/transactions/managers";
+import { InjectTransactionsManager } from '@libs/transactions/decorators';
+import { TransactionsManager } from '@libs/transactions/managers';
 import { AgentRepository, AgentTeamRepository } from '@apps/platform/agents/repositories';
 import {
   InjectAgentRepository,

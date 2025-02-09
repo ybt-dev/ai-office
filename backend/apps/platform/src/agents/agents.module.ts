@@ -47,12 +47,7 @@ import AgentsModuleTokens from './agents.module.tokens';
     ConfigModule,
     TransactionsModule,
   ],
-  controllers: [
-    AgentTeamController,
-    AgentController,
-    AgentTeamInteractionController,
-    AgentMessageController,
-  ],
+  controllers: [AgentTeamController, AgentController, AgentTeamInteractionController, AgentMessageController],
   providers: [
     {
       provide: AgentsModuleTokens.Services.AgentTeamService,

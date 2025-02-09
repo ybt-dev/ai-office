@@ -1,4 +1,4 @@
-import { FormEvent, ReactNode, useState } from "react";
+import { FormEvent, ReactNode, useState } from 'react';
 
 export interface AgentTeamInteractionFormData {
   title: string;
@@ -58,7 +58,7 @@ const AgentTeamInteractionForm = ({ initialData, onSubmit, children }: AgentTeam
       </div>
       {children({
         title,
-        requestContent
+        requestContent,
       })}
     </form>
   );

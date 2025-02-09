@@ -1,6 +1,6 @@
-import { AgentMessage } from "@/api/AgentMessagesApi";
-import { Agent } from "@/api/AgentsApi";
-import AgentMessagesListItem, { AgentMessagesListItemSkeleton } from "./AgentMessagesListItem";
+import { AgentMessage } from '@/api/AgentMessagesApi';
+import { Agent } from '@/api/AgentsApi';
+import AgentMessagesListItem, { AgentMessagesListItemSkeleton } from './AgentMessagesListItem';
 
 export interface AgentConversationsListProps {
   agentsPool: Record<string, Agent>;
@@ -12,25 +12,25 @@ const SKELETON_MESSAGES_COUNT = 4;
 const AgentMessagesList = ({ messages, agentsPool }: AgentConversationsListProps) => {
   return (
     <div className="space-y-6">
-      {!!agentsPool && messages?.map((message) => {
-        const senderAgent = agentsPool[message.sourceAgentId];
+      {!!agentsPool &&
+        messages?.map((message) => {
+          const senderAgent = agentsPool[message.sourceAgentId];
 
-        return (
-          <AgentMessagesListItem
-            key={message.id}
-            messageId={message.id}
-            senderName={senderAgent?.name ?? 'Unknown'}
-            senderAvatarUrl={senderAgent?.imageUrl ?? ''}
-            messageContent={message.content}
-            messageDate={message.createdAt}
-          />
-        );
-      })}
-      {(!messages || !agentsPool) && (
+          return (
+            <AgentMessagesListItem
+              key={message.id}
+              messageId={message.id}
+              senderName={senderAgent?.name ?? 'Unknown'}
+              senderAvatarUrl={senderAgent?.imageUrl ?? ''}
+              messageContent={message.content}
+              messageDate={message.createdAt}
+            />
+          );
+        })}
+      {(!messages || !agentsPool) &&
         Array.from({ length: SKELETON_MESSAGES_COUNT }).map((_, index) => (
           <AgentMessagesListItemSkeleton key={index} />
-        ))
-      )}
+        ))}
     </div>
   );
 };

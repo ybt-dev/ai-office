@@ -1,5 +1,5 @@
-import * as React from "react";
-import { Connector, useConnect, useAccount, useDisconnect } from "wagmi";
+import * as React from 'react';
+import { Connector, useConnect, useAccount, useDisconnect } from 'wagmi';
 
 function truncateAddress(address: string) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -17,7 +17,7 @@ export function WalletOptions() {
         onClick={() => setIsOpen(!isOpen)}
         className="px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors duration-200 ease-in-out"
       >
-        {isConnected ? truncateAddress(address!) : "Connect Wallet"}
+        {isConnected ? truncateAddress(address!) : 'Connect Wallet'}
       </button>
 
       {isOpen && (
@@ -52,13 +52,7 @@ export function WalletOptions() {
   );
 }
 
-function WalletOption({
-  connector,
-  onClick,
-}: {
-  connector: Connector;
-  onClick: () => void;
-}) {
+function WalletOption({ connector, onClick }: { connector: Connector; onClick: () => void }) {
   const [ready, setReady] = React.useState(false);
 
   React.useEffect(() => {

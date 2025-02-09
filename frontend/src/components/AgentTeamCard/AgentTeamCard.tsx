@@ -1,7 +1,7 @@
 export interface AgentTeamCardProps {
-  name: string
-  description: string
-  onEditButtonClick: () => void
+  name: string;
+  description: string;
+  onEditButtonClick: () => void;
 }
 
 const AgentTeamCard = ({ name, description, onEditButtonClick }: AgentTeamCardProps) => {

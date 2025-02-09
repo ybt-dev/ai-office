@@ -11,7 +11,7 @@ const LoadingScreen = () => {
         <p className="text-gray-400 animate-pulse">Please wait while we initialize your workspace...</p>
       </div>
     </div>
-  )
+  );
 };
 
 export default LoadingScreen;

@@ -1,4 +1,4 @@
-import AgentForm, { AgentFormData } from "@/components/AgentForm";
+import AgentForm, { AgentFormData } from '@/components/AgentForm';
 
 export interface CreateAgentFormProps {
   onSubmit: (data: AgentFormData) => void;
@@ -6,9 +6,7 @@ export interface CreateAgentFormProps {
 
 const CreateAgentForm = ({ onSubmit }: CreateAgentFormProps) => {
   return (
-    <AgentForm
-      onSubmit={onSubmit}
-    >
+    <AgentForm onSubmit={onSubmit}>
       {() => (
         <button
           type="submit"

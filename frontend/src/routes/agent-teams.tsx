@@ -1,18 +1,15 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
-import { AgentTeam } from "@/api/AgentTeamsApi";
-import { AgentTeamFormData } from "@/components/AgentTeamForm";
-import useListAgentTeamsQuery from "@/hooks/queries/useListAgentTeamsQuery";
-import useCreateAgentTeamMutation from "@/hooks/mutations/useCreateAgentTeamMutation";
-import AgentTeamsGrid from "@/components/AgentTeamsGrid";
-import Popup from "@/components/Popup";
-import CreateAgentTeamForm from "@/components/CreateAgentTeamForm";
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
+import { AgentTeam } from '@/api/AgentTeamsApi';
+import { AgentTeamFormData } from '@/components/AgentTeamForm';
+import useListAgentTeamsQuery from '@/hooks/queries/useListAgentTeamsQuery';
+import useCreateAgentTeamMutation from '@/hooks/mutations/useCreateAgentTeamMutation';
+import AgentTeamsGrid from '@/components/AgentTeamsGrid';
+import Popup from '@/components/Popup';
+import CreateAgentTeamForm from '@/components/CreateAgentTeamForm';
 
 const AgentTeamsPage = () => {
-  const [
-    displayCreateAgentTeamPopup,
-    setDisplayCreateAgentTeamPopup,
-  ] = useState(false);
+  const [displayCreateAgentTeamPopup, setDisplayCreateAgentTeamPopup] = useState(false);
 
   const navigate = useNavigate();
 
@@ -54,20 +51,13 @@ const AgentTeamsPage = () => {
         </button>
       </div>
 
-      <AgentTeamsGrid
-        agentTeams={agentTeams ?? null}
-        onEditAgentTeamClick={handleEditAgentTeamClick}
-      />
+      <AgentTeamsGrid agentTeams={agentTeams ?? null} onEditAgentTeamClick={handleEditAgentTeamClick} />
 
       {agentTeams && !agentTeams.length && (
         <div className="text-center text-gray-400 m-auto">No agent teams found. Click create button to create one.</div>
       )}
 
-      <Popup
-        title="Create New Team"
-        isOpen={displayCreateAgentTeamPopup}
-        onClose={hideCreateAgentTeamPopup}
-      >
+      <Popup title="Create New Team" isOpen={displayCreateAgentTeamPopup} onClose={hideCreateAgentTeamPopup}>
         <CreateAgentTeamForm onSubmit={handleSubmitCreateAgentForm} />
       </Popup>
     </div>

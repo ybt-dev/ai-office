@@ -1,5 +1,5 @@
-import AgentForm, { AgentFormData } from "@/components/AgentForm";
-import { Agent } from "@/api/AgentsApi";
+import AgentForm, { AgentFormData } from '@/components/AgentForm';
+import { Agent } from '@/api/AgentsApi';
 
 export interface EditAgentFormProps {
   agent: Agent;
@@ -12,11 +12,11 @@ const EditAgentForm = ({ agent, onCancel, onSubmit }: EditAgentFormProps) => {
     <AgentForm
       className="mt-6"
       innerContainerClassName="p-6"
-      header={(
+      header={
         <div className="border-b border-gray-700 p-6">
           <h2 className="text-xl font-semibold">Edit Agent Details</h2>
         </div>
-      )}
+      }
       initialData={{
         name: agent.name,
         role: agent.role,

@@ -1,7 +1,7 @@
-import { Link } from "react-router";
-import { Settings, Users, MessageSquare } from "lucide-react"
-import TeamCategoryId from "@/enums/TeamCategoryId";
-import CategoriesList, { Category } from "@/components/TeamManagementPanel/CategoriesList";
+import { Link } from 'react-router';
+import { Settings, Users, MessageSquare } from 'lucide-react';
+import TeamCategoryId from '@/enums/TeamCategoryId';
+import CategoriesList, { Category } from '@/components/TeamManagementPanel/CategoriesList';
 
 export interface TeamManagementPanelProps {
   agentTeamName: string;
@@ -10,19 +10,23 @@ export interface TeamManagementPanelProps {
   goBackButtonLink: string;
 }
 
-const CATEGORIES: Category<TeamCategoryId>[] = [{
-  id: TeamCategoryId.Agents,
-  name: 'Agents',
-  icon: Users,
-}, {
-  id: TeamCategoryId.Interactions,
-  name: 'Interactions',
-  icon: MessageSquare,
-}, {
-  id: TeamCategoryId.Settings,
-  name: 'Settings',
-  icon: Settings,
-}];
+const CATEGORIES: Category<TeamCategoryId>[] = [
+  {
+    id: TeamCategoryId.Agents,
+    name: 'Agents',
+    icon: Users,
+  },
+  {
+    id: TeamCategoryId.Interactions,
+    name: 'Interactions',
+    icon: MessageSquare,
+  },
+  {
+    id: TeamCategoryId.Settings,
+    name: 'Settings',
+    icon: Settings,
+  },
+];
 
 const TeamManagementPanel = ({
   agentTeamName,

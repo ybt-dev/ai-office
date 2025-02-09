@@ -1,4 +1,4 @@
-import {Body, Controller, Get, Param, Post, Put, Query, UseGuards} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { Session } from '@apps/platform/sessions/decorators';
 import { SessionData } from '@apps/platform/sessions/types';
 import { SessionGuard } from '@apps/platform/sessions/guards';
@@ -37,11 +37,7 @@ export default class AgentController {
   }
 
   @Put('/:id')
-  public updateAgent(
-    @Session() session: SessionData,
-    @Param('id') id: string,
-    @Body() body: UpdateAgentBodyDto,
-  ) {
+  public updateAgent(@Session() session: SessionData, @Param('id') id: string, @Body() body: UpdateAgentBodyDto) {
     return this.agentService.update(id, session.organizationId, {
       name: body.name,
       model: body.model,

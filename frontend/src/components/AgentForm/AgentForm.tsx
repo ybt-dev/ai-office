@@ -1,6 +1,6 @@
-import {FormEvent, ReactNode, useState} from "react";
-import {AgentRole} from "@/api/AgentsApi";
-import {tailwindClsx} from "@/utils";
+import { FormEvent, ReactNode, useState } from 'react';
+import { AgentRole } from '@/api/AgentsApi';
+import { tailwindClsx } from '@/utils';
 
 export interface AgentFormData {
   name: string;
@@ -21,7 +21,15 @@ interface AgentFormProps {
   hideRoleInput?: boolean;
 }
 
-const AgentForm = ({ className, innerContainerClassName, header, initialData, onSubmit, children, hideRoleInput }: AgentFormProps) => {
+const AgentForm = ({
+  className,
+  innerContainerClassName,
+  header,
+  initialData,
+  onSubmit,
+  children,
+  hideRoleInput,
+}: AgentFormProps) => {
   const [name, setName] = useState(initialData?.name || '');
   const [role, setRole] = useState(initialData?.role || '');
   const [description, setDescription] = useState(initialData?.description || '');

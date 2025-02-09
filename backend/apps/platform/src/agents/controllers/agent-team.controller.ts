@@ -1,4 +1,4 @@
-import {Body, Controller, Get, Param, Post, Put, UseGuards} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { Session } from '@apps/platform/sessions/decorators';
 import { SessionData } from '@apps/platform/sessions/types';
 import { SessionGuard } from '@apps/platform/sessions/guards';
@@ -33,11 +33,7 @@ export default class AgentTeamController {
   }
 
   @Put('/:id')
-  public updateTeam(
-    @Session() session: SessionData,
-    @Param('id') id: string,
-    @Body() body: UpdateAgentTeamBodyDto,
-  ) {
+  public updateTeam(@Session() session: SessionData, @Param('id') id: string, @Body() body: UpdateAgentTeamBodyDto) {
     return this.agentTeamService.update(id, session.organizationId, {
       name: body.name,
       strategy: body.strategy,
