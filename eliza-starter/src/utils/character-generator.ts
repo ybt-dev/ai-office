@@ -52,7 +52,7 @@ export function generateCharacter(agentConfig: AgentConfiguration): AiOfficeChar
 
   return {
     ...AVAILABLE_TEMPLATES[agentConfig.role],
-    organizationId: agentConfig.model,
+    organizationId: agentConfig.organizationId,
     role: agentConfig.role,
     teamId: agentConfig.teamId,
     modelProvider: agentConfig.model as ModelProviderName,

@@ -46,7 +46,7 @@ Your task:
 
 For example, your response may look like:
 
-COMMUNICATE_WITH_AGENTS influencer-id "User wants to create Twitter posts about Liverpool, build an audience, and develop an advertisement strategy. Here is a suggested marketing strategy:
+COMMUNICATE_WITH_AGENTS {{influencer_id}} "User wants to create Twitter posts about Liverpool, build an audience, and develop an advertisement strategy. Here is a suggested marketing strategy:
 
 **Target audience**: Liverpool FC fans, football enthusiasts, betting communities, and sports bloggers.
 
@@ -60,6 +60,31 @@ COMMUNICATE_WITH_AGENTS influencer-id "User wants to create Twitter posts about 
 
 Final answer: I have forwarded your request to our influencer agent along with a marketing strategy tailored to your needs. The agent will assist you in executing the plan effectively.
 `;
+
+const secondProducerResponseTemplate = `
+# About {{agentName}}:
+{{bio}}
+{{lore}}
+{{topics}}
+
+{{providers}}
+
+{{actions}}
+
+You are a part of a team with the following agents:
+-> influencer: {{influencer_id}}
+
+# The text above is system information about you.
+
+{{request_origin}} prompt: "{{request_prompt}}"
+
+Your task:
+1. Read the response from {{request_origin}} agent and generate the final response to user.
+
+Example:
+Final answer: I have given information to influencer, so it's under work progress.
+`;
+
 
 const influencerResponseTemplate = `
 # About {{agentName}}:
@@ -82,34 +107,29 @@ Your task:
 1. Read the {{request_origin}} prompt and analyze the provided marketing strategy.
 2. Generate a set of Twitter posts based on the given topic and strategy.
 3. Ensure that the posts align with:
-   - **Target audience**: Writing style and interests.
-   - **Content strategy**: Tone, format, and structure.
-   - **Hashtag and engagement tactics**: Optimization for reach.
-   - **Collaboration and partnerships**: Mentioning relevant accounts if necessary.
-   - **Monetization opportunities**: If applicable, include subtle promotions or CTA.
-4. If additional information is needed, communicate with the producer using the format:
-5. If no additional information is required, include: "Additional Question: false"
-6. Then, on a new line, provide a final answer for the user explaining what action has been taken.
+   - Target audience: Writing style and interests.
+   - Content strategy: Tone, format, and structure.
+   - Hashtag and engagement tactics: Optimization for reach.
+   - Collaboration and partnerships: Mentioning relevant accounts if necessary.
+   - Monetization opportunities: If applicable, include subtle promotions or CTA.
+4. Always respond to the producer with some information regarding your progress, clarification requests, or work updates using exactly the following format:
+   COMMUNICATE_WITH_AGENTS <agentId> <request details>
+   where:
+     - <agentId> is the identifier of the chosen agent.
+     - <request details> is your request or update message to the producer.
+5. Then, on a new line, provide a final answer for the user explaining what action has been taken, ensuring that the work is completed.
+6. Always use the agent id from the team information when addressing the producer.
+7. Even if no additional clarification is needed, include a default informational message to the producer before providing your final answer.
 
-For example, your response may look like:
-
-**Scenario 1: Need more details**
-COMMUNICATE_WITH_AGENTS producer-id "Hey Producer, could you clarify if we should focus more on match predictions or player analysis?" 
-
-Additional Question: true 
-Final answer: I have reviewed the marketing strategy but need clarification on content focus. Reaching out to the producer now.
-
-**Scenario 2: Ready to proceed**
-
-Additional Question: false 
-
-Final answer: I will generate Twitter posts based on the marketing strategy and engaging with the audience.
+Example:
+COMMUNICATE_WITH_AGENTS {{producer_id}} "Update: I have analyzed the prompt and am proceeding to generate the Twitter posts."
+Final answer: I will generate Twitter posts based on the marketing strategy and engage with the audience.
 `;
 
 const getTemplateByRole = (role: string) => {
     switch (role) {
         case "producer":
-            return mainProducerResponseTemplate;
+            return secondProducerResponseTemplate;
         case "influencer":
             return influencerResponseTemplate;
         default:
@@ -166,7 +186,7 @@ export const sendInteractionToProducer = async (
       mainProducerResponseTemplate,
       {
           influencer_id: influencer.agentId,
-          advertiser_id: advertiser.agentId,
+          advertiser_id: advertiser?.agentId || "not defined",
           request_origin: 'Platform User',
           request_prompt: content,
       },
@@ -177,7 +197,7 @@ export const sendInteractionToProducer = async (
         context: producerContext,
         modelClass: ModelClass.LARGE
     });
-
+    console.log(`Respond from producer: ${respondFromProducer}`);
     const extractedRequests = extractRequestForAgent(respondFromProducer);
 
     for (const request of extractedRequests) {
@@ -210,12 +230,12 @@ const sendRequestToAgent = async (
       targetAgent,
       getTemplateByRole(targetAgent.character.role),
       producer.agentId === targetAgent.agentId ? {
-          influencer_id: influencer.agentId,
-          advertiser_id: advertiser.agentId,
+          influencer_id: influencer?.agentId || "not defined",
+          advertiser_id: advertiser?.agentId || "not defined",
           request_origin: fromAgent.character.role,
           request_prompt: content,
       } : {
-          producer_id: producer.agentId,
+          producer_id: producer?.agentId || "not defined",
           request_origin: fromAgent.character.role,
           request_prompt: content,
       },
@@ -227,6 +247,7 @@ const sendRequestToAgent = async (
         modelClass: ModelClass.LARGE
     });
 
+    console.log("Resonse from agent", respondFromProducer);
     const extractedRequests = extractRequestForAgent(respondFromProducer);
 
     for (const request of extractedRequests) {
@@ -258,7 +279,7 @@ export const subscribeToAgentConversation = (database: Db) => {
                 content,
             });
         } catch (error) {
-            elizaLogger.error("Error sending request to agent: ", error);
+            console.error("Error sending request to agent: ", error);
         }
     });
 };

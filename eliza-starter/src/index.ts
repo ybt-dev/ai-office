@@ -329,15 +329,15 @@ const initializeAgentsSystem = async () => {
         organizationId,
         requestContent,
       ).catch((error) => {
-        elizaLogger.error("Error sending interaction to producer:", error);
+        console.error("Error sending interaction to producer:", error);
       });
 
       response.status(200).send({ status: 'OK' });
     },
   );
 
-  expressApp.listen(process.env.EXPRESS_APP_PORT, () => {
-    console.log(`Express app is running on port ${process.env.EXPRESS_APP_PORT}`);
+  expressApp.listen(process.env.EXPRESS_APP_PORT || 3001, () => {
+    console.log(`Express app is running on port ${process.env.EXPRESS_APP_PORT || 3001}`);
   });
 };
 

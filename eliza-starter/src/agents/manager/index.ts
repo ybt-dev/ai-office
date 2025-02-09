@@ -17,7 +17,7 @@ class AgentManager {
   public addAgent(id, agent) {
     if (!this.agentsMap.has(id)) {
       this.agentsMap.set(id, agent);
-      this.rolesIndex.delete(this.generateRolesIndex(agent.character.organizationId, agent.character.role));
+      this.rolesIndex.set(this.generateRolesIndex(agent.character.organizationId, agent.character.role), id);
 
       console.log(`Agent ${id} added.`);
     } else {
