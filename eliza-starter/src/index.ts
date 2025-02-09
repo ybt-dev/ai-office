@@ -304,6 +304,30 @@ const initializeAgentsSystem = async () => {
     },
   );
 
+  expressApp.post(
+    '/agents/communicate',
+    bodyParser.json({}),
+    async (request, response) => {
+      const {
+        title,
+        requestContent,
+        interactionId,
+        teamId,
+        organizationId,
+      } = request.body as {
+        title: string;
+        requestContent: string;
+        interactionId: string;
+        teamId: string;
+        organizationId: string;
+      };
+
+      // TODO initializa interaction with agents.
+
+      response.status(200).send({ status: 'OK' });
+    },
+  );
+
   expressApp.listen(process.env.EXPRESS_APP_PORT, () => {
     console.log(`Express app is running on port ${process.env.EXPRESS_APP_PORT}`);
   });
