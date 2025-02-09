@@ -2,7 +2,7 @@ import { FlattenMaps } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { AnyObject } from '@libs/types';
 import { Agent } from '@apps/platform/agents/schemas';
-import { AgentRole } from '@apps/platform/agents/enums';
+import { AgentModel, AgentRole } from '@apps/platform/agents/enums';
 
 export interface AgentEntity {
   getId(): string;
@@ -10,13 +10,15 @@ export interface AgentEntity {
   getOrganizationId(): string;
   getName(): string;
   getRole(): AgentRole;
-  getModel(): string;
+  getModel(): AgentModel;
   getModelApiKey(): string;
   getConfig(): AnyObject;
   getDescription(): string | undefined;
   getImageUrl(): string | undefined;
   getCreatedAt(): Date;
   getUpdatedAt(): Date;
+  getWalletAddress(): string;
+  getEncryptedWalletPrivateKey(): string;
   getCreatedById(): string;
   getUpdatedById(): string;
 }
@@ -74,6 +76,14 @@ export class MongoAgentEntity implements AgentEntity {
 
   public getCreatedById() {
     return this.document.createdBy.toString();
+  }
+
+  public getWalletAddress() {
+    return this.document.walletAddress;
+  }
+
+  public getEncryptedWalletPrivateKey() {
+    return this.document.encryptedPrivateKey;
   }
 
   public getUpdatedById() {

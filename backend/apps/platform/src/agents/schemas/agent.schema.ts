@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { AnyObject } from '@libs/types';
-import { AgentRole } from '@apps/platform/agents/enums';
+import { AgentModel, AgentRole } from '@apps/platform/agents/enums';
 
 export type AgentDocument = HydratedDocument<Agent>;
 
@@ -24,7 +24,7 @@ export class Agent {
   team: ObjectId;
 
   @Prop({ required: true, type: mongoose.Schema.Types.String })
-  model: string;
+  model: AgentModel;
 
   @Prop({ required: true, type: mongoose.Schema.Types.String })
   modelApiKey: string;

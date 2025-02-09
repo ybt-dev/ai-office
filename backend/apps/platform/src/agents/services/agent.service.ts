@@ -1,3 +1,5 @@
+import { AES, enc } from 'crypto-js';
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { InjectTransactionsManager } from '@libs/transactions/decorators';
 import { TransactionsManager } from '@libs/transactions/managers';
@@ -6,21 +8,22 @@ import {
   InjectAgentRepository,
   InjectAgentEntityToDtoMapper,
   InjectAgentTeamRepository,
+  InjectElizaApi,
 } from '@apps/platform/agents/decorators';
 import { AgentDto } from '@apps/platform/agents/dto';
 import { AgentEntityToDtoMapper } from '@apps/platform/agents/entities-mappers';
-import { AgentRole } from '@apps/platform/agents/enums';
-import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
-import { AES, enc } from 'crypto-js';
+import { AgentModel, AgentRole } from '@apps/platform/agents/enums';
+import { ElizaApi } from '@apps/platform/agents/api';
 
 export interface CreateAgentParams {
   role: AgentRole;
   organizationId: string;
-  model: string;
+  model: AgentModel;
   modelApiKey: string;
   teamId: string;
   name: string;
   twitterCookie?: string;
+  twitterUsername?: string;
   createdById: string;
   description?: string;
   walletAddress: string;
@@ -28,9 +31,10 @@ export interface CreateAgentParams {
 }
 
 export interface UpdateAgentParams {
-  model?: string;
+  model?: AgentModel;
   modelApiKey?: string;
   twitterCookie?: string;
+  twitterUsername?: string;
   name?: string;
   updatedById?: string | null;
   description?: string;
@@ -50,6 +54,7 @@ export class DefaultAgentService implements AgentService {
     @InjectAgentRepository() private readonly agentRepository: AgentRepository,
     @InjectAgentTeamRepository() private readonly agentTeamRepository: AgentTeamRepository,
     @InjectAgentEntityToDtoMapper() private agentEntityToDtoMapper: AgentEntityToDtoMapper,
+    @InjectElizaApi() private elizaApi: ElizaApi,
     @InjectTransactionsManager() private transactionsManager: TransactionsManager,
   ) {}
 
@@ -85,18 +90,19 @@ export class DefaultAgentService implements AgentService {
     if (!team) {
       throw new UnprocessableEntityException('Provided Agent Team does not exist.');
     }
-    
+
     const privateKey = generatePrivateKey();
     const account = privateKeyToAccount(privateKey);
 
     const encryptionKey = process.env.WALLET_ENCRYPTION_KEY;
+
     if (!encryptionKey) {
       throw new Error('WALLET_ENCRYPTION_KEY environment variable is not set');
     }
 
     const encryptedPrivateKey = AES.encrypt(privateKey, encryptionKey).toString();
-    
-    return this.transactionsManager.useTransaction(async () => {
+
+    const createdAgent = await this.transactionsManager.useTransaction(async () => {
       const agentsWithSameRole = await this.agentRepository.exists({
         organizationId: params.organizationId,
         teamId: params.teamId,
@@ -115,6 +121,7 @@ export class DefaultAgentService implements AgentService {
         modelApiKey: params.modelApiKey,
         config: {
           twitterCookie: params.twitterCookie,
+          twitterUsername: params.twitterUsername,
         },
         imageUrl: '',
         description: params.description,
@@ -127,18 +134,28 @@ export class DefaultAgentService implements AgentService {
 
       return this.agentEntityToDtoMapper.mapOne(agentEntity);
     });
+
+    await this.elizaApi.sendAgentsChange({
+      type: 'add',
+      agent: createdAgent,
+    });
+
+    return createdAgent;
   }
 
   public async update(id: string, organizationId: string, params: UpdateAgentParams) {
-    return this.transactionsManager.useTransaction(async () => {
-      await this.getIfExist(id, organizationId);
+    const updatedAgent = await this.transactionsManager.useTransaction(async () => {
+      const existingAgent = await this.getIfExist(id, organizationId);
 
       const updatedAgentEntity = await this.agentRepository.updateOneById(id, {
         ...(params.name ? { name: params.name } : {}),
         ...(params.model ? { model: params.model } : {}),
         ...(params.modelApiKey ? { modelApiKey: params.modelApiKey } : {}),
-        ...(params.twitterCookie !== undefined ? { config: { twitterCookie: params.twitterCookie } } : {}),
         ...(params.description !== undefined ? { description: params.description } : {}),
+        config: {
+          twitterCookie: params.twitterCookie ?? (existingAgent.config.twitterCookie as string | undefined),
+          twitterUsername: params.twitterUsername ?? (existingAgent.config.twitterUsername as string | undefined),
+        },
         updatedBy: params.updatedById,
       });
 
@@ -148,6 +165,13 @@ export class DefaultAgentService implements AgentService {
 
       return this.agentEntityToDtoMapper.mapOne(updatedAgentEntity);
     });
+
+    await this.elizaApi.sendAgentsChange({
+      type: 'update',
+      agent: updatedAgent,
+    });
+
+    return updatedAgent;
   }
 
   private decryptPrivateKey(encryptedPrivateKey: string): string {

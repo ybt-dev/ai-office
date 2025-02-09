@@ -6,15 +6,20 @@ export enum AgentRole {
   Adviser = 'adviser',
 }
 
+export enum AgentModelProvider {
+  OpenAi = 'openai',
+  OpenRouter = 'openrouter',
+}
+
 export interface Agent {
   id: string;
   name: string;
   imageUrl: string;
   teamId: string;
   role: AgentRole;
-  model: string;
+  model: AgentModelProvider;
   modelApiKey: string;
-  config: unknown;
+  config: Record<string, unknown>;
   description?: string;
 }
 
@@ -25,6 +30,7 @@ export interface CreateAgentParams {
   model: string;
   modelApiKey: string;
   twitterCookie?: string;
+  twitterUsername?: string;
   description?: string;
 }
 
@@ -34,6 +40,7 @@ export interface UpdateAgentParams {
   modelApiKey?: string;
   description?: string;
   twitterCookie?: string;
+  twitterUsername?: string;
 }
 
 export interface AgentsApi {

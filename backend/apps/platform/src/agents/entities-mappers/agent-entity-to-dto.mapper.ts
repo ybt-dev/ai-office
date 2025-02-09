@@ -25,6 +25,8 @@ export class DefaultAgentEntityToDtoMapper implements AgentEntityToDtoMapper {
       updatedAt: entity.getUpdatedAt(),
       createdById: entity.getCreatedById(),
       updatedById: entity.getUpdatedById(),
+      walletAddress: entity.getWalletAddress(),
+      encryptedPrivateKey: entity.getEncryptedWalletPrivateKey(),
     };
   }
 

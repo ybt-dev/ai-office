@@ -1,4 +1,7 @@
 const AgentsModuleTokens = {
+  Api: {
+    ElizaApi: Symbol('ElizaApi'),
+  },
   Services: {
     AgentTeamService: Symbol('AgentTeamService'),
     AgentService: Symbol('AgentService'),

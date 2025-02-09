@@ -4,10 +4,10 @@ import { useAccount, useConnect } from 'wagmi';
 import WalletOption from './WalletOption';
 
 export interface WalletConnectionAttributes {
-  isConnected: boolean,
-  isOpen: boolean,
-  address: string | undefined,
-  setIsOpen: (isOpen: boolean) => void,
+  isConnected: boolean;
+  isOpen: boolean;
+  address: string | undefined;
+  setIsOpen: (isOpen: boolean) => void;
 }
 export interface WalletConnectionProps {
   children: (attributes: WalletConnectionAttributes) => ReactNode;

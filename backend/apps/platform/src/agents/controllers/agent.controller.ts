@@ -29,6 +29,7 @@ export default class AgentController {
       role: body.role,
       model: body.model,
       twitterCookie: body.twitterCookie,
+      twitterUsername: body.twitterUsername,
       modelApiKey: body.modelApiKey,
       description: body.description,
       createdById: session.userId,
@@ -46,6 +47,7 @@ export default class AgentController {
       modelApiKey: body.modelApiKey,
       description: body.description,
       twitterCookie: body.twitterCookie,
+      twitterUsername: body.twitterUsername,
       updatedById: session.userId,
     });
   }

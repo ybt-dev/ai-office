@@ -1,27 +1,16 @@
 import { FormEvent, ReactNode, useState } from 'react';
-import { Wallet, parseEther } from 'ethers';
-import { useWalletClient, usePublicClient } from 'wagmi';
-import { toast } from 'react-toastify';
-import { AgentRole } from '@/api/AgentsApi';
+import { AgentModelProvider, AgentRole } from '@/api/AgentsApi';
 import { tailwindClsx } from '@/utils';
-import { waitForTransactionReceipt, getPublicClient } from '@wagmi/core';
-import { type PublicClient } from 'viem';
 
 export interface AgentFormData {
   name: string;
   role: AgentRole;
   description: string;
-  model: string;
+  model: AgentModelProvider;
   modelApiKey: string;
   twitterCookie?: string;
+  twitterUsername?: string;
   ethAmount?: string;
-  walletAddress: string;
-  encryptedPrivateKey: string;
-}
-
-interface AgentResponse {
-  walletAddress: string;
-  encryptedPrivateKey: string;
 }
 
 interface AgentFormProps {
@@ -29,7 +18,7 @@ interface AgentFormProps {
   innerContainerClassName?: string;
   header?: ReactNode;
   initialData?: AgentFormData;
-  onSubmit: (data: AgentFormData) => Promise<AgentResponse>;
+  onSubmit: (data: AgentFormData) => void;
   children: (data: AgentFormData) => ReactNode;
   hideRoleInput?: boolean;
 }
@@ -43,7 +32,6 @@ const AgentForm = ({
   children,
   hideRoleInput,
 }: AgentFormProps) => {
-  const { data: walletClient } = useWalletClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState(initialData?.name || '');
   const [role, setRole] = useState(initialData?.role || '');
@@ -51,8 +39,8 @@ const AgentForm = ({
   const [model, setModel] = useState(initialData?.model || '');
   const [modelApiKey, setModelApiKey] = useState(initialData?.modelApiKey || '');
   const [twitterCookie, setTwitterCookie] = useState(initialData?.twitterCookie || '');
+  const [twitterUsername, setTwitterUsername] = useState(initialData?.twitterUsername || '');
   const [ethAmount, setEthAmount] = useState(initialData?.ethAmount || '');
-  const [response, setResponse] = useState<AgentResponse | null>(null);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -62,44 +50,14 @@ const AgentForm = ({
       name,
       role: role as AgentRole,
       description,
-      model,
+      model: model as AgentModelProvider,
       modelApiKey,
       twitterCookie,
+      twitterUsername,
       ethAmount,
     };
 
-    console.log('Submitting form data:', formData);
-
-    try {
-      // Submit form and get response with wallet info
-      const agentResponse = (await onSubmit(formData)) as AgentResponse;
-      setResponse(agentResponse);
-      console.log('Agent creation response:', agentResponse);
-
-      // Use the wallet address from the response for the ETH transfer
-      if (role === AgentRole.Producer && ethAmount && walletClient && agentResponse) {
-        try {
-          const tx = await walletClient.sendTransaction({
-            to: agentResponse.walletAddress,
-            value: parseEther(ethAmount),
-          });
-
-          toast.info('Sending ETH to agent wallet...');
-          const publicClient = getPublicClient() as PublicClient;
-          await waitForTransactionReceipt(publicClient, { hash: tx });
-          toast.success(`Successfully sent ${ethAmount} ETH to agent wallet`);
-        } catch (error) {
-          console.error('Transaction failed:', error);
-          toast.error('Failed to send ETH to agent wallet. Please try sending manually.');
-        }
-      }
-    } catch (error) {
-      console.error('Form submission failed:', error);
-      console.error('Error details:', error);
-      toast.error('Failed to create agent');
-    } finally {
-      setIsSubmitting(false);
-    }
+    onSubmit(formData);
   };
 
   return (
@@ -136,7 +94,7 @@ const AgentForm = ({
                 id="role"
                 name="role"
                 value={role}
-                onChange={(event) => setRole(event.target.value)}
+                onChange={(event) => setRole(event.target.value as AgentRole)}
                 className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
               <datalist id="roleOptions">
@@ -146,6 +104,21 @@ const AgentForm = ({
               </datalist>
             </div>
           )}
+          {role === AgentRole.Adviser || role === AgentRole.Influencer ? (
+            <div>
+              <label htmlFor="twitterName" className="block text-sm font-medium text-gray-400">
+                Twitter Username
+              </label>
+              <input
+                type="text"
+                id="twitterUsername"
+                name="twitterUsername"
+                value={twitterCookie}
+                onChange={(event) => setTwitterUsername(event.target.value)}
+                className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+          ) : null}
           {role === AgentRole.Adviser || role === AgentRole.Influencer ? (
             <div>
               <label htmlFor="twitterCookie" className="block text-sm font-medium text-gray-400">
@@ -200,18 +173,24 @@ const AgentForm = ({
             />
           </div>
           <div>
-            <label htmlFor="model" className="block text-sm font-medium text-gray-400">
-              Model (AI model)
+            <label htmlFor="role" className="block text-sm font-medium text-gray-400">
+              Model (AI Model)
             </label>
             <input
               required
               type="text"
+              list="modelOptions"
               id="model"
               name="model"
-              value={model}
-              onChange={(event) => setModel(event.target.value)}
+              value={role}
+              onChange={(event) => setModel(event.target.value as AgentModelProvider)}
               className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
+            <datalist id="modelOptions">
+              {Object.values(AgentModelProvider).map((roleOption) => (
+                <option key={roleOption} value={roleOption} />
+              ))}
+            </datalist>
           </div>
           <div>
             <label htmlFor="apiKey" className="block text-sm font-medium text-gray-400">
@@ -232,11 +211,11 @@ const AgentForm = ({
           name,
           role: role as AgentRole,
           description,
-          model,
+          model: model as AgentModelProvider,
           modelApiKey,
+          twitterCookie,
+          twitterUsername,
           ethAmount,
-          walletAddress: response?.walletAddress || '',
-          encryptedPrivateKey: response?.encryptedPrivateKey || '',
         })}
 
         {isSubmitting && (

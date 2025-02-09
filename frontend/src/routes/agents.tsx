@@ -32,6 +32,7 @@ const Agents = () => {
       model: data.model,
       role: data.role,
       twitterCookie: data.twitterCookie,
+      twitterUsername: data.twitterUsername,
       teamId,
     });
 
