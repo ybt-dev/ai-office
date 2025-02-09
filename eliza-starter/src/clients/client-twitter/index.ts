@@ -189,15 +189,15 @@ export class ClientBase extends EventEmitter {
         const cachedCookies = await this.getCachedCookies(username);
 
         if (cachedCookies) {
-            elizaLogger.info("Using cached cookies");
+            // elizaLogger.info("Using cached cookies");
             await this.setCookiesFromArray(cachedCookies);
         }
 
-        elizaLogger.log("Waiting for Twitter login");
+        // elizaLogger.log("Waiting for Twitter login");
         while (retries > 0) {
             try {
                 if (await this.twitterClient.isLoggedIn()) { // cookies are valid, no login required
-                    elizaLogger.info("Successfully logged in.");
+                    // elizaLogger.info("Successfully logged in.");
                     break;
                 } else {
                     await this.twitterClient.login(
@@ -207,8 +207,8 @@ export class ClientBase extends EventEmitter {
                         twitter2faSecret
                     );
                     if (await this.twitterClient.isLoggedIn()) {  // fresh login, store new cookies
-                        elizaLogger.info("Successfully logged in.");
-                        elizaLogger.info("Caching cookies");
+                        // elizaLogger.info("Successfully logged in.");
+                        // elizaLogger.info("Caching cookies");
                         await this.cacheCookies(
                             username,
                             await this.twitterClient.getCookies()
@@ -217,18 +217,18 @@ export class ClientBase extends EventEmitter {
                     }
                 }
             } catch (error) {
-                elizaLogger.error(`Login attempt failed: ${error.message}`);
+                // elizaLogger.error(`Login attempt failed: ${error.message}`);
             }
 
             retries--;
-            elizaLogger.error(
-                `Failed to login to Twitter. Retrying... (${retries} attempts left)`
-            );
+            // elizaLogger.error(
+            //     `Failed to login to Twitter. Retrying... (${retries} attempts left)`
+            // );
 
             if (retries === 0) {
-                elizaLogger.error(
-                    "Max retries reached. Exiting login process."
-                );
+                // elizaLogger.error(
+                //     "Max retries reached. Exiting login process."
+                // );
                 throw new Error("Twitter login failed after maximum retries.");
             }
 
@@ -238,11 +238,11 @@ export class ClientBase extends EventEmitter {
         this.profile = await this.fetchProfile(username);
 
         if (this.profile) {
-            elizaLogger.log("Twitter user ID:", this.profile.id);
-            elizaLogger.log(
-                "Twitter loaded:",
-                JSON.stringify(this.profile, null, 10)
-            );
+            // elizaLogger.log("Twitter user ID:", this.profile.id);
+            // elizaLogger.log(
+            //     "Twitter loaded:",
+            //     JSON.stringify(this.profile, null, 10)
+            // );
             // Store profile info for use in responses
             this.runtime.character.twitterProfile = {
                 id: this.profile.id,
@@ -260,7 +260,7 @@ export class ClientBase extends EventEmitter {
     }
 
     async fetchOwnPosts(count: number): Promise<Tweet[]> {
-        elizaLogger.debug("fetching own posts");
+        // elizaLogger.debug("fetching own posts");
         const homeTimeline = await this.twitterClient.getUserTweets(
             this.profile.id,
             count
@@ -272,12 +272,12 @@ export class ClientBase extends EventEmitter {
      * Fetch timeline for twitter account, optionally only from followed accounts
      */
     async fetchHomeTimeline(count: number, following?: boolean): Promise<Tweet[]> {
-        elizaLogger.debug("fetching home timeline");
+        // elizaLogger.debug("fetching home timeline");
         const homeTimeline = following
             ? await this.twitterClient.fetchFollowingTimeline(count, [])
             : await this.twitterClient.fetchHomeTimeline(count, []);
 
-        elizaLogger.debug(homeTimeline, { depth: Infinity });
+        // elizaLogger.debug(homeTimeline, { depth: Infinity });
         const processedTimeline = homeTimeline
             .filter((t) => t.__typename !== "TweetWithVisibilityResults") // what's this about?
             .map((tweet) => {
@@ -331,7 +331,7 @@ export class ClientBase extends EventEmitter {
     }
 
     async fetchTimelineForActions(count: number): Promise<Tweet[]> {
-        elizaLogger.debug("fetching timeline for actions");
+        // elizaLogger.debug("fetching timeline for actions");
 
         const agentUsername = this.twitterConfig.TWITTER_USERNAME
         const homeTimeline = await this.twitterClient.fetchHomeTimeline(
@@ -392,11 +392,11 @@ export class ClientBase extends EventEmitter {
                 );
                 return (result ?? { tweets: [] }) as QueryTweetsResponse;
             } catch (error) {
-                elizaLogger.error("Error fetching search tweets:", error);
+                // elizaLogger.error("Error fetching search tweets:", error);
                 return { tweets: [] };
             }
         } catch (error) {
-            elizaLogger.error("Error fetching search tweets:", error);
+            // elizaLogger.error("Error fetching search tweets:", error);
             return { tweets: [] };
         }
     }
@@ -1650,37 +1650,37 @@ export class TwitterPostClient {
         this.twitterUsername = this.client.twitterConfig.TWITTER_USERNAME;
         this.isDryRun = this.client.twitterConfig.TWITTER_DRY_RUN
 
-        // Log configuration on initialization
-        elizaLogger.log("Twitter Client Configuration:");
-        elizaLogger.log(`- Username: ${this.twitterUsername}`);
-        elizaLogger.log(
-            `- Dry Run Mode: ${this.isDryRun ? "enabled" : "disabled"}`
-        );
-        elizaLogger.log(
-            `- Post Interval: ${this.client.twitterConfig.POST_INTERVAL_MIN}-${this.client.twitterConfig.POST_INTERVAL_MAX} minutes`
-        );
-        elizaLogger.log(
-            `- Action Processing: ${this.client.twitterConfig.ENABLE_ACTION_PROCESSING ? "enabled" : "disabled"}`
-        );
-        elizaLogger.log(
-            `- Action Interval: ${this.client.twitterConfig.ACTION_INTERVAL} seconds`
-        );
-        elizaLogger.log(
-            `- Post Immediately: ${this.client.twitterConfig.POST_IMMEDIATELY ? "enabled" : "disabled"}`
-        );
-        elizaLogger.log(
-            `- Search Enabled: ${this.client.twitterConfig.TWITTER_SEARCH_ENABLE ? "enabled" : "disabled"}`
-        );
+        // // Log configuration on initialization
+        // elizaLogger.log("Twitter Client Configuration:");
+        // elizaLogger.log(`- Username: ${this.twitterUsername}`);
+        // elizaLogger.log(
+        //     `- Dry Run Mode: ${this.isDryRun ? "enabled" : "disabled"}`
+        // );
+        // elizaLogger.log(
+        //     `- Post Interval: ${this.client.twitterConfig.POST_INTERVAL_MIN}-${this.client.twitterConfig.POST_INTERVAL_MAX} minutes`
+        // );
+        // elizaLogger.log(
+        //     `- Action Processing: ${this.client.twitterConfig.ENABLE_ACTION_PROCESSING ? "enabled" : "disabled"}`
+        // );
+        // elizaLogger.log(
+        //     `- Action Interval: ${this.client.twitterConfig.ACTION_INTERVAL} seconds`
+        // );
+        // elizaLogger.log(
+        //     `- Post Immediately: ${this.client.twitterConfig.POST_IMMEDIATELY ? "enabled" : "disabled"}`
+        // );
+        // elizaLogger.log(
+        //     `- Search Enabled: ${this.client.twitterConfig.TWITTER_SEARCH_ENABLE ? "enabled" : "disabled"}`
+        // );
 
         const targetUsers = this.client.twitterConfig.TWITTER_TARGET_USERS;
         if (targetUsers) {
-            elizaLogger.log(`- Target Users: ${targetUsers}`);
+            // elizaLogger.log(`- Target Users: ${targetUsers}`);
         }
 
         if (this.isDryRun) {
-            elizaLogger.log(
-                "Twitter client initialized in dry run mode - no actual tweets should be posted"
-            );
+            // elizaLogger.log(
+            //     "Twitter client initialized in dry run mode - no actual tweets should be posted"
+            // );
         }
     }
 
@@ -1710,7 +1710,7 @@ export class TwitterPostClient {
                 generateNewTweetLoop(); // Set up next iteration
             }, delay);
 
-            elizaLogger.log(`Next tweet scheduled in ${randomMinutes} minutes`);
+            // elizaLogger.log(`Next tweet scheduled in ${randomMinutes} minutes`);
         };
 
         const processActionsLoop = async () => {
@@ -1720,20 +1720,20 @@ export class TwitterPostClient {
                 try {
                     const results = await this.processTweetActions();
                     if (results) {
-                        elizaLogger.log(`Processed ${results.length} tweets`);
-                        elizaLogger.log(
-                            `Next action processing scheduled in ${actionInterval / 1000} seconds`
-                        );
+                        // elizaLogger.log(`Processed ${results.length} tweets`);
+                        // elizaLogger.log(
+                        //     `Next action processing scheduled in ${actionInterval / 1000} seconds`
+                        // );
                         // Wait for the full interval before next processing
                         await new Promise((resolve) =>
                             setTimeout(resolve, actionInterval * 60 * 1000) // now in minutes
                         );
                     }
                 } catch (error) {
-                    elizaLogger.error(
-                        "Error in action processing loop:",
-                        error
-                    );
+                    // elizaLogger.error(
+                    //     "Error in action processing loop:",
+                    //     error
+                    // );
                     // Add exponential backoff on error
                     await new Promise((resolve) => setTimeout(resolve, 30000)); // Wait 30s on error
                 }
@@ -3442,7 +3442,7 @@ export const TwitterClientInterface: Client = {
     async start(runtime: IAgentRuntime) {
         const twitterConfig: TwitterConfig = await validateTwitterConfig(runtime);
 
-        elizaLogger.log("Twitter client started");
+        // elizaLogger.log("Twitter client started");
 
         const manager = new TwitterManager(runtime, twitterConfig);
 
@@ -3458,7 +3458,7 @@ export const TwitterClientInterface: Client = {
         return manager;
     },
     async stop(_runtime: IAgentRuntime) {
-        elizaLogger.warn("Twitter client does not support stopping yet");
+        // elizaLogger.warn("Twitter client does not support stopping yet");
     },
 };
 

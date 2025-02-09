@@ -6,7 +6,7 @@ import {
 } from "@elizaos/core";
 import { imageGenerationPlugin } from "../plugin/imagePlugin/index.ts";
 import { bootstrapPlugin } from "@elizaos/plugin-bootstrap";
-import paymentPlugin from "../plugin/paymentPlugin/src/index.ts";
+import baseSepPlugin from "../plugin/BaseSepPlugin/src/index.ts";
 
 export const PRODUCER_AGENT_ID = "1de943dc-7fbf-4e84-8ae5-ce6b254d395c";
 
@@ -14,10 +14,10 @@ export const producer: Character = {
   ...defaultCharacter,
   id: PRODUCER_AGENT_ID,
   name: "Lex",
-  clients: [],
+  clients: [Clients.DIRECT],
   modelProvider: ModelProviderName.OPENROUTER,
   imageModelProvider: ModelProviderName.TOGETHER,
-  plugins: [imageGenerationPlugin, bootstrapPlugin],
+  plugins: [imageGenerationPlugin, bootstrapPlugin, baseSepPlugin],
   settings: {
     voice: {
       model: "en_US-male-medium",
@@ -26,6 +26,9 @@ export const producer: Character = {
     imageSettings: {
       hideWatermark: true,
       modelId: "together",
+    },
+    secrets: {
+      SERVER_PORT: "3000",
     },
   },
 

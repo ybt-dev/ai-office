@@ -1,18 +1,24 @@
-import { Plugin } from "@elizaos/core";
-import { NFTService } from "../services/NFTService";
-import { ethers } from "ethers";
+export * from "../actions/mintNft.ts";
+export * from "../actions/nftCollectionGeneration.ts";
+export * from "../providers/wallet.ts";
+export * from "../types/index.ts";
 
-const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
-const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
-const nftService = new NFTService(provider, signer);
+import type { Plugin } from "@elizaos/core";
+import nftCollectionGeneration from "../actions/nftCollectionGeneration.ts";
+import mintNFTAction from "../actions/mintNft.ts";
 
+export async function sleep(ms = 3000) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 export const nftPlugin: Plugin = {
   name: "nft",
-  description: "NFT deployment and minting functionality plugin",
-  actions: [], // Add NFT related actions here
-  evaluators: [], // Add NFT related evaluators here
-  providers: [], // Add NFT related providers here
-  services: [nftService],
+  description: "NFT plugin",
+  providers: [],
+  evaluators: [],
+  services: [],
+  actions: [nftCollectionGeneration, mintNFTAction],
 };
 
 export default nftPlugin;

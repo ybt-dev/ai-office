@@ -6,7 +6,7 @@ const DEFAULT_TOPIC = "crypto memes";
 
 export const twitterTopicHandler = {
     get: async (runtime: IAgentRuntime) => {
-        (await runtime.cacheManager.get<string>(TABLE_TOPIC_KEY)) || DEFAULT_TOPIC;
+        return (await runtime.cacheManager.get<string>(TABLE_TOPIC_KEY)) || DEFAULT_TOPIC;
     },
     set: async (runtime: IAgentRuntime, content: string) => {
         await runtime.cacheManager.set(TABLE_TOPIC_KEY, content);
