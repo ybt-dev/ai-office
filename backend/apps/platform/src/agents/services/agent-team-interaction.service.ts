@@ -3,11 +3,13 @@ import {AgentTeamInteractionRepository, AgentTeamRepository} from '@apps/platfor
 import {AgentTeamInteractionEntityToDtoMapper} from '@apps/platform/agents/entities-mappers';
 import {AgentTeamInteractionDto} from '@apps/platform/agents/dto';
 import {
+  InjectAgentService,
   InjectAgentTeamInteractionEntityToDtoMapper,
   InjectAgentTeamInteractionRepository,
   InjectAgentTeamRepository,
 } from '@apps/platform/agents/decorators';
-import { AgentTeamInteractionStatus } from "@apps/platform/agents/enums";
+import { AgentRole, AgentTeamInteractionStatus } from "@apps/platform/agents/enums";
+import { AgentService } from "./agent.service";
 
 export interface CreateAgentTeamInteractionParams {
   title: string;
@@ -31,6 +33,7 @@ export class DefaultAgentTeamInteractionService implements AgentTeamInteractionS
     private readonly agentTeamInteractionRepository: AgentTeamInteractionRepository,
     @InjectAgentTeamRepository()
     private readonly agentTeamRepository: AgentTeamRepository,
+    @InjectAgentService() private readonly agentService: AgentService,
     @InjectAgentTeamInteractionEntityToDtoMapper()
     private readonly agentTeamInteractionEntityToDtoMapper: AgentTeamInteractionEntityToDtoMapper,
   ) {}
@@ -71,6 +74,16 @@ export class DefaultAgentTeamInteractionService implements AgentTeamInteractionS
 
     if (!team) {
       throw new UnprocessableEntityException(`Team with id ${params.teamId} not found`);
+    }
+
+    const agents = await this.agentService.listForTeam(
+      params.teamId,
+      params.organizationId,
+      [AgentRole.Producer],
+    );
+
+    if (!agents.length) {
+      throw new UnprocessableEntityException('Team should have at least one producer.');
     }
 
     const entity = await this.agentTeamInteractionRepository.createOne({

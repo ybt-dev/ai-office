@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
-import { AnyObject } from '@libs/types';
 import { InjectTransactionsManager } from "@libs/transactions/decorators";
 import { TransactionsManager } from "@libs/transactions/managers";
 import { AgentRepository, AgentTeamRepository } from '@apps/platform/agents/repositories';
@@ -19,6 +18,7 @@ export interface CreateAgentParams {
   modelApiKey: string;
   teamId: string;
   name: string;
+  twitterCookie?: string;
   createdById: string;
   description?: string;
 }
@@ -26,14 +26,14 @@ export interface CreateAgentParams {
 export interface UpdateAgentParams {
   model?: string;
   modelApiKey?: string;
-  config?: AnyObject;
+  twitterCookie?: string;
   name?: string;
   updatedById?: string | null;
   description?: string;
 }
 
 export interface AgentService {
-  listForTeam(teamId: string, organizationId: string): Promise<AgentDto[]>;
+  listForTeam(teamId: string, organizationId: string, roles?: AgentRole[]): Promise<AgentDto[]>;
   get(id: string, organizationId: string): Promise<AgentDto | null>;
   getIfExist(id: string, organizationId: string): Promise<AgentDto>;
   create(params: CreateAgentParams): Promise<AgentDto>;
@@ -49,10 +49,11 @@ export class DefaultAgentService implements AgentService {
     @InjectTransactionsManager() private transactionsManager: TransactionsManager,
   ) {}
 
-  public async listForTeam(teamId: string, organizationId: string) {
+  public async listForTeam(teamId: string, organizationId: string, roles?: AgentRole[]) {
     const agentEntities = await this.agentRepository.findMany({
       teamId,
       organizationId,
+      roles,
     });
 
     return this.agentEntityToDtoMapper.mapMany(agentEntities);
@@ -81,21 +82,35 @@ export class DefaultAgentService implements AgentService {
       throw new UnprocessableEntityException('Provided Agent Team does not exist.');
     }
 
-    const agentEntity = await this.agentRepository.createOne({
-      name: params.name,
-      role: params.role,
-      team: params.teamId,
-      model: params.model,
-      modelApiKey: params.modelApiKey,
-      config: {},
-      imageUrl: '',
-      description: params.description,
-      organization: params.organizationId,
-      createdBy: params.createdById,
-      updatedBy: params.createdById,
-    });
+    return this.transactionsManager.useTransaction(async () => {
+      const agentsWithSameRole = await this.agentRepository.exists({
+        organizationId: params.organizationId,
+        teamId: params.teamId,
+        role: params.role,
+      });
 
-    return this.agentEntityToDtoMapper.mapOne(agentEntity);
+      if (agentsWithSameRole) {
+        throw new UnprocessableEntityException('Agent with the same role already exists.');
+      }
+
+      const agentEntity = await this.agentRepository.createOne({
+        name: params.name,
+        role: params.role,
+        team: params.teamId,
+        model: params.model,
+        modelApiKey: params.modelApiKey,
+        config: {
+          twitterCookie: params.twitterCookie,
+        },
+        imageUrl: '',
+        description: params.description,
+        organization: params.organizationId,
+        createdBy: params.createdById,
+        updatedBy: params.createdById,
+      });
+
+      return this.agentEntityToDtoMapper.mapOne(agentEntity);
+    });
   }
 
   public async update(id: string, organizationId: string, params: UpdateAgentParams) {
@@ -106,7 +121,7 @@ export class DefaultAgentService implements AgentService {
         ...(params.name ? { name: params.name } : {}),
         ...(params.model ? { model: params.model } : {}),
         ...(params.modelApiKey ? { modelApiKey: params.modelApiKey } : {}),
-        ...(params.config ? { config: params.config } : {}),
+        ...(params.twitterCookie !== undefined ? { config: { twitterCookie: params.twitterCookie } } : {}),
         ...(params.description !== undefined ? { description: params.description } : {}),
         updatedBy: params.updatedById,
       });

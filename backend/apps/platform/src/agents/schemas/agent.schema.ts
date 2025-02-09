@@ -51,3 +51,4 @@ export class Agent {
 export const AgentSchema = SchemaFactory.createForClass(Agent);
 
 AgentSchema.index({ organization: 1, team: 1 });
+AgentSchema.index({ organization: 1, team: 1, role: 1 }, { unique: true });

@@ -12,7 +12,9 @@ import { AgentRole } from '@apps/platform/agents/enums';
 
 export interface IFindAgentTeamFilter {
   organizationId: string;
+  role?: AgentRole;
   teamId?: string;
+  roles?: AgentRole[];
 }
 
 interface CreateAgentEntityParams {
@@ -41,6 +43,7 @@ export interface UpdateAgentEntityParams {
 
 export interface AgentRepository {
   findMany(filter: IFindAgentTeamFilter): Promise<AgentEntity[]>;
+  exists(filter: IFindAgentTeamFilter): Promise<boolean>;
   findByIdAndOrganizationId(id: string, organizationId: string): Promise<AgentEntity | null>;
   createOne(params: CreateAgentEntityParams): Promise<AgentEntity>;
   updateOneById(id: string, params: UpdateAgentEntityParams): Promise<AgentEntity | null>;
@@ -53,13 +56,18 @@ export class MongoAgentRepository implements AgentRepository {
     @InjectTransactionsManager() private readonly transactionsManager: TransactionsManager<MongodbTransaction>,
   ) {}
 
+  public async exists(filter: IFindAgentTeamFilter) {
+    const count = await this.agentModel
+      .countDocuments(this.mapFilterToQuery(filter))
+      .exec();
+
+    return count > 0;
+  }
+
   public async findMany(filter: IFindAgentTeamFilter) {
     const agents = await this.agentModel
       .find(
-        {
-          ...(filter.teamId && { team: new ObjectId(filter.teamId) }),
-          organization: new ObjectId(filter.organizationId),
-        },
+        this.mapFilterToQuery(filter),
         undefined,
         {
           lean: true,
@@ -118,5 +126,14 @@ export class MongoAgentRepository implements AgentRepository {
       .exec();
 
     return agent && new MongoAgentEntity(agent);
+  }
+
+  private mapFilterToQuery(filter: IFindAgentTeamFilter) {
+    return {
+      ...(filter.teamId && { team: new ObjectId(filter.teamId) }),
+      ...(filter.role && { role: filter.role }),
+      ...(filter.roles && { role: { $in: filter.roles } }),
+      organization: new ObjectId(filter.organizationId),
+    };
   }
 }
