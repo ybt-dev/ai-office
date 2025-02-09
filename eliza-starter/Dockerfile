@@ -8,7 +8,7 @@ WORKDIR /usr/src/app/
 
 COPY package.json pnpm-lock.yaml* ./
 
-RUN pnpm i --frozen-lockfile
+RUN npm i --frozen-lockfile
 
 COPY . .
 
