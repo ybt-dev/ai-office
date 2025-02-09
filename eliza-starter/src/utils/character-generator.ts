@@ -18,6 +18,8 @@ export interface AgentConfiguration {
   config: {
     twitterCookie?: string;
     twitterUsername?: string;
+    twitterPassword?: string;
+    twitterEmail?: string;
   };
 }
 
@@ -63,6 +65,8 @@ export function generateCharacter(agentConfig: AgentConfiguration): AiOfficeChar
       secrets: {
         TWITTER_COOKIES: agentConfig.config.twitterCookie,
         TWITTER_USERNAME: agentConfig.config.twitterUsername,
+        TWITTER_PASSWORD: agentConfig.config.twitterPassword,
+        TWITTER_EMAIL: agentConfig.config.twitterEmail,
         ...getSecretsByModel(agentConfig.model, agentConfig.modelApiKey),
       },
     },

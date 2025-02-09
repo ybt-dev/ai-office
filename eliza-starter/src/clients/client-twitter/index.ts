@@ -1648,7 +1648,7 @@ export class TwitterPostClient {
         this.client = client;
         this.runtime = runtime;
         this.twitterUsername = this.client.twitterConfig.TWITTER_USERNAME;
-        this.isDryRun = this.client.twitterConfig.TWITTER_DRY_RUN
+        this.isDryRun = this.client.twitterConfig.TWITTER_DRY_RUN;
 
         // // Log configuration on initialization
         // elizaLogger.log("Twitter Client Configuration:");
@@ -1977,9 +1977,6 @@ Write a prompt. Only include the prompt and nothing else.`;
             const imageUsage = (await client.runtime.cacheManager.get<{ count: number }>(imageUsageKey)) || { count: 0 };
             elizaLogger.log("IMAGEUSAGE", imageUsage)
 
-            const agent = await agentsManager.getAgent(INFLUENCER_AGENT_ID);
-            elizaLogger.log("Agents ID", agent.agentId);
-
             let mediaFiles = [];
             if (imageUsage.count < 2) {
                 const imgBufferData = await this.generateImgforPost(content);
@@ -2030,7 +2027,7 @@ Write a prompt. Only include the prompt and nothing else.`;
 
             return body.data.create_tweet.tweet_results.result;
         } catch (error) {
-            elizaLogger.error("Error sending standard Tweet:", error);
+            console.error("Error sending standard Tweet:", error);
             throw error;
         }
     }
@@ -2203,7 +2200,7 @@ Write a prompt. Only include the prompt and nothing else.`;
         }
     }
 
-    // 
+    //
     private async generateTweetContent(
         tweetState: any,
         options?: {
