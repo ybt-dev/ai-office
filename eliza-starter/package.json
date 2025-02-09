@@ -37,9 +37,8 @@
     "ai": "4.0.3",
     "amqplib": "^0.10.5",
     "axios": "^1.7.9",
-    "better-sqlite3": "^11.8.1",
-    "crypto-js": "^4.2.0",
     "better-sqlite3": "^11.7.0",
+    "crypto-js": "^4.2.0",
     "body-parser": "^1.20.3",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
@@ -77,5 +76,6 @@
     "onlyBuiltDependencies": [
       "better-sqlite3"
     ]
-  }
+  },
+  "packageManager": "pnpm@10.2.1+sha1.48adf39a4ab751eda7b73b99447d1f0b6d227e02"
 }
