@@ -1,7 +1,8 @@
-import {MongoClient} from "mongodb";
+import {MongoClient, ObjectId} from "mongodb";
 import {MongoDBDatabaseAdapter} from "@elizaos/adapter-mongodb";
-import {DirectClient} from "@elizaos/client-direct";
+import {DirectClient, DirectClientInterface} from "@elizaos/client-direct";
 import {AutoClientInterface} from "@elizaos/client-auto";
+import express from 'express';
 import {
   AgentRuntime,
   CacheManager,
@@ -11,28 +12,30 @@ import {
   IAgentRuntime,
   ICacheManager,
   IDatabaseAdapter,
-  IDatabaseCacheAdapter,
   ModelProviderName,
   settings,
-
-  stringToUuid,
 } from "@elizaos/core";
 import {createNodePlugin} from "@elizaos/plugin-node";
+import bodyParser from 'body-parser';
 import fs from "fs";
 import path from "path";
 import {fileURLToPath} from "url";
 import {TwitterTopicProvider} from "./providers/twitterTopicProvider/index.ts";
-import {agentsManager} from "./agents/manager/index.ts";
+import {agentsManager, AiOfficeAgentRuntime, AiOfficeCharacter} from "./agents/manager/index.ts";
 import {configDotenv} from "dotenv";
 import {TelegramClientInterface} from "@elizaos/client-telegram";
 import {communicateWithAgents} from "./actions/communicate-agent/index.ts";
-import {loopDBHandler} from "./utils/dialogue-system.ts";
-import {generateCharacter} from "./utils/character-generator.ts";
+import {AgentConfiguration, generateCharacter} from "./utils/character-generator.ts";
+import {sendInteractionToProducer, subscribeToAgentConversation} from "./utils/dialogue-system.ts";
+//import TwitterClientInterface from "./clients/client-twitter";
+
+const expressApp = express();
 
 configDotenv();
 
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
+
 
 export const wait = (minTime: number = 1000, maxTime: number = 3000) => {
   const waitTime =
@@ -86,40 +89,46 @@ export function getTokenForProvider(
   }
 }
 
-export function initializeDatabase() {
+export function initializeDatabaseClient() {
   const DATABASE_URL = process.env.MONGODB_URL || "";
-  const DATABASE_NAME = process.env.MONGODB_NAME || "ai-office";
 
-  const client = new MongoClient(DATABASE_URL);
-  const db = new MongoDBDatabaseAdapter(client, DATABASE_NAME);
-
-  return {
-    db,
-    client
-  };
+  return new MongoClient(DATABASE_URL);
 }
 
 export async function initializeClients(
   character: Character,
-  runtime: IAgentRuntime
+  runtime: IAgentRuntime,
 ) {
   const clients = [];
   const clientTypes = character.clients?.map((str) => str.toLowerCase()) || [];
 
-  if (clientTypes.includes("auto")) {
+  if (clientTypes.includes('auto')) {
     const autoClient = await AutoClientInterface.start(runtime);
-    if (autoClient) clients.push(autoClient);
+
+    if (autoClient) {
+      clients.push(autoClient);
+    }
   }
 
   if (clientTypes.includes("telegram")) {
     const telegramClient = await TelegramClientInterface.start(runtime);
-    if (telegramClient) clients.push(telegramClient);
+
+    if (telegramClient) {
+      clients.push(telegramClient);
+    }
   }
 
-  // if (clientTypes.includes("twitter")) {
-  //   const twitterClients = await TwitterClientInterface.start(runtime)
-  //   clients.push(twitterClients);
-  // }
+  if (clientTypes.includes("twitter")) {
+     //const twitterClients = await TwitterClientInterface.start(runtime)
+
+     //clients.push(twitterClients);
+  }
+
+  if (clientTypes.includes("direct")) {
+    const directClient = await DirectClientInterface.start(runtime);
+
+    clients.push(directClient);
+  }
 
   if (character.plugins?.length > 0) {
     for (const plugin of character.plugins) {
@@ -137,11 +146,11 @@ export async function initializeClients(
 let nodePlugin: any | undefined;
 
 export function createAgent(
-  character: Character,
+  character: AiOfficeCharacter,
   db: IDatabaseAdapter,
   cache: ICacheManager,
   token: string
-) {
+): AiOfficeAgentRuntime {
   elizaLogger.success(
     elizaLogger.successesTitle,
     "Creating runtime for character",
@@ -162,202 +171,177 @@ export function createAgent(
     services: [],
     managers: [],
     cacheManager: cache,
-  });
+  }) as AiOfficeAgentRuntime;
 }
 
-function intializeDbCache(character: Character, db: IDatabaseCacheAdapter) {
-  const cache = new CacheManager(new DbCacheAdapter(db, character.id));
-  return cache;
-}
-
-async function startAgent(character: Character, organizationId: string, role: string, directClient: DirectClient) {
+async function startAgent(
+  character: AiOfficeCharacter,
+  database: MongoDBDatabaseAdapter,
+) {
   try {
-    character.id ??= stringToUuid(character.name);
-    character.username ??= character.name;
-
     const token = getTokenForProvider(character.modelProvider, character);
-    const dataDir = path.join(__dirname, "../data");
 
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
+    const cache = new CacheManager(new DbCacheAdapter(database, character.id));
 
-    const { db } = initializeDatabase();
+    const runtime = createAgent(character, database as IDatabaseAdapter, cache, token);
 
-    await db.init();
-
-    const cache = intializeDbCache(character, db);
-    const runtime = createAgent(character, db, cache, token);
+    agentsManager.addAgent(runtime.agentId, runtime);
 
     await runtime.initialize();
 
-    const cookies =
-      runtime.getSetting("TWITTER_COOKIES") || process.env.TWITTER_COOKIES;
-    const username =
-      runtime.getSetting("TWITTER_USERNAME") || process.env.TWITTER_USERNAME;
+    const cookies = runtime.getSetting('TWITTER_COOKIES');
+    const username = runtime.getSetting('TWITTER_USERNAME');
 
     if (cookies) {
-      elizaLogger.log(`Reading cookies from ENV...`);
+      elizaLogger.log(`Reading cookies from SETTINGS...`);
 
       await runtime.cacheManager.set(
         `twitter/${username}/cookies`,
-        JSON.parse(cookies)
+        JSON.parse(cookies),
       );
     }
 
-    const clients = await initializeClients(character, runtime);
-
-    directClient.registerAgent(runtime);
-
-
-    agentsManager.addAgent(runtime.agentId, runtime, organizationId, role);
-    return clients;
+    return initializeClients(character, runtime);
   } catch (error) {
     elizaLogger.error(
       `Error starting agent for character ${character.name}:`,
       error
     );
-    console.error(error);
+
     throw error;
   }
 }
 
-async function addAgentHandler() {
+const killAgent = async (agentId: string) => {
   try {
-    const agents: {
-      character: Character,
-      organizationId: string,
-      role: string,
-    }[] = [];
-    const { client, db } = initializeDatabase();
-    const database = client.db("ai-office");
+    const agent = agentsManager.getAgent(agentId);
 
-    if (!database) {
-      throw new Error("No db exist");
-    }
-    const dbAgentsList = await database.collection("agents").find().toArray();
-    for (const item of dbAgentsList) {
-      if (!agentsManager.findAgents(item["_id"].toString())) {
-        const newAgent = generateCharacter(item["_id"].toString(), item.name, item.role);
+    await agent.stop();
 
-        elizaLogger.log("id", item.organization.toString()+item.role);
-        agents.push({
-          character: newAgent,
-          organizationId: item.organization.toString(),
-          role: item.role,
-        })
-      }
-    }
+    agentsManager.removeAgent(agentId);
 
-
-    return agents;
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-async function deleteAgentHandler() {
-  try {
-    const agents: AgentRuntime[] = agentsManager.getAllAgents();
-
-    const { client } = initializeDatabase();
-    const database =  client.db("ai-office");
-
-    if (!database) {
-      throw new Error("No db exist");
-    }
-
-    const dbAgentsList = await database.collection("agents").find().toArray();
-    for (const item of agents) {
-      const itemFromDB = dbAgentsList.find(el => el["_id"].toString() !== item.agentId)
-      if (!itemFromDB) {
-        await item.stop();
-        agentsManager.removeAgent(item.agentId);
-      }
-    }
-
-    return agents;
-  } catch (e) {
-    console.log("Error", e)
-  }
-}
-
-// const processAgentsFromDatabase = async (
-//     database: any
-// ) => {
-//   const databaseAgents = await database.collection('agents').find({}).toArray();
-//
-//   const databaseAgentIdsSet: Set<string> = new Set();
-//
-//   for (const databaseAgent of databaseAgents) {
-//     const databaseAgentId = databaseAgent._id.toString();
-//
-//     databaseAgentIdsSet.add(databaseAgentId);
-//
-//     // TODO Handle agent settings change
-//     if (agentsManager.hasAgent(databaseAgentId)) {
-//       continue;
-//     }
-//
-//     const newAgent = generateCharacter(databaseAgent._id.toString(), databaseAgent.name, databaseAgent.role);
-//
-//     agentsManager.addAgent(
-//       databaseAgentId,
-//         await createAgent(newAgent),
-//     );
-//   }
-//
-//   for (const agent of agentsManager.getAllAgents()) {
-//     if (!databaseAgentIdsSet.has(agent.agentId)) {
-//       // kill agent
-//       await agent.stop();
-//       agentsManager.removeAgent(agent.agentId);
-//     } else {
-//       agent.initialize()()
-//     }
-//   }
-// };
-
-const loopAgentHandler = async (directClient: DirectClient) => {
-  elizaLogger.log("Starting loopAgentHandler");
-
-  setInterval(async () => {
-    elizaLogger.log("Checking for database changes...");
-    const listOfNewAgents = await addAgentHandler();
-
-    for (const { character, organizationId, role} of listOfNewAgents) {
-      await startAgent(character, organizationId, role, directClient as DirectClient);
-    }
-  }, 30000);
-
-  setInterval(async () => {
-    elizaLogger.log("Checking if agents exist in database...");
-    await deleteAgentHandler();
-  }, 120000);
-};
-
-// const createCustomAgent = async (character: Character) => {
-//   const { db } = initializeDatabase();
-//
-//   const token = getTokenForProvider(character.modelProvider, character);
-//   const cache = intializeDbCache(character, db);
-//
-//   return createAgent(character, db, cache, token);
-// }
-
-const startAgents = async () => {
-  const directClient = new DirectClient();
-
-  try {
-    await loopAgentHandler(directClient);
-
-    await loopDBHandler();
+    elizaLogger.success(`Agent stopped: ${agentId}`);
   } catch (error) {
-    elizaLogger.error("Error starting agents:", error);
+    elizaLogger.error(`Failed to stop agent: ${agentId}`);
   }
 };
 
-startAgents().catch((error) => {
+const initializeAgentsSystem = async () => {
+  const dataDir = path.join(__dirname, "../data");
+
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+
+  const databaseClient = initializeDatabaseClient();
+
+  const databaseName = process.env.MONGODB_NAME || 'ai-office';
+
+  const elizaMongodbAdapter = new MongoDBDatabaseAdapter(
+    databaseClient,
+    databaseName,
+  );
+
+  await elizaMongodbAdapter.init();
+
+  const database = databaseClient.db(databaseName);
+
+  subscribeToAgentConversation(database);
+
+  const agentConfigurations = await database.collection('agents').find<{
+    _id: ObjectId;
+    name: string;
+    role: 'advertiser' | 'influencer' | 'producer';
+    organization: ObjectId;
+    team: ObjectId;
+    description?: string;
+    model: string;
+    modelApiKey: string;
+    config: {
+      twitterCookie?: string;
+      twitterName?: string;
+    };
+  }>({}).toArray();
+
+  for (const agentConfiguration of agentConfigurations) {
+    const character = generateCharacter({
+      id: agentConfiguration._id.toString(),
+      name: agentConfiguration.name,
+      role: agentConfiguration.role,
+      teamId: agentConfiguration.team.toString(),
+      organizationId: agentConfiguration.organization.toString(),
+      description: agentConfiguration.description,
+      model: agentConfiguration.model,
+      modelApiKey: agentConfiguration.modelApiKey,
+      config: agentConfiguration.config,
+    });
+
+    await startAgent(character, elizaMongodbAdapter);
+  }
+
+  expressApp.post(
+    '/agents/change',
+    bodyParser.json({}),
+    async (request, response) => {
+      const {
+        type,
+        agent,
+      } = request.body as {
+        type: 'add' | 'remove' | 'update';
+        agent: AgentConfiguration;
+      };
+
+      if (type === 'add') {
+        await startAgent(generateCharacter(agent), elizaMongodbAdapter);
+      }
+
+      if (type === 'remove') {
+        await killAgent(agent.id);
+      }
+
+      if (type === 'update') {
+        await killAgent(agent.id);
+        await startAgent(generateCharacter(agent), elizaMongodbAdapter);
+      }
+
+      response.status(200).send({ status: 'OK' });
+    },
+  );
+
+  expressApp.post(
+    '/agents/communicate',
+    bodyParser.json({}),
+    async (request, response) => {
+      const {
+        requestContent,
+        interactionId,
+        organizationId,
+      } = request.body as {
+        title: string;
+        requestContent: string;
+        interactionId: string;
+        teamId: string;
+        organizationId: string;
+      };
+
+      sendInteractionToProducer(
+        interactionId,
+        organizationId,
+        requestContent,
+      ).catch((error) => {
+        console.error("Error sending interaction to producer:", error);
+      });
+
+      response.status(200).send({ status: 'OK' });
+    },
+  );
+
+  expressApp.listen(process.env.EXPRESS_APP_PORT || 3001, () => {
+    console.log(`Express app is running on port ${process.env.EXPRESS_APP_PORT || 3001}`);
+  });
+};
+
+initializeAgentsSystem().catch((error) => {
   elizaLogger.error("Unhandled error in startAgents:", error);
 
   if (error instanceof Error) {
