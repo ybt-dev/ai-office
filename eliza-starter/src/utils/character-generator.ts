@@ -5,7 +5,7 @@ import { producer } from "../characters/producer.ts";
 
 type AgentRole =  "advertiser" | "influencer" | "producer";
 
-export function generateCharacter(name: string, role: AgentRole): Character {
+export function generateCharacter(id: string, name: string, role: AgentRole): Character {
     const templates = {
         advertiser,
         influencer,
@@ -18,6 +18,7 @@ export function generateCharacter(name: string, role: AgentRole): Character {
 
     return {
         ...templates[role],
+        id: id as Character["id"],
         name
     };
 }

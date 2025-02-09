@@ -8,7 +8,7 @@ export const influencer: Character = {
     ...defaultCharacter,
     id: INFLUENCER_AGENT_ID,
     name: "Maverick AI",
-    clients: [Clients.TELEGRAM],
+    clients: [],
     modelProvider: ModelProviderName.OPENROUTER,
     imageModelProvider: ModelProviderName.TOGETHER,
     plugins: [

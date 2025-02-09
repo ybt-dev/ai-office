@@ -1,39 +1,32 @@
-import { MongoClient } from "mongodb";
-import { MongoDBDatabaseAdapter } from "@elizaos/adapter-mongodb";
-import { DirectClient } from "@elizaos/client-direct";
-import { AutoClientInterface } from "@elizaos/client-auto";
+import {MongoClient} from "mongodb";
+import {MongoDBDatabaseAdapter} from "@elizaos/adapter-mongodb";
+import {DirectClient} from "@elizaos/client-direct";
+import {AutoClientInterface} from "@elizaos/client-auto";
 import {
-  DbCacheAdapter,
-  defaultCharacter,
-  FsCacheAdapter,
-  ICacheManager,
-  IDatabaseCacheAdapter,
-  stringToUuid,
   AgentRuntime,
   CacheManager,
   Character,
-  IAgentRuntime,
-  ModelProviderName,
+  DbCacheAdapter,
   elizaLogger,
-  settings,
+  IAgentRuntime,
+  ICacheManager,
   IDatabaseAdapter,
-  validateCharacterConfig,
-  Client
+  IDatabaseCacheAdapter,
+  ModelProviderName,
+  settings,
+  stringToUuid,
 } from "@elizaos/core";
-import { createNodePlugin } from "@elizaos/plugin-node";
+import {createNodePlugin} from "@elizaos/plugin-node";
 import fs from "fs";
-import yargs from "yargs";
 import path from "path";
-import { fileURLToPath } from "url";
-import { producer } from "./characters/producer.ts";
-import { advertiser } from "./characters/advertiser.ts";
-import { influencer } from "./characters/influencer.ts";
-import { TwitterTopicProvider } from "./providers/twitterTopicProvider/index.ts";
-import { agentsManager } from "./agents/manager/index.ts";
-import { configDotenv } from "dotenv";
-import { TelegramClientInterface } from "@elizaos/client-telegram";
-import { communicateWithAgents } from "./actions/communicate-agent/index.ts";
-import { loopDBHandler } from "./utils/dialogue-system.ts";
+import {fileURLToPath} from "url";
+import {TwitterTopicProvider} from "./providers/twitterTopicProvider/index.ts";
+import {agentsManager} from "./agents/manager/index.ts";
+import {configDotenv} from "dotenv";
+import {TelegramClientInterface} from "@elizaos/client-telegram";
+import {communicateWithAgents} from "./actions/communicate-agent/index.ts";
+import {loopDBHandler} from "./utils/dialogue-system.ts";
+import {generateCharacter} from "./utils/character-generator.ts";
 
 configDotenv();
 
@@ -46,63 +39,6 @@ export const wait = (minTime: number = 1000, maxTime: number = 3000) => {
     Math.floor(Math.random() * (maxTime - minTime + 1)) + minTime;
   return new Promise((resolve) => setTimeout(resolve, waitTime));
 };
-
-export function parseArguments(): {
-  character?: string;
-  characters?: string;
-} {
-  try {
-    return yargs(process.argv.slice(2))
-      .option("character", {
-        type: "string",
-        description: "Path to the character JSON file",
-      })
-      .option("characters", {
-        type: "string",
-        description: "Comma separated list of paths to character JSON files",
-      })
-      .parseSync();
-  } catch (error) {
-    console.error("Error parsing arguments:", error);
-    return {};
-  }
-}
-
-export async function loadCharacters(
-  charactersArg: string
-): Promise<Character[]> {
-  let characterPaths = charactersArg?.split(",").map((filePath) => {
-    if (path.basename(filePath) === filePath) {
-      filePath = "../characters/" + filePath;
-    }
-    return path.resolve(process.cwd(), filePath.trim());
-  });
-
-  const loadedCharacters = [];
-
-  if (characterPaths?.length > 0) {
-    for (const path of characterPaths) {
-      try {
-        const character = JSON.parse(fs.readFileSync(path, "utf8"));
-
-        validateCharacterConfig(character);
-
-        loadedCharacters.push(character);
-      } catch (e) {
-        console.error(`Error loading character from ${path}: ${e}`);
-        // don't continue to load if a specified file is not found
-        process.exit(1);
-      }
-    }
-  }
-
-  if (loadedCharacters.length === 0) {
-    console.log("No characters found, using default character");
-    loadedCharacters.push(defaultCharacter);
-  }
-
-  return loadedCharacters;
-}
 
 export function getTokenForProvider(
   provider: ModelProviderName,
@@ -150,14 +86,17 @@ export function getTokenForProvider(
   }
 }
 
-function initializeDatabase(dataDir: string) {
+export function initializeDatabase() {
   const DATABASE_URL = process.env.MONGODB_URL || "";
   const DATABASE_NAME = process.env.MONGODB_NAME || "ai-office";
-  
+
   const client = new MongoClient(DATABASE_URL);
   const db = new MongoDBDatabaseAdapter(client, DATABASE_NAME);
-  
-  return db;
+
+  return {
+    db,
+    client
+  };
 }
 
 export async function initializeClients(
@@ -226,19 +165,12 @@ export function createAgent(
   });
 }
 
-function intializeFsCache(baseDir: string, character: Character) {
-  const cacheDir = path.resolve(baseDir, character.id, "cache");
-
-  const cache = new CacheManager(new FsCacheAdapter(cacheDir));
-  return cache;
-}
-
 function intializeDbCache(character: Character, db: IDatabaseCacheAdapter) {
   const cache = new CacheManager(new DbCacheAdapter(db, character.id));
   return cache;
 }
 
-async function startAgent(character: Character, directClient: DirectClient) {
+async function startAgent(character: Character, organizationId: string, role: string, directClient: DirectClient) {
   try {
     character.id ??= stringToUuid(character.name);
     character.username ??= character.name;
@@ -250,7 +182,7 @@ async function startAgent(character: Character, directClient: DirectClient) {
       fs.mkdirSync(dataDir, { recursive: true });
     }
 
-    const db = initializeDatabase(dataDir);
+    const { db } = initializeDatabase();
 
     await db.init();
 
@@ -274,8 +206,8 @@ async function startAgent(character: Character, directClient: DirectClient) {
     const clients = await initializeClients(character, runtime);
 
     directClient.registerAgent(runtime);
-    
-    agentsManager.addAgent(runtime.agentId, runtime);
+
+    agentsManager.addAgent(runtime.agentId, runtime, organizationId, role);
     return clients;
   } catch (error) {
     elizaLogger.error(
@@ -287,23 +219,133 @@ async function startAgent(character: Character, directClient: DirectClient) {
   }
 }
 
-async function getAgents() {
-  const agents: Character[] = [];
-  
-  // load from DB agents
-  agents.push(influencer, producer, advertiser)
-  return agents;
+async function addAgentHandler() {
+  try {
+    const agents: {
+      character: Character,
+      organizationId: string,
+      role: string,
+    }[] = [];
+    const { client, db } = initializeDatabase();
+    const database = client.db("ai-office");
+
+    if (!database) {
+      throw new Error("No db exist");
+    }
+    const dbAgentsList = await database.collection("agents").find().toArray();
+    for (const item of dbAgentsList) {
+      if (!agentsManager.findAgents(item["_id"].toString())) {
+        const newAgent = generateCharacter(item["_id"].toString(), item.name, item.role);
+
+        elizaLogger.log("id", item.organization.toString()+item.role);
+        agents.push({
+          character: newAgent,
+          organizationId: item.organization.toString(),
+          role: item.role,
+        })
+      }
+    }
+
+    return agents;
+  } catch (e) {
+    console.log(e);
+  }
 }
+
+async function deleteAgentHandler() {
+  try {
+    const agents: AgentRuntime[] = agentsManager.getAllAgents();
+
+    const { client } = initializeDatabase();
+    const database =  client.db("ai-office");
+
+    if (!database) {
+      throw new Error("No db exist");
+    }
+
+    const dbAgentsList = await database.collection("agents").find().toArray();
+    for (const item of agents) {
+      const itemFromDB = dbAgentsList.find(el => el["_id"].toString() !== item.agentId)
+      if (!itemFromDB) {
+        await item.stop();
+        agentsManager.removeAgent(item.agentId);
+      }
+    }
+
+    return agents;
+  } catch (e) {
+    console.log("Error", e)
+  }
+}
+
+// const processAgentsFromDatabase = async (
+//     database: any
+// ) => {
+//   const databaseAgents = await database.collection('agents').find({}).toArray();
+//
+//   const databaseAgentIdsSet: Set<string> = new Set();
+//
+//   for (const databaseAgent of databaseAgents) {
+//     const databaseAgentId = databaseAgent._id.toString();
+//
+//     databaseAgentIdsSet.add(databaseAgentId);
+//
+//     // TODO Handle agent settings change
+//     if (agentsManager.hasAgent(databaseAgentId)) {
+//       continue;
+//     }
+//
+//     const newAgent = generateCharacter(databaseAgent._id.toString(), databaseAgent.name, databaseAgent.role);
+//
+//     agentsManager.addAgent(
+//       databaseAgentId,
+//         await createAgent(newAgent),
+//     );
+//   }
+//
+//   for (const agent of agentsManager.getAllAgents()) {
+//     if (!databaseAgentIdsSet.has(agent.agentId)) {
+//       // kill agent
+//       await agent.stop();
+//       agentsManager.removeAgent(agent.agentId);
+//     } else {
+//       agent.initialize()()
+//     }
+//   }
+// };
+
+const loopAgentHandler = async (directClient: DirectClient) => {
+  elizaLogger.log("Starting loopAgentHandler");
+
+  setInterval(async () => {
+    elizaLogger.log("Checking for database changes...");
+    const listOfNewAgents = await addAgentHandler();
+
+    for (const { character, organizationId, role} of listOfNewAgents) {
+      await startAgent(character, organizationId, role, directClient as DirectClient);
+    }
+  }, 30000);
+
+  setInterval(async () => {
+    elizaLogger.log("Checking if agents exist in database...");
+    await deleteAgentHandler();
+  }, 120000);
+};
+
+// const createCustomAgent = async (character: Character) => {
+//   const { db } = initializeDatabase();
+//
+//   const token = getTokenForProvider(character.modelProvider, character);
+//   const cache = intializeDbCache(character, db);
+//
+//   return createAgent(character, db, cache, token);
+// }
 
 const startAgents = async () => {
   const directClient = new DirectClient();
-  
-  const agents = await getAgents();
 
   try {
-    for (const character of agents) {
-      await startAgent(character, directClient as DirectClient);
-    }
+    await loopAgentHandler(directClient);
 
     await loopDBHandler();
   } catch (error) {
