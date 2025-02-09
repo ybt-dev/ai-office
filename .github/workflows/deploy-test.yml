@@ -60,13 +60,9 @@ jobs:
       DOCKERFILE_PATH: ./eliza-starter/Dockerfile
       DOCKER_CONTEXT: ./eliza-starter
       AWS_SECRETS_LIST: |
-        DATABASE_CONNECTION_URL
-        SESSIONS_SECRET
-        SESSION_TOKEN_EXPIRES_IN
-        APPLICATION_ORIGIN
-        COOKIE_DOMAIN
-        PORT
-        WALLET_ENCRYPTION_KEY
+        MONGODB_URL
+        MONGODB_NAME
+        EXPRESS_APP_PORT
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
