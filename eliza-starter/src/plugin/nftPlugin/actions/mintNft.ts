@@ -19,6 +19,74 @@ function isMintNFTContent(content: any): content is MintNFTContent {
   return typeof content.collectionAddress === "string";
 }
 
+// Exported for tests
+export class MintNFTAction {
+  private publicClient;
+  private walletClient;
+  private account;
+
+  constructor(private runtime: IAgentRuntime) {
+    const privateKey = runtime.getSetting("EVM_PRIVATE_KEY") as `0x${string}`;
+    if (!privateKey) throw new Error("EVM private key not found");
+
+    const chain = viemChains.baseSepolia;
+    const provider = http(chain.rpcUrls.default.http[0]);
+    this.account = privateKeyToAccount(privateKey);
+
+    this.walletClient = createWalletClient({
+      account: this.account,
+      chain,
+      transport: provider,
+    });
+
+    this.publicClient = createPublicClient({
+      chain,
+      transport: provider,
+    });
+  }
+
+  async mintNFT(content: MintNFTContent) {
+    if (!isMintNFTContent(content)) {
+      throw new Error("Invalid content for MINT_NFT action");
+    }
+
+    const chain = viemChains.baseSepolia;
+
+    // Mint NFT
+    const mintTx = await this.walletClient.writeContract({
+      address: content.collectionAddress as `0x${string}`,
+      abi: [
+        {
+          inputs: [{ internalType: "address", name: "_to", type: "address" }],
+          name: "mint",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+      ],
+      functionName: "mint",
+      args: [this.account.address],
+      chain: chain,
+      account: this.account,
+    });
+
+    // Wait for transaction confirmation
+    const receipt = await this.publicClient.waitForTransactionReceipt({
+      hash: mintTx,
+    });
+
+    if (receipt.status !== "success") {
+      throw new Error("Transaction failed");
+    }
+
+    return {
+      hash: mintTx,
+      collectionAddress: content.collectionAddress,
+      chain,
+    };
+  }
+}
+
 const mintNFTAction: Action = {
   name: "MINT_NFT",
   similes: [
@@ -67,70 +135,14 @@ const mintNFTAction: Action = {
       const content = res.object as MintNFTContent;
       elizaLogger.log("Generate Object:", content);
 
-      if (!isMintNFTContent(content)) {
-        elizaLogger.error("Invalid content for MINT_NFT action.");
-        if (callback) {
-          callback({
-            text: "Unable to process mint request. Invalid content provided.",
-            content: { error: "Invalid mint content" },
-          });
-        }
-        return false;
-      }
+      const action = new MintNFTAction(runtime);
+      const result = await action.mintNFT(content);
 
-      // Setup Base Sepolia connection
-      const privateKey = runtime.getSetting("EVM_PRIVATE_KEY") as `0x${string}`;
-      if (!privateKey) {
-        throw new Error("EVM private key not found");
-      }
-
-      const chain = viemChains.baseSepolia;
-      const provider = http(chain.rpcUrls.default.http[0]);
-      const account = privateKeyToAccount(privateKey);
-
-      const walletClient = createWalletClient({
-        account,
-        chain,
-        transport: provider,
-      });
-
-      const publicClient = createPublicClient({
-        chain,
-        transport: provider,
-      });
-
-      // Mint NFT
-      const mintTx = await walletClient.writeContract({
-        address: content.collectionAddress as `0x${string}`,
-        abi: [
-          {
-            inputs: [{ internalType: "address", name: "_to", type: "address" }],
-            name: "mint",
-            outputs: [],
-            stateMutability: "nonpayable",
-            type: "function",
-          },
-        ],
-        functionName: "mint",
-        args: [account.address],
-        chain: chain,
-        account: account,
-      });
-
-      // Wait for transaction confirmation
-      const receipt = await publicClient.waitForTransactionReceipt({
-        hash: mintTx,
-      });
-
-      if (receipt.status === "success") {
-        if (callback) {
-          callback({
-            text: `NFT minted successfully! 🎉\nCollection Address: ${content.collectionAddress}\nTransaction: ${chain.blockExplorers.default.url}/tx/${mintTx}`,
-            attachments: [],
-          });
-        }
-      } else {
-        throw new Error("Transaction failed");
+      if (callback) {
+        callback({
+          text: `NFT minted successfully! 🎉\nCollection Address: ${result.collectionAddress}\nTransaction: ${result.chain.blockExplorers.default.url}/tx/${result.hash}`,
+          attachments: [],
+        });
       }
 
       return true;

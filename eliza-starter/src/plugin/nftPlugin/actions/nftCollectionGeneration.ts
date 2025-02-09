@@ -23,6 +23,74 @@ import {
   generateERC721ContractCode,
 } from "../utils/deployEVMContract.ts";
 
+export class NFTCollectionAction {
+  private publicClient;
+  private walletClient;
+  private account;
+
+  constructor(
+    private runtime: IAgentRuntime,
+    private chain: (typeof viemChains)[keyof typeof viemChains]
+  ) {
+    const privateKey = runtime.getSetting("EVM_PRIVATE_KEY") as `0x${string}`;
+    if (!privateKey) throw new Error("EVM private key not found");
+
+    const provider = http(chain.rpcUrls.default.http[0]);
+    this.account = privateKeyToAccount(privateKey);
+
+    this.walletClient = createWalletClient({
+      account: this.account,
+      chain,
+      transport: provider,
+    });
+
+    this.publicClient = createPublicClient({
+      chain,
+      transport: provider,
+    });
+  }
+
+  async generateCollection() {
+    const contractName = this.runtime.character.name.replace(
+      /[^a-zA-Z0-9]/g,
+      "_"
+    );
+    const contractSymbol = `${contractName.toUpperCase()[0]}`;
+    const contractMaxSupply = 5000;
+    const royalty = 0;
+    const params = [contractName, contractSymbol, contractMaxSupply, royalty];
+
+    const sourceCode = generateERC721ContractCode(contractName);
+    const compiledContract = await compileContract(contractName, sourceCode);
+
+    if (
+      !compiledContract ||
+      !compiledContract.abi ||
+      !compiledContract.bytecode
+    ) {
+      throw new Error("Contract compilation failed or produced invalid output");
+    }
+
+    const { abi, bytecode } = compiledContract;
+    elizaLogger.log("Contract compiled successfully");
+
+    const contractAddress = await deployContract({
+      walletClient: this.walletClient,
+      publicClient: this.publicClient,
+      abi,
+      bytecode,
+      args: params,
+    });
+
+    if (!contractAddress) {
+      throw new Error("Contract deployment failed");
+    }
+
+    elizaLogger.log(`Contract deployed at: ${contractAddress}`);
+    return contractAddress;
+  }
+}
+
 const nftCollectionGeneration: Action = {
   name: "GENERATE_COLLECTION",
   similes: [
@@ -81,61 +149,10 @@ const nftCollectionGeneration: Action = {
         chainName: (typeof supportedChains)[number];
       };
 
-      // Setup wallet and clients
-      const privateKey = runtime.getSetting("EVM_PRIVATE_KEY") as `0x${string}`;
-      if (!privateKey) throw new Error("EVM private key not found");
-
       const chain = viemChains[content.chainName];
-      const provider = http(chain.rpcUrls.default.http[0]);
-      const account = privateKeyToAccount(privateKey);
+      const action = new NFTCollectionAction(runtime, chain);
 
-      const walletClient = createWalletClient({
-        account,
-        chain,
-        transport: provider,
-      });
-
-      const publicClient = createPublicClient({
-        chain,
-        transport: provider,
-      });
-
-      // Generate and deploy contract
-      const contractName = runtime.character.name.replace(/[^a-zA-Z0-9]/g, "_");
-      const contractSymbol = `${contractName.toUpperCase()[0]}`;
-      const contractMaxSupply = 5000;
-      const royalty = 0;
-      const params = [contractName, contractSymbol, contractMaxSupply, royalty];
-
-      const sourceCode = generateERC721ContractCode(contractName);
-      const compiledContract = await compileContract(contractName, sourceCode);
-
-      if (
-        !compiledContract ||
-        !compiledContract.abi ||
-        !compiledContract.bytecode
-      ) {
-        throw new Error(
-          "Contract compilation failed or produced invalid output"
-        );
-      }
-
-      const { abi, bytecode } = compiledContract;
-      elizaLogger.log("Contract compiled successfully");
-
-      const contractAddress = await deployContract({
-        walletClient,
-        publicClient,
-        abi,
-        bytecode,
-        args: params,
-      });
-
-      if (!contractAddress) {
-        throw new Error("Contract deployment failed");
-      }
-
-      elizaLogger.log(`Contract deployed at: ${contractAddress}`);
+      const contractAddress = await action.generateCollection();
 
       if (callback) {
         callback({
