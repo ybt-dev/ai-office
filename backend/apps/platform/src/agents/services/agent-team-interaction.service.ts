@@ -6,7 +6,8 @@ import {
   InjectAgentService,
   InjectAgentTeamInteractionEntityToDtoMapper,
   InjectAgentTeamInteractionRepository,
-  InjectAgentTeamRepository, InjectElizaApi,
+  InjectAgentTeamRepository,
+  InjectElizaApi,
 } from '@apps/platform/agents/decorators';
 import { AgentRole, AgentTeamInteractionStatus } from '@apps/platform/agents/enums';
 import { ElizaApi } from "@apps/platform/agents/api";
@@ -90,11 +91,15 @@ export class DefaultAgentTeamInteractionService implements AgentTeamInteractionS
       status: AgentTeamInteractionStatus.New,
     });
 
-    await this.elizaApi.sendAgentsCommunication({
-      interactionId: entity.getId(),
-      requestContent: entity.getRequestContent(),
-      organizationId: entity.getOrganizationId(),
-    });
+    try {
+      await this.elizaApi.sendAgentsCommunication({
+        interactionId: entity.getId(),
+        requestContent: entity.getRequestContent(),
+        organizationId: entity.getOrganizationId(),
+      });
+    } catch (error) {
+      console.error('Failed to send agents communication', error);
+    }
 
     return this.agentTeamInteractionEntityToDtoMapper.mapOne(entity);
   }
