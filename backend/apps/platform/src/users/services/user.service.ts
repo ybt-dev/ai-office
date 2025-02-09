@@ -7,7 +7,7 @@ import { UserDto } from '@apps/platform/users/dto';
 import { UserEntityToDtoMapper } from '@apps/platform/users/entities-mappers';
 
 export interface CreateUserParams {
-  email: string;
+  address: string;
   organizationId: string;
   firstName?: string;
   lastName?: string;
@@ -15,7 +15,7 @@ export interface CreateUserParams {
 
 export interface UserService {
   getById(id: string): Promise<UserDto | null>;
-  getByEmail(email: string): Promise<UserDto | null>;
+  getByAddress(address: string): Promise<UserDto | null>;
   create(params: CreateUserParams): Promise<UserDto>;
 }
 
@@ -33,24 +33,24 @@ export class DefaultUserService implements UserService {
     return user && this.userEntityToDtoMapper.mapOne(user);
   }
 
-  public async getByEmail(email: string) {
-    const user = await this.userRepository.findByEmail(email);
+  public async getByAddress(address: string) {
+    const user = await this.userRepository.findByAddress(address);
 
     return user && this.userEntityToDtoMapper.mapOne(user);
   }
 
   public async create(params: CreateUserParams) {
     return this.transactionsManager.useTransaction(async () => {
-      const existingUser = await this.userRepository.findByEmail(params.email);
+      const existingUser = await this.userRepository.findByAddress(params.address);
 
       if (existingUser) {
-        throw new UnprocessableEntityException('User with this email already exists.');
+        throw new UnprocessableEntityException('User with this address already exists.');
       }
 
       const user = await this.userRepository.createOne({
         firstName: params.firstName,
         lastName: params.lastName,
-        email: params.email,
+        address: params.address,
         organization: params.organizationId,
       });
 

@@ -36,7 +36,7 @@ export class DefaultJwtService implements JwtService {
   }
 
   public verify<Payload>(token: string) {
-    return new Promise<Payload | null>((resolve, reject) => {
+    return new Promise<Payload | null>((resolve) => {
       jsonwebtoken.verify(token, this.JWT_SECRET, (error, decoded) => {
         if (error || !decoded) {
           this.logger.warn(`Failed to decode token: ${error}`);

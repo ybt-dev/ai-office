@@ -10,7 +10,7 @@
 
 html,
 body {
-  @apply bg-white dark:bg-[#0d1116];
+  @apply bg-white dark:bg-[#030712];
 
   @media (prefers-color-scheme: dark) {
     color-scheme: dark;
@@ -33,4 +33,10 @@ html, body {
   min-height: 100%;
   width: 100%;
   max-width: unset;
+}
+
+button {
+  &:not(:disabled) {
+    cursor: pointer;
+  }
 }

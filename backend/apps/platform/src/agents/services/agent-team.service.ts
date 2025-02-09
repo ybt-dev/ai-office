@@ -1,4 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectTransactionsManager } from '@libs/transactions/decorators';
+import { TransactionsManager } from '@libs/transactions/managers';
 import { AgentTeamRepository } from '@apps/platform/agents/repositories';
 import { InjectAgentTeamRepository, InjectAgentTeamEntityToDtoMapper } from '@apps/platform/agents/decorators';
 import { AgentTeamDto } from '@apps/platform/agents/dto';
@@ -12,11 +14,19 @@ export interface CreateAgentTeamParams {
   description?: string;
 }
 
+export interface UpdateAgentTeamParams {
+  name?: string;
+  description?: string;
+  strategy?: string;
+  updatedById?: string | null;
+}
+
 export interface AgentTeamService {
   get(id: string, organizationId: string): Promise<AgentTeamDto | null>;
   getIfExist(id: string, organizationId: string): Promise<AgentTeamDto>;
   list(organizationId: string): Promise<AgentTeamDto[]>;
   create(params: CreateAgentTeamParams): Promise<AgentTeamDto>;
+  update(id: string, organizationId: string, params: UpdateAgentTeamParams): Promise<AgentTeamDto>;
 }
 
 @Injectable()
@@ -24,6 +34,7 @@ export class DefaultAgentTeamService implements AgentTeamService {
   constructor(
     @InjectAgentTeamRepository() private readonly agentTeamRepository: AgentTeamRepository,
     @InjectAgentTeamEntityToDtoMapper() private agentTeamEntityToDtoMapper: AgentTeamEntityToDtoMapper,
+    @InjectTransactionsManager() private readonly transactionsManager: TransactionsManager,
   ) {}
 
   public async get(id: string, organizationId: string) {
@@ -46,6 +57,25 @@ export class DefaultAgentTeamService implements AgentTeamService {
     const agentTeamEntities = await this.agentTeamRepository.findManyByOrganizationId(organizationId);
 
     return this.agentTeamEntityToDtoMapper.mapMany(agentTeamEntities);
+  }
+
+  public async update(id: string, organizationId: string, params: UpdateAgentTeamParams) {
+    return this.transactionsManager.useTransaction(async () => {
+      await this.getIfExist(id, organizationId);
+
+      const agentTeamEntity = await this.agentTeamRepository.updateById(id, {
+        name: params.name,
+        strategy: params.strategy,
+        description: params.description,
+        updatedBy: params.updatedById,
+      });
+
+      if (!agentTeamEntity) {
+        throw new NotFoundException('Agent team not found.');
+      }
+
+      return this.agentTeamEntityToDtoMapper.mapOne(agentTeamEntity);
+    });
   }
 
   public async create(params: CreateAgentTeamParams) {

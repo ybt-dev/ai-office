@@ -1,27 +1,44 @@
-import { useParams } from "react-router";
-import useCreateAgentMutation from "~/hooks/mutations/useCreateAgentMutation";
-import useAgentByIdQuery from "~/hooks/queries/useAgentByIdQuery";
-import AgentForm from "~/components/AgentForm";
+import { useParams } from 'react-router';
+import { useState } from 'react';
+import { AgentFormData } from '@/components/AgentForm';
+import useUpdateAgentMutation from '@/hooks/mutations/useUpdateAgentMutation';
+import useAgentByIdQuery from '@/hooks/queries/useAgentByIdQuery';
+import AgentDetailsOverview from '@/components/AgentDetailsOverview';
+import EditAgentForm from '@/components/EditAgentForm';
 
 const AgentDetails = () => {
-  const { agentId } = useParams<{ agentId: string; }>();
+  const [isEditMode, setIsEditMode] = useState(false);
+
+  const { agentId } = useParams<{ agentId: string }>();
 
   const { data: agent } = useAgentByIdQuery(agentId || '');
 
-  const { mutateAsync: createAgent } = useCreateAgentMutation();
+  const { mutateAsync: updateAgent } = useUpdateAgentMutation();
+
+  const handleUpdateAgent = async (data: AgentFormData) => {
+    if (!agentId) {
+      return;
+    }
+
+    await updateAgent({
+      id: agentId,
+      name: data.name,
+      description: data.description,
+      modelApiKey: data.modelApiKey,
+      model: data.model,
+      twitterCookie: data.twitterCookie,
+    });
+
+    setIsEditMode(false);
+  };
 
   return (
-    <div className="h-full p-8 text-white">
-      <h2 className="text-2xl font-semibold mb-6 text-white">
-        Agent Details for {agent?.name}:
-      </h2>
-      {agent ? (
-        <AgentForm
-          key={agent.id}
-          existingAgent={agent}
-          onSubmit={() => {}} actionName="Update Agent"
-        />
-      ) : null}
+    <div className="h-full w-2/3">
+      {isEditMode && agent ? (
+        <EditAgentForm agent={agent} onCancel={() => setIsEditMode(false)} onSubmit={handleUpdateAgent} />
+      ) : (
+        <AgentDetailsOverview agent={agent ?? null} onEditButtonClick={() => setIsEditMode(true)} />
+      )}
     </div>
   );
 };

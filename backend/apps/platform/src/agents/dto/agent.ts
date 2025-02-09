@@ -1,4 +1,4 @@
-import { IsIn, IsNotEmpty, IsObject, IsString } from 'class-validator';
+import { IsIn, IsNotEmpty, IsString } from 'class-validator';
 import { IsIdentifier } from '@libs/validation/class-validators';
 import { AnyObject } from '@libs/types';
 import { AgentRole } from '@apps/platform/agents/enums';
@@ -32,6 +32,7 @@ export class CreateAgentBodyDto {
   name: string;
 
   @IsIn(Object.values(AgentRole))
+  @IsNotEmpty()
   role: AgentRole;
 
   @IsIdentifier()
@@ -46,10 +47,26 @@ export class CreateAgentBodyDto {
   @IsNotEmpty()
   modelApiKey: string;
 
-  @IsNotEmpty()
-  @IsObject()
-  config: AnyObject;
+  @IsString()
+  description?: string;
 
   @IsString()
-  description: string;
+  twitterCookie?: string;
+}
+
+export class UpdateAgentBodyDto {
+  @IsString()
+  name?: string;
+
+  @IsString()
+  model?: string;
+
+  @IsString()
+  modelApiKey?: string;
+
+  @IsString()
+  description?: string;
+
+  @IsString()
+  twitterCookie?: string;
 }

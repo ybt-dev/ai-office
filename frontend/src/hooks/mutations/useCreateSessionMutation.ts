@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { DefaultError, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useSessionsApi } from '~/providers/ApiProvider';
+import { CreateSessionParams } from '@/api/SessionsApi';
+import { useSessionsApi } from '@/providers/ApiProvider';
 
 const useCreateSessionMutation = () => {
   const sessionsApi = useSessionsApi();
@@ -11,8 +12,8 @@ const useCreateSessionMutation = () => {
     await queryClient.invalidateQueries({ queryKey: ['session-user'] });
   }, [queryClient]);
 
-  return useMutation<void, DefaultError, string>({
-    mutationFn: (token: string) => sessionsApi.createSession(token),
+  return useMutation<void, DefaultError, CreateSessionParams>({
+    mutationFn: (params) => sessionsApi.createSession(params),
     onSuccess: handleMutationSuccess,
   });
 };

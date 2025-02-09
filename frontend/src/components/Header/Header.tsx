@@ -1,16 +1,31 @@
-import React from 'react';
+import WalletConnection from '@/components/WalletConnection';
+
+const truncateAddress = (address: string) => {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+};
 
 const Header = () => {
   return (
-    <header className="text-white px-12 py-6 flex justify-between items-center">
-      <div className="flex flex-row items-center gap-4">
-        <img className="h-fit mb-1" src="/logo.png" alt="logo" />
-        <h3 className="typography-h3 text-white">
-          AI office
-        </h3>
-      </div>
-      <div>
-        <img src="/avatar-mini.png" alt="avatar" className="h-8 w-8 rounded-full" />
+    <header className="border-b border-gray-800 bg-gray-900/50 backdrop-blur-sm sticky top-0 z-10">
+      <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-24">
+        <div className="flex items-center space-x-3">
+          <img className="h-fit mb-1" src="/logo.png" alt="logo" />
+          <span className="text-xl font-semibold text-white">AI office</span>
+        </div>
+        <div className="flex items-center">
+          <div className="flex items-center gap-4">
+            <WalletConnection>
+              {(isConnected, isOpen, address, setIsOpen) => (
+                <button
+                  onClick={() => setIsOpen(!isOpen)}
+                  className="px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors duration-200 ease-in-out"
+                >
+                  {isConnected && address ? truncateAddress(address) : 'Connect Wallet'}
+                </button>
+              )}
+            </WalletConnection>
+          </div>
+        </div>
       </div>
     </header>
   );

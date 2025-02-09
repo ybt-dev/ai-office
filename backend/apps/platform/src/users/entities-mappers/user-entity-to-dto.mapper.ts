@@ -13,7 +13,7 @@ export class DefaultUserEntityToDtoMapper implements UserEntityToDtoMapper {
     return {
       id: entity.getId(),
       organizationId: entity.getOrganizationId(),
-      email: entity.getEmail(),
+      address: entity.getAddress(),
       firstName: entity.getFirstName(),
       lastName: entity.getLastName(),
     };

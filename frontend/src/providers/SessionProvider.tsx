@@ -1,5 +1,5 @@
 import { createContext, useMemo, ReactNode } from 'react';
-import { User } from '@api/UserApi';
+import { User } from '@/api/UsersApi';
 
 export interface SessionProviderProps {
   children: ReactNode;

@@ -1,15 +1,19 @@
-import { useMemo } from "react";
-import { BrowserRouter } from "react-router";
-import {MutationCache, QueryCache, QueryClient, QueryClientProvider} from "@tanstack/react-query";
-import {toast, ToastContainer} from "react-toastify";
-import { RestApiClient } from "./api/ApiClient";
-import Header from "./components/Header";
-import Routing from "./Routing";
-import AppInitializer from "./AppInitializer";
-import { ApiProvider } from "./providers/ApiProvider";
-import SessionsRestApi from "./api/SessionsApi";
+import { useMemo } from 'react';
+import { BrowserRouter } from 'react-router';
+import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { WagmiProvider } from 'wagmi';
+import { toast, ToastContainer } from 'react-toastify';
+import { RestApiClient } from './api/ApiClient';
+import wagmiConfig from './wagmi-config';
+import Header from './components/Header';
+import Routing from './Routing';
+import AppInitializer from './AppInitializer';
+import { ApiProvider } from './providers/ApiProvider';
+import SessionsRestApi from './api/SessionsApi';
 import AgentTeamsRestApi from './api/AgentTeamsApi';
-import AgentsRestApi from "./api/AgentsApi";
+import AgentsRestApi from './api/AgentsApi';
+import AgentTeamInteractionsRestApi from './api/AgentTeamInteractionsApi';
+import AgentMessagesRestApi from './api/AgentMessagesApi';
 
 import './tailwind.css';
 
@@ -18,7 +22,7 @@ function App() {
     return new QueryClient({
       queryCache: new QueryCache({
         onError: (error) => {
-          toast.error(error.message)
+          toast.error(error.message);
         },
       }),
       mutationCache: new MutationCache({
@@ -40,20 +44,24 @@ function App() {
     return {
       sessionsApi: new SessionsRestApi(apiClient),
       agentTeamsApi: new AgentTeamsRestApi(apiClient),
+      agentTeamInteractionsApi: new AgentTeamInteractionsRestApi(apiClient),
       agentApi: new AgentsRestApi(apiClient),
+      agentMessagesApi: new AgentMessagesRestApi(apiClient),
     };
   }, []);
 
   return (
     <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <ApiProvider value={services}>
-          <AppInitializer>
-            <Header />
-            <Routing />
-          </AppInitializer>
-        </ApiProvider>
-      </QueryClientProvider>
+      <WagmiProvider config={wagmiConfig}>
+        <QueryClientProvider client={queryClient}>
+          <ApiProvider value={services}>
+            <AppInitializer>
+              <Header />
+              <Routing />
+            </AppInitializer>
+          </ApiProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
       <ToastContainer
         pauseOnFocusLoss={false}
         pauseOnHover={false}
@@ -62,7 +70,7 @@ function App() {
         position="top-right"
       />
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;

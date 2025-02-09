@@ -1,11 +1,13 @@
-import {useState} from "react";
-import {Outlet, useNavigate, useOutletContext, useParams} from "react-router";
-import { Agent } from "~/api/AgentsApi";
-import useListAgentsByTeamIdQuery from "~/hooks/queries/useListAgentsByTeamIdQuery";
-import useCreateAgentMutation from "~/hooks/mutations/useCreateAgentMutation";
-import AgentsList from "~/components/AgentsList";
-import Popup from "~/components/Popup";
-import AgentForm, { AgentFormData } from "~/components/AgentForm";
+import { useState } from 'react';
+import { Plus } from 'lucide-react';
+import { Outlet, useNavigate, useOutletContext, useParams } from 'react-router';
+import { Agent } from '@/api/AgentsApi';
+import { AgentFormData } from '@/components/AgentForm';
+import useListAgentsByTeamIdQuery from '@/hooks/queries/useListAgentsByTeamIdQuery';
+import useCreateAgentMutation from '@/hooks/mutations/useCreateAgentMutation';
+import AgentsList from '@/components/AgentsList';
+import Popup from '@/components/Popup';
+import CreateAgentForm from '@/components/CreateAgentForm';
 
 const Agents = () => {
   const teamId = useOutletContext<string>();
@@ -15,7 +17,6 @@ const Agents = () => {
   const navigate = useNavigate();
 
   const { data: agents } = useListAgentsByTeamIdQuery(teamId);
-
   const { mutateAsync: createAgent } = useCreateAgentMutation();
 
   const [displayCreateAgentPopup, setDisplayCreateAgentPopup] = useState(false);
@@ -25,14 +26,16 @@ const Agents = () => {
 
   const handleCreateAgentSubmit = async (data: AgentFormData) => {
     await createAgent({
-      name: data.agentName,
-      description: data.agentDescription,
+      name: data.name,
+      description: data.description,
       modelApiKey: data.modelApiKey,
       model: data.model,
-      role: data.agentRole,
-      config: {},
+      role: data.role,
+      twitterCookie: data.twitterCookie,
       teamId,
     });
+
+    hideCreateAgentPopup();
   };
 
   const handleAgentClick = (agent: Agent) => {
@@ -40,36 +43,27 @@ const Agents = () => {
   };
 
   return (
-    <div className="w-full h-full text-white">
-      {agents && agents.length > 0 ? (
-        <div className="flex flex-row p-2 rounded-xl bg-gray-800 gap-8">
-          <AgentsList
-            selectedAgentId={selectedAgentId || null}
-            agents={agents}
-            onAgentClick={handleAgentClick}
-          />
-          <div
-            onClick={showCreateAgentPopup}
-            className="flex flex-col items-center justify-center w-36 h-36 cursor-pointer p-2 rounded-full border-2 border-dashed border-gray-600 mt-2"
-          >
-            <span className="text-3xl font-bold text-green-500">+</span>
-            <span className="mt-2 text-sm">Add Agent</span>
-          </div>
+    <div className="flex flex-col w-full h-full text-white">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-white">My Agents:</h1>
+        <button
+          disabled={!agents}
+          onClick={showCreateAgentPopup}
+          className="flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+        >
+          <Plus className="h-5 w-5 mr-2" />
+          New Agent
+        </button>
+      </div>
+      <AgentsList selectedAgentId={selectedAgentId || null} agents={agents ?? null} onAgentClick={handleAgentClick} />
+      {agents && !agents.length ? (
+        <div className="text-center text-gray-400 m-auto">
+          No agents found. Click the "New Agent" button to create one.
         </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center h-64">
-          <p className="mb-4 text-lg">No Agents</p>
-          <button
-            onClick={showCreateAgentPopup}
-            className="bg-green-500 hover:bg-green-600 transition px-6 py-3 rounded"
-          >
-            Create Agent
-          </button>
-        </div>
-      )}
-      <Outlet />
-      <Popup isOpen={displayCreateAgentPopup} onClose={hideCreateAgentPopup}>
-        <AgentForm onSubmit={handleCreateAgentSubmit} actionName="Create Agent" />
+      ) : null}
+      <Outlet key={selectedAgentId} />
+      <Popup title="Create New Agent" isOpen={displayCreateAgentPopup} onClose={hideCreateAgentPopup}>
+        <CreateAgentForm onSubmit={handleCreateAgentSubmit} />
       </Popup>
     </div>
   );

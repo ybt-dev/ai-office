@@ -1,17 +1,15 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
-import { AgentTeam } from "~/api/AgentTeamsApi";
-import useListAgentTeamsQuery from "~/hooks/queries/useListAgentTeamsQuery";
-import useCreateAgentTeamMutation from "~/hooks/mutations/useCreateAgentTeamMutation";
-import AgentTeamsList from "~/components/AgentTeamsList";
-import AgentTeamForm, { AgentTeamFormData } from "~/components/AgentTeamForm";
-import Popup from "~/components/Popup";
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
+import { AgentTeam } from '@/api/AgentTeamsApi';
+import { AgentTeamFormData } from '@/components/AgentTeamForm';
+import useListAgentTeamsQuery from '@/hooks/queries/useListAgentTeamsQuery';
+import useCreateAgentTeamMutation from '@/hooks/mutations/useCreateAgentTeamMutation';
+import AgentTeamsGrid from '@/components/AgentTeamsGrid';
+import Popup from '@/components/Popup';
+import CreateAgentTeamForm from '@/components/CreateAgentTeamForm';
 
 const AgentTeamsPage = () => {
-  const [
-    displayCreateAgentTeamPopup,
-    setDisplayCreateAgentTeamPopup,
-  ] = useState(false);
+  const [displayCreateAgentTeamPopup, setDisplayCreateAgentTeamPopup] = useState(false);
 
   const navigate = useNavigate();
 
@@ -19,72 +17,48 @@ const AgentTeamsPage = () => {
 
   const { mutateAsync: createAgentTeam } = useCreateAgentTeamMutation();
 
+  const showCreateAgentTeamPopup = () => {
+    setDisplayCreateAgentTeamPopup(true);
+  };
+
+  const hideCreateAgentTeamPopup = () => {
+    setDisplayCreateAgentTeamPopup(false);
+  };
+
   const handleSubmitCreateAgentForm = async (data: AgentTeamFormData) => {
     await createAgentTeam({
       description: data.description,
       name: data.name,
       strategy: data.strategy,
     });
-  };
 
-  const closeCreateAgentTeamPopup = () => {
-    setDisplayCreateAgentTeamPopup(false);
-  };
-
-  const showCreateAgentTeamPopup = () => {
-    setDisplayCreateAgentTeamPopup(true);
+    hideCreateAgentTeamPopup();
   };
 
   const handleEditAgentTeamClick = (agentTeam: AgentTeam) => {
     navigate(`/agent-teams/${agentTeam.id}`);
   };
 
-  const renderContent = () => {
-    if (!agentTeams) {
-      return (
-        <p>Loading...</p>
-      );
-    }
-
-    if (agentTeams.length === 0) {
-      return (
-        <div className="flex flex-col items-center justify-center h-64">
-          <p className="mb-4 text-lg">No Agent Teams</p>
-          <button
-            onClick={showCreateAgentTeamPopup}
-            className="bg-green-500 hover:bg-green-600 transition px-6 py-3 rounded"
-          >
-            Create Agent Team
-          </button>
-        </div>
-      );
-    }
-
-    return (
-      <AgentTeamsList
-        agentTeams={agentTeams}
-        onEditAgentTeamClick={handleEditAgentTeamClick}
-      />
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-[#0A0712] p-8 text-white">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">Agent Teams</h1>
+    <div className="flex flex-col min-h-screen p-8">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-white">Agent Teams:</h1>
         <button
           onClick={showCreateAgentTeamPopup}
-          className="bg-green-500 hover:bg-green-600 transition px-4 py-2 rounded"
+          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800"
         >
           Add Agent Team
         </button>
       </div>
-      {renderContent()}
-      <Popup
-        isOpen={displayCreateAgentTeamPopup}
-        onClose={closeCreateAgentTeamPopup}
-      >
-        <AgentTeamForm onSubmit={handleSubmitCreateAgentForm} />
+
+      <AgentTeamsGrid agentTeams={agentTeams ?? null} onEditAgentTeamClick={handleEditAgentTeamClick} />
+
+      {agentTeams && !agentTeams.length && (
+        <div className="text-center text-gray-400 m-auto">No agent teams found. Click create button to create one.</div>
+      )}
+
+      <Popup title="Create New Team" isOpen={displayCreateAgentTeamPopup} onClose={hideCreateAgentTeamPopup}>
+        <CreateAgentTeamForm onSubmit={handleSubmitCreateAgentForm} />
       </Popup>
     </div>
   );

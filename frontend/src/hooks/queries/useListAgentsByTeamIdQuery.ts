@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { useAgentsApi } from "~/providers/ApiProvider";
+import { useQuery } from '@tanstack/react-query';
+import { useAgentsApi } from '@/providers/ApiProvider';
 
 const useListAgentsByTeamIdQuery = (teamId: string) => {
   const agentTeamsApi = useAgentsApi();

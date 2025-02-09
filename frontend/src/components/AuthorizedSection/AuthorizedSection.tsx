@@ -1,6 +1,6 @@
-import {ReactNode} from "react";
+import { ReactNode } from 'react';
 import { Navigate } from 'react-router';
-import useSession from "~/hooks/useSession";
+import useSession from '@/hooks/useSession';
 
 export interface AuthorizedSectionProps {
   children: ReactNode;
@@ -9,19 +9,11 @@ export interface AuthorizedSectionProps {
 const AuthorizedSection = ({ children }: AuthorizedSectionProps) => {
   const [sessionUser] = useSession();
 
-  console.log(sessionUser);
-
   if (!sessionUser) {
-    return (
-      <Navigate replace to="/sign-in" />
-    );
+    return <Navigate replace to="/" />;
   }
 
-  return (
-    <>
-      {children}
-    </>
-  )
+  return <>{children}</>;
 };
 
 export default AuthorizedSection;

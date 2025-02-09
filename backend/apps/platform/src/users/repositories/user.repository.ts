@@ -9,14 +9,14 @@ import { UserEntity, MongoUserEntity } from '@apps/platform//users/entities';
 
 interface CreateUserEntityParams {
   organization: string;
-  email: string;
+  address: string;
   firstName?: string;
   lastName?: string;
 }
 
 export interface UserRepository {
   findById(id: string): Promise<UserEntity | null>;
-  findByEmail(email: string): Promise<UserEntity | null>;
+  findByAddress(address: string): Promise<UserEntity | null>;
   createOne(params: CreateUserEntityParams): Promise<UserEntity>;
 }
 
@@ -35,9 +35,9 @@ export class MongoUserRepository implements UserRepository {
     return user ? new MongoUserEntity(user) : null;
   }
 
-  public async findByEmail(email: string) {
+  public async findByAddress(address: string) {
     const user = await this.userModel
-      .findOne({ email }, undefined, {
+      .findOne({ address }, undefined, {
         session: this.transactionsManager.getCurrentTransaction()?.getSession(),
         lean: true,
       })

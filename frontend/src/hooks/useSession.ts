@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { SessionContext } from '~/providers/SessionProvider';
+import { SessionContext } from '@/providers/SessionProvider';
 
 const useSession = () => {
   const sessionValue = useContext(SessionContext);
@@ -8,10 +8,7 @@ const useSession = () => {
     throw new Error('Session value is not provided.');
   }
 
-  return [
-    sessionValue.sessionUser,
-    sessionValue.refetch,
-  ] as const;
+  return [sessionValue.sessionUser, sessionValue.refetch] as const;
 };
 
 export default useSession;

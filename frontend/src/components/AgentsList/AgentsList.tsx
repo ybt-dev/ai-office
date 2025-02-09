@@ -1,30 +1,31 @@
-import { Agent } from "~/api/AgentsApi";
+import { Agent } from '@/api/AgentsApi';
+import AgentListItem, { AgentListItemSkeleton } from './AgentListItem';
 
 export interface AgentListProps {
-  agents: Agent[];
+  agents: Agent[] | null;
   selectedAgentId: string | null;
   onAgentClick: (agent: Agent) => void;
 }
 
+const SKELETON_AGENTS_COUNT = 3;
+
 const AgentsList = ({ selectedAgentId, agents, onAgentClick }: AgentListProps) => {
   return (
-    <div className="flex overflow-x-auto gap-5">
-      {agents.map((agent) => {
+    <div className="flex gap-5 shrink-0">
+      {!agents &&
+        Array.from({ length: SKELETON_AGENTS_COUNT }).map((_, index) => <AgentListItemSkeleton key={index} />)}
+      {agents?.map((agent) => {
         const isSelected = agent.id === selectedAgentId;
+
         return (
-          <div
+          <AgentListItem
             key={agent.id}
-            className="flex flex-col items-center cursor-pointer p-2 rounded"
+            name={agent.name}
+            role={agent.role}
+            imageSrc={agent.imageUrl}
             onClick={() => onAgentClick(agent)}
-          >
-            <img
-              src={agent.imageUrl}
-              alt={agent.name}
-              className={`w-36 h-36 rounded-full object-cover border-2 ${isSelected ? "border-blue-500" : "border-gray-600"}`}
-            />
-            <span className="mt-2 text-white text-xl font-medium">{agent.name}</span>
-            <span className="text-gray-400 text-sm">{agent.role}</span>
-          </div>
+            isSelected={isSelected}
+          />
         );
       })}
     </div>

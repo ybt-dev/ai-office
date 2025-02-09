@@ -1,35 +1,35 @@
-export interface CategoriesListProps {
-  selectedCategory: string;
-  onSelectCategory: (category: string) => void;
+import { ComponentType } from 'react';
+import CategoryListItem from './CategoryListItem';
+
+export interface Category<CategoryId extends string> {
+  id: CategoryId;
+  name: string;
+  icon: ComponentType<{ className: string }>;
 }
 
-const CategoriesList = ({ selectedCategory, onSelectCategory }: CategoriesListProps) => {
+export interface CategoriesListProps<CategoryId extends string> {
+  categories: Category<CategoryId>[];
+  selectedCategoryId: CategoryId;
+  onSelectCategory: (categoryId: CategoryId) => void;
+}
+
+const CategoriesList = <CategoryId extends string>({
+  categories,
+  selectedCategoryId,
+  onSelectCategory,
+}: CategoriesListProps<CategoryId>) => {
   return (
     <ul className="space-y-2">
-      <li
-        onClick={() => onSelectCategory('agents')}
-        className={`cursor-pointer p-3 rounded hover:bg-[#0D1116] font-lg font-bold transition-colors ${
-          selectedCategory === 'Strategy' ? 'bg-blue-100' : ''
-        }`}
-      >
-        Agents
-      </li>
-      <li
-        onClick={() => onSelectCategory('conversation')}
-        className={`cursor-pointer p-3 rounded hover:bg-[#0D1116] font-lg font-bold transition-colors ${
-          selectedCategory === 'Conversation' ? 'bg-blue-100' : ''
-        }`}
-      >
-        Conversation
-      </li>
-      <li
-        onClick={() => onSelectCategory('settings')}
-        className={`cursor-pointer p-3   rounded hover:bg-[#0D1116] font-lg font-bold transition-colors ${
-          selectedCategory === 'Settings' ? 'bg-blue-100' : ''
-        }`}
-      >
-        Settings
-      </li>
+      {categories.map((category) => (
+        <CategoryListItem
+          key={category.id}
+          categoryId={category.id}
+          categoryName={category.name}
+          onSelect={onSelectCategory}
+          isSelected={category.id === selectedCategoryId}
+          Icon={category.icon}
+        />
+      ))}
     </ul>
   );
 };

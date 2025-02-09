@@ -22,61 +22,61 @@ export interface AgentEntity {
 }
 
 export class MongoAgentEntity implements AgentEntity {
-  constructor(private readonly agentDocument: FlattenMaps<Agent> & { _id: ObjectId }) {}
+  constructor(private readonly document: FlattenMaps<Agent> & { _id: ObjectId }) {}
 
   public getId() {
-    return this.agentDocument._id.toString();
+    return this.document._id.toString();
   }
 
   public getRole() {
-    return this.agentDocument.role;
+    return this.document.role;
   }
 
   public getTeamId() {
-    return this.agentDocument.team.toString();
+    return this.document.team.toString();
   }
 
   public getOrganizationId() {
-    return this.agentDocument.organization.toString();
+    return this.document.organization.toString();
   }
 
   public getName() {
-    return this.agentDocument.name;
+    return this.document.name;
   }
 
   public getModel() {
-    return this.agentDocument.model;
+    return this.document.model;
   }
 
   public getModelApiKey() {
-    return this.agentDocument.modelApiKey;
+    return this.document.modelApiKey;
   }
 
   public getConfig() {
-    return this.agentDocument.config;
+    return this.document.config;
   }
 
   public getDescription() {
-    return this.agentDocument.description;
+    return this.document.description;
   }
 
   public getImageUrl() {
-    return this.agentDocument.imageUrl || '';
+    return this.document.imageUrl || '';
   }
 
   public getCreatedAt() {
-    return this.agentDocument.createdAt;
+    return this.document.createdAt;
   }
 
   public getUpdatedAt() {
-    return this.agentDocument.updatedAt;
+    return this.document.updatedAt;
   }
 
   public getCreatedById() {
-    return this.agentDocument.createdBy.toString();
+    return this.document.createdBy.toString();
   }
 
   public getUpdatedById() {
-    return this.agentDocument.updatedBy.toString();
+    return this.document.updatedBy.toString();
   }
 }
