@@ -14,6 +14,8 @@ export interface AgentDto {
   organizationId: string;
   createdAt: Date;
   updatedAt: Date;
+  walletAddress: string;
+  encryptedPrivateKey: string;
   description?: string;
   imageUrl?: string;
   createdById?: string | null;
@@ -52,6 +54,12 @@ export class CreateAgentBodyDto {
 
   @IsString()
   twitterCookie?: string;
+  
+  @IsString()
+  walletAddress: string;
+
+  @IsString()
+  encryptedPrivateKey: string;
 }
 
 export class UpdateAgentBodyDto {

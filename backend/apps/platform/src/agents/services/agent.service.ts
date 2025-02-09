@@ -10,6 +10,8 @@ import {
 import { AgentDto } from '@apps/platform/agents/dto';
 import { AgentEntityToDtoMapper } from '@apps/platform/agents/entities-mappers';
 import { AgentRole } from '@apps/platform/agents/enums';
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
+import { AES, enc } from 'crypto-js';
 
 export interface CreateAgentParams {
   role: AgentRole;
@@ -21,6 +23,8 @@ export interface CreateAgentParams {
   twitterCookie?: string;
   createdById: string;
   description?: string;
+  walletAddress: string;
+  encryptedPrivateKey: string;
 }
 
 export interface UpdateAgentParams {
@@ -81,7 +85,17 @@ export class DefaultAgentService implements AgentService {
     if (!team) {
       throw new UnprocessableEntityException('Provided Agent Team does not exist.');
     }
+    
+    const privateKey = generatePrivateKey();
+    const account = privateKeyToAccount(privateKey);
 
+    const encryptionKey = process.env.WALLET_ENCRYPTION_KEY;
+    if (!encryptionKey) {
+      throw new Error('WALLET_ENCRYPTION_KEY environment variable is not set');
+    }
+
+    const encryptedPrivateKey = AES.encrypt(privateKey, encryptionKey).toString();
+    
     return this.transactionsManager.useTransaction(async () => {
       const agentsWithSameRole = await this.agentRepository.exists({
         organizationId: params.organizationId,
@@ -107,6 +121,8 @@ export class DefaultAgentService implements AgentService {
         organization: params.organizationId,
         createdBy: params.createdById,
         updatedBy: params.createdById,
+        walletAddress: account.address,
+        encryptedPrivateKey: encryptedPrivateKey,
       });
 
       return this.agentEntityToDtoMapper.mapOne(agentEntity);
@@ -132,5 +148,15 @@ export class DefaultAgentService implements AgentService {
 
       return this.agentEntityToDtoMapper.mapOne(updatedAgentEntity);
     });
+  }
+
+  private decryptPrivateKey(encryptedPrivateKey: string): string {
+    const encryptionKey = process.env.WALLET_ENCRYPTION_KEY;
+    if (!encryptionKey) {
+      throw new Error('WALLET_ENCRYPTION_KEY environment variable is not set');
+    }
+
+    const bytes = AES.decrypt(encryptedPrivateKey, encryptionKey);
+    return bytes.toString(enc.Utf8);
   }
 }

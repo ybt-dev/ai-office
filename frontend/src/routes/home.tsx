@@ -13,7 +13,7 @@ const Home = () => {
         </div>
         <div className="flex flex-col">
           <WalletConnection>
-            {(isConnected, isOpen, address, setIsOpen) => (
+            {({ setIsOpen }) => (
               <button onClick={() => setIsOpen(true)} className="p-4 rounded text-white text-bold bg-[#482F8A]">
                 Join AI Office
               </button>

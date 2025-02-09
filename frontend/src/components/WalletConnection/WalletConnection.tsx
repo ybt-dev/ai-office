@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router';
 import { useAccount, useConnect } from 'wagmi';
 import WalletOption from './WalletOption';
 
+export interface WalletConnectionAttributes {
+  isConnected: boolean,
+  isOpen: boolean,
+  address: string | undefined,
+  setIsOpen: (isOpen: boolean) => void,
+}
 export interface WalletConnectionProps {
-  children: (
-    isConnected: boolean,
-    isOpen: boolean,
-    address: string | undefined,
-    setIsOpen: (isOpen: boolean) => void,
-  ) => ReactNode;
+  children: (attributes: WalletConnectionAttributes) => ReactNode;
 }
 
 const WalletConnection = ({ children }: WalletConnectionProps) => {
@@ -21,7 +22,12 @@ const WalletConnection = ({ children }: WalletConnectionProps) => {
 
   return (
     <div className="relative">
-      {children(isConnected, isOpen, address, (open) => setIsOpen(open))}
+      {children({
+        isConnected,
+        isOpen,
+        address,
+        setIsOpen,
+      })}
       {isOpen && (
         <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5">
           <div className="py-1" role="menu">
