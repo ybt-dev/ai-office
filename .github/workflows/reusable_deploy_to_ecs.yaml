@@ -135,27 +135,3 @@ jobs:
           service: ${{ inputs.SERVICE_TYPE }}-service
           cluster: ${{ secrets.ECS_CLUSTER_NAME }}
           wait-for-service-stability: false
-
-      - name: Check deploy status
-        run: |
-          DURATION=0
-          RETRY_INTERVAL=15
-          TIMEOUT_INTERVAL=600
-          DESCRIBE_SERVICES="aws ecs describe-services --cluster ${{ secrets.ECS_CLUSTER_NAME }} --services ${{ inputs.LAUNCH_TYPE }}-${{ inputs.SERVICE_TYPE }}-service"
-          echo "Start to deploy task-definition: $( $DESCRIBE_SERVICES --query 'services[0].taskDefinition' --output text)"
-          while [[ $( $DESCRIBE_SERVICES --query 'services[0].deployments[0].rolloutState' --output text) != "COMPLETED" ]]; do
-            if [[ $( $DESCRIBE_SERVICES --query 'services[0].deployments[0].failedTasks' --output text) != "0" ]]; then
-              FAILED_TASK_ARN=$(aws ecs list-tasks --cluster ${{ secrets.ECS_CLUSTER_NAME }} --desired-status STOPPED --region ${{ secrets.AWS_REGION }} --query 'taskArns[0]' --output text)
-              STOPPED_REASON=$(aws ecs describe-tasks --cluster ${{ secrets.ECS_CLUSTER_NAME }} --tasks $FAILED_TASK_ARN --region ${{ secrets.AWS_REGION }} --query 'tasks[0].stoppedReason' --output text)
-              echo "Deployment failed with stop reason: ${STOPPED_REASON}"
-              exit 1
-            fi
-            if [[ $DURATION -ge $TIMEOUT_INTERVAL ]]; then
-              echo "Deployment failed after timeout ${TIMEOUT_INTERVAL} seconds"
-              exit 1
-            fi
-            DURATION=$[${DURATION}+${RETRY_INTERVAL}]
-            echo "Deploy lasts ${DURATION} seconds"
-            sleep $RETRY_INTERVAL
-          done
-          echo "Deployment finished after ${DURATION} seconds"
