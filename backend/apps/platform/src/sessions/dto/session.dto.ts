@@ -1,13 +1,17 @@
-import { IsNotEmpty, IsString, IsEmail } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateSessionDto {
   @IsNotEmpty()
   @IsString()
-  token: string;
+  message: string;
+
+  @IsNotEmpty()
+  @IsString()
+  signature: string;
 }
 
-export class CreateSessionTokenDto {
+export class CreateSessionNonceDto {
   @IsNotEmpty()
-  @IsEmail()
-  email: string;
+  @IsString()
+  address: string;
 }

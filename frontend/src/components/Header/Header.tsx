@@ -1,12 +1,5 @@
-import { WalletOptions } from '../Wallet/wallet-options';
+import Wallet from '@/components/Wallet';
 
-function ConnectWallet() {
-  return (
-    <div className="flex items-center gap-4">
-      <WalletOptions />
-    </div>
-  );
-}
 const Header = () => {
   return (
     <header className="border-b border-gray-800 bg-gray-900/50 backdrop-blur-sm sticky top-0 z-10">
@@ -16,7 +9,9 @@ const Header = () => {
           <span className="text-xl font-semibold text-white">AI office</span>
         </div>
         <div className="flex items-center">
-          <ConnectWallet />
+          <div className="flex items-center gap-4">
+            <Wallet />
+          </div>
         </div>
       </div>
     </header>

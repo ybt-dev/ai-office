@@ -1,8 +1,9 @@
 const SessionsModuleTokens = {
   Services: {
     SessionService: Symbol('SessionService'),
-    SessionTokenService: Symbol('SessionTokenService'),
-    SessionLinkService: Symbol('SessionLinkService'),
+  },
+  Repositories: {
+    SessionNonceRepository: Symbol('SessionNonceRepository'),
   },
 };
 

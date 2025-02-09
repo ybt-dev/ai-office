@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
 import { BrowserRouter } from 'react-router';
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { WagmiProvider } from 'wagmi';
 import { toast, ToastContainer } from 'react-toastify';
 import { RestApiClient } from './api/ApiClient';
+import wagmiConfig from './wagmi-config';
 import Header from './components/Header';
 import Routing from './Routing';
 import AppInitializer from './AppInitializer';
@@ -12,8 +14,6 @@ import AgentTeamsRestApi from './api/AgentTeamsApi';
 import AgentsRestApi from './api/AgentsApi';
 import AgentTeamInteractionsRestApi from './api/AgentTeamInteractionsApi';
 import AgentMessagesRestApi from './api/AgentMessagesApi';
-import { WagmiProvider } from 'wagmi';
-import { config } from '../config';
 
 import './tailwind.css';
 
@@ -52,7 +52,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      <WagmiProvider config={config}>
+      <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
           <ApiProvider value={services}>
             <AppInitializer>

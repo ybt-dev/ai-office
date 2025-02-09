@@ -10,7 +10,7 @@ const AuthorizedSection = ({ children }: AuthorizedSectionProps) => {
   const [sessionUser] = useSession();
 
   if (!sessionUser) {
-    return <Navigate replace to="/sign-in" />;
+    return <Navigate replace to="/" />;
   }
 
   return <>{children}</>;

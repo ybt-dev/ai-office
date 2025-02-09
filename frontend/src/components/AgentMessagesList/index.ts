@@ -1,1 +1,1 @@
-export { default } from './AgentConversationsList';
+export { default } from './AgentMessagesList';

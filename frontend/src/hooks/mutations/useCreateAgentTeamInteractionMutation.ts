@@ -9,11 +9,16 @@ const useCreateAgentTeamInteractionMutation = () => {
 
   const queryClient = useQueryClient();
 
-  const handleMutationSuccess = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: ['agent-teams', { latest: true }] });
+  const handleMutationSuccess = useCallback(
+    async (agentTeamInteraction: AgentTeamInteraction) => {
+      await queryClient.invalidateQueries({
+        queryKey: ['agent-team-interactions', { teamId: agentTeamInteraction.teamId }],
+      });
 
-    toast('Your request to the team was sent successfully!');
-  }, [queryClient]);
+      toast('Your request to the team was sent successfully!');
+    },
+    [queryClient],
+  );
 
   return useMutation<AgentTeamInteraction, DefaultError, CreateAgentTeamInteraction>({
     mutationFn: (params) => agentTeamInteractionsApi.createAgentTeamInteraction(params),

@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { SessionProvider } from '@/providers/SessionProvider';
 import useSessionUserQuery from '@/hooks/queries/useSessionUserQuery';
 import LoadingScreen from '@/components/LoadingScreen';
+import SignIn from '@/components/SignIn';
 
 export interface AppInitializerProps {
   children: ReactNode;
@@ -16,6 +17,7 @@ const AppInitializer = ({ children }: AppInitializerProps) => {
 
   return (
     <SessionProvider sessionUser={sessionUser ?? null} refetch={refetchSessionUser}>
+      <SignIn />
       {children}
     </SessionProvider>
   );

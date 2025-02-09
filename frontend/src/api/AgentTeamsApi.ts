@@ -31,18 +31,18 @@ export default class AgentTeamsRestApi implements AgentTeamsApi {
   public constructor(private client: ApiClient) {}
 
   public async listAgentTeams() {
-    return this.client.makeCall('/agent-teams', 'GET');
+    return this.client.makeCall<AgentTeam[]>('/agent-teams', 'GET');
   }
 
   public async createAgentTeam(params: CreateAgentTeamParams) {
-    return this.client.makeCall('/agent-teams', 'POST', params);
+    return this.client.makeCall<AgentTeam>('/agent-teams', 'POST', params);
   }
 
   public async getAgentTeamById(id: string) {
-    return this.client.makeCall(`/agent-teams/${id}`, 'GET');
+    return this.client.makeCall<AgentTeam>(`/agent-teams/${id}`, 'GET');
   }
 
   public async updateAgentTeam(id: string, params: UpdateAgentTeamParams) {
-    return this.client.makeCall(`/agent-teams/${id}`, 'PUT', params);
+    return this.client.makeCall<AgentTeam>(`/agent-teams/${id}`, 'PUT', params);
   }
 }

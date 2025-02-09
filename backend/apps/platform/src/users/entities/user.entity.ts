@@ -5,7 +5,7 @@ import { User } from '@apps/platform//users/schemas';
 export interface UserEntity {
   getId(): string;
   getOrganizationId(): string;
-  getEmail(): string;
+  getAddress(): string;
   getFirstName(): string;
   getLastName(): string;
 }
@@ -29,7 +29,7 @@ export class MongoUserEntity implements UserEntity {
     return this.userDocument.lastName;
   }
 
-  getEmail() {
-    return this.userDocument.email;
+  public getAddress() {
+    return this.userDocument.address;
   }
 }

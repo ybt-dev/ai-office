@@ -13,7 +13,7 @@ export interface ApiProviderValue {
   agentApi: AgentsApi;
 }
 
-export type Services = SessionsApi;
+export type Services = ApiProviderValue[keyof ApiProviderValue];
 
 const ApiContext = createContext<ApiProviderValue>({} as ApiProviderValue);
 

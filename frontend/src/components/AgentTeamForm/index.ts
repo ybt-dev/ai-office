@@ -1,1 +1,1 @@
-export { default, type AgentTeamFormData } from './AgentTeamForm.tsx';
+export { default, type AgentTeamFormData } from './AgentTeamForm';

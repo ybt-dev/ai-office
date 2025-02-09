@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { Agent } from '@/api/AgentsApi';
 import useListLatestAgentMessagesQuery from '@/hooks/queries/useListLatestAgentMessagesQuery';
 import useAgentTeamInteractionByIdQuery from '@/hooks/queries/useAgentTeamInteractionByIdQuery';
-import AgentMessagesList from '@/components/AgentMessagesList/AgentMessagesList';
+import AgentMessagesList from '@/components/AgentMessagesList';
 import Skeleton from '@/components/Skeleton';
 import useListAgentsByTeamIdQuery from '@/hooks/queries/useListAgentsByTeamIdQuery';
 
