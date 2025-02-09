@@ -42,6 +42,8 @@ jobs:
         COOKIE_DOMAIN
         PORT
         WALLET_ENCRYPTION_KEY
+        ELIZA_API_URL
+        ELIZA_API_SECRET_KEY
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
