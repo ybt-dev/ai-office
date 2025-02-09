@@ -26,6 +26,8 @@ import { SessionsModule } from '@apps/platform/sessions';
         COOKIE_DOMAIN: Joi.string().optional(),
         SESSIONS_SECRET: Joi.string().required(),
         SESSION_TOKEN_EXPIRES_IN: Joi.number().required(),
+        ELIZA_API_URL: Joi.string().required(),
+        ELIZA_API_SECRET_KEY: Joi.string().required(),
       }),
     }),
     ScheduleModule.forRoot(),

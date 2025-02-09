@@ -6,9 +6,10 @@ import {
   InjectAgentService,
   InjectAgentTeamInteractionEntityToDtoMapper,
   InjectAgentTeamInteractionRepository,
-  InjectAgentTeamRepository,
+  InjectAgentTeamRepository, InjectElizaApi,
 } from '@apps/platform/agents/decorators';
 import { AgentRole, AgentTeamInteractionStatus } from '@apps/platform/agents/enums';
+import { ElizaApi } from "@apps/platform/agents/api";
 import { AgentService } from './agent.service';
 
 export interface CreateAgentTeamInteractionParams {
@@ -36,6 +37,7 @@ export class DefaultAgentTeamInteractionService implements AgentTeamInteractionS
     @InjectAgentService() private readonly agentService: AgentService,
     @InjectAgentTeamInteractionEntityToDtoMapper()
     private readonly agentTeamInteractionEntityToDtoMapper: AgentTeamInteractionEntityToDtoMapper,
+    @InjectElizaApi() private readonly elizaApi: ElizaApi,
   ) {}
 
   public async listByTeam(teamId: string, organizationId: string): Promise<AgentTeamInteractionDto[]> {
@@ -86,6 +88,12 @@ export class DefaultAgentTeamInteractionService implements AgentTeamInteractionS
       organization: params.organizationId,
       createdBy: params.createdById,
       status: AgentTeamInteractionStatus.New,
+    });
+
+    await this.elizaApi.sendAgentsCommunication({
+      interactionId: entity.getId(),
+      requestContent: entity.getRequestContent(),
+      organizationId: entity.getOrganizationId(),
     });
 
     return this.agentTeamInteractionEntityToDtoMapper.mapOne(entity);

@@ -23,6 +23,8 @@ const EditAgentForm = ({ agent, onCancel, onSubmit }: EditAgentFormProps) => {
         description: agent.description || '',
         model: agent.model,
         modelApiKey: agent.modelApiKey,
+        twitterUsername: (agent.config.twitterUsername as string) || '',
+        twitterCookie: (agent.config.twitterCookie as string) || '',
       }}
       hideRoleInput
       onSubmit={onSubmit}

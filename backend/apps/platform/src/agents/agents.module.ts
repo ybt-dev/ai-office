@@ -36,6 +36,7 @@ import {
   DefaultAgentTeamInteractionEntityToDtoMapper,
   DefaultAgentMessageEntityToDtoMapper,
 } from './entities-mappers';
+import { ElizaRestApi } from './api';
 import AgentsModuleTokens from './agents.module.tokens';
 
 @Module({
@@ -96,6 +97,10 @@ import AgentsModuleTokens from './agents.module.tokens';
     {
       provide: AgentsModuleTokens.EntityMappers.AgentMessageEntityToDtoMapper,
       useClass: DefaultAgentMessageEntityToDtoMapper,
+    },
+    {
+      provide: AgentsModuleTokens.Api.ElizaApi,
+      useClass: ElizaRestApi,
     },
   ],
   exports: [

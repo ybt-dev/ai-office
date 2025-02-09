@@ -27,7 +27,7 @@ import {TelegramClientInterface} from "@elizaos/client-telegram";
 import {communicateWithAgents} from "./actions/communicate-agent/index.ts";
 import {AgentConfiguration, generateCharacter} from "./utils/character-generator.ts";
 import {sendInteractionToProducer, subscribeToAgentConversation} from "./utils/dialogue-system.ts";
-//import TwitterClientInterface from "./clients/client-twitter";
+import TwitterClientInterface from "./clients/client-twitter/index.ts";
 
 const expressApp = express();
 
@@ -119,9 +119,9 @@ export async function initializeClients(
   }
 
   if (clientTypes.includes("twitter")) {
-     //const twitterClients = await TwitterClientInterface.start(runtime)
+     const twitterClients = await TwitterClientInterface.start(runtime)
 
-     //clients.push(twitterClients);
+     clients.push(twitterClients);
   }
 
   if (clientTypes.includes("direct")) {
@@ -279,6 +279,14 @@ const initializeAgentsSystem = async () => {
     await startAgent(character, elizaMongodbAdapter);
   }
 
+  const verifySecretKey = (secretKey: string) => {
+    return secretKey === process.env.ELIZA_API_SECRET_KEY;
+  };
+
+  expressApp.get('/health', (request, response) => {
+    response.status(200).send('OK');
+  });
+
   expressApp.post(
     '/agents/change',
     bodyParser.json({}),
@@ -286,10 +294,17 @@ const initializeAgentsSystem = async () => {
       const {
         type,
         agent,
+        secretKey,
       } = request.body as {
         type: 'add' | 'remove' | 'update';
         agent: AgentConfiguration;
       };
+
+      if (!verifySecretKey(secretKey)) {
+        response.status(401).send({ status: 'Unauthorized' });
+
+        return;
+      }
 
       if (type === 'add') {
         await startAgent(generateCharacter(agent), elizaMongodbAdapter);
@@ -316,13 +331,21 @@ const initializeAgentsSystem = async () => {
         requestContent,
         interactionId,
         organizationId,
+        secretKey,
       } = request.body as {
         title: string;
         requestContent: string;
         interactionId: string;
         teamId: string;
         organizationId: string;
+        secretKey: string;
       };
+
+      if (!verifySecretKey(secretKey)) {
+        response.status(401).send({ status: 'Unauthorized' });
+
+        return;
+      }
 
       sendInteractionToProducer(
         interactionId,

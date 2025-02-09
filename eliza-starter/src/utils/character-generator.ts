@@ -1,4 +1,4 @@
-import { Character, ModelProviderName } from "@elizaos/core";
+import {Character, Clients, ModelProviderName} from "@elizaos/core";
 import { advertiser } from "../characters/advertiser.ts";
 import { influencer } from "../characters/influencer.ts";
 import { producer } from "../characters/producer.ts";
@@ -18,6 +18,8 @@ export interface AgentConfiguration {
   config: {
     twitterCookie?: string;
     twitterUsername?: string;
+    twitterPassword?: string;
+    twitterEmail?: string;
   };
 }
 
@@ -58,10 +60,13 @@ export function generateCharacter(agentConfig: AgentConfiguration): AiOfficeChar
     modelProvider: agentConfig.model as ModelProviderName,
     id: agentConfig.id as Character['id'],
     name: agentConfig.name,
+    clients: [agentConfig.role !== "producer" && Clients.TWITTER],
     settings: {
       secrets: {
         TWITTER_COOKIES: agentConfig.config.twitterCookie,
         TWITTER_USERNAME: agentConfig.config.twitterUsername,
+        TWITTER_PASSWORD: agentConfig.config.twitterPassword,
+        TWITTER_EMAIL: agentConfig.config.twitterEmail,
         ...getSecretsByModel(agentConfig.model, agentConfig.modelApiKey),
       },
     },

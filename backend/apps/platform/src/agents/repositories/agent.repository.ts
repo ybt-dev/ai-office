@@ -8,7 +8,7 @@ import { MongodbTransaction } from '@libs/mongodb-transactions';
 import { AnyObject } from '@libs/types';
 import { Agent } from '@apps/platform/agents/schemas';
 import { AgentEntity, MongoAgentEntity } from '@apps/platform/agents/entities';
-import { AgentRole } from '@apps/platform/agents/enums';
+import { AgentModel, AgentRole } from '@apps/platform/agents/enums';
 
 export interface IFindAgentTeamFilter {
   organizationId: string;
@@ -21,7 +21,7 @@ export interface CreateAgentEntityParams {
   name: string;
   team: string;
   role: AgentRole;
-  model: string;
+  model: AgentModel;
   modelApiKey: string;
   config: AnyObject;
   organization: string;
@@ -35,7 +35,7 @@ export interface CreateAgentEntityParams {
 
 export interface UpdateAgentEntityParams {
   name?: string;
-  model?: string;
+  model?: AgentModel;
   modelApiKey?: string;
   config?: AnyObject;
   description?: string;

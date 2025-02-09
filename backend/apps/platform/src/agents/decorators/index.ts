@@ -10,3 +10,4 @@ export { default as InjectAgentTeamInteractionEntityToDtoMapper } from './inject
 export { default as InjectAgentMessageRepository } from './inject-agent-message-repository.decorator';
 export { default as InjectAgentMessageService } from './inject-agent-message-service.decorator';
 export { default as InjectAgentMessageEntityToDtoMapper } from './inject-agent-message-entity-to-dto-mapper.decorator';
+export { default as InjectElizaApi } from './inject-eliza-api.decorator';
