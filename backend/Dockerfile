@@ -20,4 +20,4 @@ COPY --from=build /usr/src/app/node_modules ./node_modules
 ENV PORT=80
 ENV NODE_ENV=production
 
-CMD ["node", "dist/apps/babushka/main"]
+CMD ["node", "dist/apps/platform/main"]
