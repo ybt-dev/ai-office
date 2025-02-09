@@ -1,10 +1,15 @@
+import { Loader } from 'lucide-react';
+
 const LoadingScreen = () => {
   return (
-    <div className="fixed top-0 left-0 w-full h-full flex flex-col items-center justify-center bg-transparent z-50">
-      <div className="w-16 h-16 border-t-4 border-b-4 border-blue-500 rounded-full animate-spin"></div>
-      <p className="mt-4 text-lg text-white animate-pulse">
-        INITIALIZATION...
-      </p>
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="text-center">
+        <div className="inline-block rounded-lg bg-gray-800 p-3 mb-4">
+          <Loader className="animate-spin" />
+        </div>
+        <h2 className="text-2xl font-bold text-white mb-2">AI Office</h2>
+        <p className="text-gray-400 animate-pulse">Please wait while we initialize your workspace...</p>
+      </div>
     </div>
   );
 };

@@ -1,39 +1,70 @@
-import { IAgentRuntime } from "@elizaos/core";
-import { ADVERTISER_AGENT_ID } from "../../characters/advertiser.ts";
-import { INFLUENCER_AGENT_ID } from "../../characters/influencer.ts";
-import { PRODUCER_AGENT_ID } from "../../characters/producer.ts";
+import { AgentRuntime } from "@elizaos/core";
 
-const agentName = {
-    advertiser: ADVERTISER_AGENT_ID,
-    producer: PRODUCER_AGENT_ID,
-    influencer: INFLUENCER_AGENT_ID
+class ExtendedAgentRuntime extends AgentRuntime {
+    organizationId: string;
+    role: string;
 }
-
 class AgentManager {
-    agents: Map<keyof typeof agentName, IAgentRuntime>;
-    
+    rolesIndex: Map<string, string>;
+    agents: Map<string, ExtendedAgentRuntime>;
+
     constructor() {
       this.agents = new Map();
+      this.rolesIndex = new Map();
     }
-  
-    addAgent(name, agent) {
-      if (!this.agents.has(name)) {
-        this.agents.set(name, agent);
-        console.log(`Agent ${name} added.`);
+
+    addAgent(id, agent, organizationId?: string, role?: string) {
+      if (!this.agents.has(id)) {
+        this.agents.set(id, agent);
+        this.rolesIndex.set(`${organizationId}-${role}`, id);
+
+        console.log(`Agent ${id} added.`);
       } else {
-        console.log(`Agent ${name} already exists.`);
+        console.log(`Agent ${id} already exists.`);
       }
     }
-  
-    getAgent(name) {
-      return this.agents.get(name);
+
+    removeAgent(id) {
+        const agent = this.getAgent(id);
+
+        if (!agent) {
+            return;
+        }
+
+        this.rolesIndex.delete(this.createRolesIndexKey(agent.organizationId, agent.role));
+      this.agents.delete(id);
     }
-  
+
+    getAgent(id) {
+      return this.agents.get(id);
+    }
+
+    getAgentByRole(organizationId: string, role: string) {
+        const rolesId = `${organizationId}-${role}`;
+
+        if (!rolesId) {
+            return undefined;
+        }
+
+        console.log("All rolesIndex", Array.from(this.rolesIndex.values()));
+        const agentId = this.rolesIndex.get(rolesId);
+        const agent = this.getAgent(agentId);
+        return this.getAgent(agentId);
+    }
+
+    hasAgent(id) {
+        return this.agents.has(id);
+    }
+
     getAllAgents() {
       return Array.from(this.agents.values());
     }
-  
-    async performTask(name, taskFunction) {
+
+    findAgents(id) {
+      return this.agents.has(id)
+    }
+
+    async performTask(id, taskFunction) {
       const agent = this.getAgent(name);
       if (!agent) {
         throw new Error(`Agent ${name} not found.`);
@@ -45,8 +76,12 @@ class AgentManager {
         throw error;
       }
     }
+
+    createRolesIndexKey(organizationId, role) {
+        return `${organizationId}-${role}`;
+    }
   }
-  
+
 const agentsManager = new AgentManager();
 
 export {

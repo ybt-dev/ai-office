@@ -1,7 +1,6 @@
-import { composeContext, elizaLogger, generateText, ModelClass, Memory, IAgentRuntime } from "@elizaos/core";
-import { agentsManager } from "../agents/manager/index.ts";
-import { PRODUCER_AGENT_ID } from "../characters/producer.ts";
-import { INFLUENCER_AGENT_ID } from "../characters/influencer.ts";
+import {composeContext, elizaLogger, generateText, IAgentRuntime, Memory, ModelClass} from "@elizaos/core";
+import {agentsManager} from "../agents/manager/index.ts";
+import {initializeDatabase} from "../index.ts";
 
 const NOT_FOUND = "Request not found";
 
@@ -104,7 +103,7 @@ Final answer: I will generate  Twitter posts based on the marketing strategy and
 `;
 
 const createContextForLLM = async (
-    userPrompt: string, 
+    userPrompt: string,
     userId: `${string}-${string}-${string}-${string}-${string}`,
     agentRuntime: IAgentRuntime,
     template: string
@@ -119,17 +118,11 @@ const createContextForLLM = async (
     }
     const state = await agentRuntime.composeState(message);
 
-    const choosenTemplate = {
-        PRODUCER_AGENT_ID: mainProducerResponseTemplate,
-        INFLUENCER_AGENT_ID: influencerResponseTemplate
-    }
 
-    const context = await composeContext({
+    return composeContext({
         state,
         template: template
     });
-
-    return context;
 }
 
 const extractAdditional = (messageState: string) => {
@@ -151,50 +144,89 @@ const extractRequestForProducer = (messageState: string) => {
     return match ? match[1] : NOT_FOUND;
 }
 
-export const callGenerate = async () => {
+const getListOfInteraction = async () => {
+    const { client } = initializeDatabase();
+    const database = client.db("ai-office");
+
+    return (await database.collection("agent_team_interactions").find().toArray());
+}
+
+export const loopDBHandler = async () => {
+    elizaLogger.log("Starting loopDBHandler");
+
+    setInterval(async () => {
+        elizaLogger.log("Checking for database changes...");
+
+        const list = await getListOfInteraction();
+        if (list.length > 0) {
+            for(const item of list) {
+                await conversationHandler(item._id.toString(), item.organization.toString(), item.requestContent);
+            }
+        }
+
+    }, 30000);
+};
+
+
+export const conversationHandler = async (interactionId: string, organisationId: string, requestContent: string) => {
     try {
-    elizaLogger.log("Start conversation func")
-    const producerRuntime = await agentsManager.getAgent(PRODUCER_AGENT_ID);
-    const influencerRuntime = await agentsManager.getAgent(INFLUENCER_AGENT_ID);
+    elizaLogger.log("Start Conversation");
+
+
+    const all = agentsManager.getAllAgents();
+    // console.log("all agents from manager", all); - тут работает
+    const res = agentsManager.getAgentByRole(organisationId, 'producer');
+
+    elizaLogger.log("All agents", all); // - тут не работает
+    elizaLogger.log("agentsManager.getAgentByRole(organisationId, producer)", res);
+
+    const producerRuntime =  agentsManager.getAgentByRole(organisationId, "producer");
+
+    elizaLogger.log("producerRuntime", producerRuntime);
+
+    const influencerRuntime =  agentsManager.getAgentByRole(organisationId, "influencer");
+
+    elizaLogger.log("influencerRuntime", influencerRuntime);
 
     let isFinishConversation = false;
-    let userPrompt = "Hey, Lex. We have an idea, to write some posts on twitter about Liverpool and we need audience. Also need some advertisement strategy Can you help us with that?";
+    let userPrompt = requestContent
 
-    while(!isFinishConversation) {
-        const producerContext = await createContextForLLM(userPrompt, influencerRuntime.agentId, producerRuntime, mainProducerResponseTemplate);
-
-        const respondFromProducer = await generateText({
-            runtime: producerRuntime,
-            context: producerContext,
-            modelClass: ModelClass.LARGE
-        });
-        elizaLogger.log("RespondFromProducer", respondFromProducer)
-        const extractedRequest = extractRequestForInfluencer(respondFromProducer);
-        elizaLogger.log("ExtractedRequest", extractedRequest)
-        if(extractedRequest !== NOT_FOUND) {
-            const inflContext = await createContextForLLM(extractedRequest, producerRuntime.agentId, influencerRuntime, influencerResponseTemplate);
-            
-            const respondFromInfluencer = await generateText({
-                runtime: influencerRuntime,
-                context: inflContext,
-                modelClass: ModelClass.LARGE
-            });
-
-            elizaLogger.log("RepondFromInfluencer", respondFromInfluencer)
-
-            const additional = extractAdditional(respondFromInfluencer);
-            elizaLogger.log("Additional Info from response", additional)
-
-            if(additional !== NOT_FOUND && additional === "true") {
-                userPrompt = respondFromInfluencer;
-                continue
-            } else {
-                isFinishConversation = true;
-            }
-        } else {
-            isFinishConversation = true;
-        }
-    }
+    // while(!isFinishConversation) {
+    //     const producerContext = await createContextForLLM(userPrompt, influencerRuntime.agentId, producerRuntime, mainProducerResponseTemplate);
+    //
+    //     const respondFromProducer = await generateText({
+    //         runtime: producerRuntime,
+    //         context: producerContext,
+    //         modelClass: ModelClass.LARGE
+    //     });
+    //     elizaLogger.log("RespondFromProducer", respondFromProducer)
+    //     const extractedRequest = extractRequestForInfluencer(respondFromProducer);
+    //     elizaLogger.log("ExtractedRequest", extractedRequest)
+    //     if(extractedRequest !== NOT_FOUND) {
+    //
+    //         const inflContext = await createContextForLLM(extractedRequest, producerRuntime.agentId, influencerRuntime, influencerResponseTemplate);
+    //
+    //         const respondFromInfluencer = await generateText({
+    //             runtime: influencerRuntime,
+    //             context: inflContext,
+    //             modelClass: ModelClass.LARGE
+    //         });
+    //
+    //         elizaLogger.log("RepondFromInfluencer", respondFromInfluencer)
+    //
+    //         const additional = extractAdditional(respondFromInfluencer);
+    //         elizaLogger.log("Additional Info from response", additional)
+    //
+    //         if(additional !== NOT_FOUND && additional === "true") {
+    //             userPrompt = respondFromInfluencer;
+    //             continue
+    //         } else {
+    //             isFinishConversation = true;
+    //         }
+    //     } else {
+    //         isFinishConversation = true;
+    //     }
+    // }
 
     elizaLogger.log("IsConverestionIsFinished", isFinishConversation)
     return null;

@@ -42,10 +42,10 @@ export class Agent {
   imageUrl?: string;
 
   @Prop({ required: false, type: mongoose.Schema.Types.ObjectId })
-  createdBy: Object;
+  createdBy: ObjectId;
 
   @Prop({ required: false, type: mongoose.Schema.Types.ObjectId })
-  updatedBy: Object;
+  updatedBy: ObjectId;
 
   @Prop({ required: false, type: mongoose.Schema.Types.Date })
   createdAt: Date;
@@ -57,3 +57,4 @@ export class Agent {
 export const AgentSchema = SchemaFactory.createForClass(Agent);
 
 AgentSchema.index({ organization: 1, team: 1 });
+AgentSchema.index({ organization: 1, team: 1, role: 1 }, { unique: true });

@@ -16,9 +16,9 @@ export class User {
   organization: ObjectId;
 
   @Prop({ type: mongoose.Schema.Types.String, required: true })
-  email: string;
+  address: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
-UserSchema.index({ email: 1 }, { unique: true });
+UserSchema.index({ address: 1 }, { unique: true });

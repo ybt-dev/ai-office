@@ -1,10 +1,10 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { Session } from '@apps/platform/sessions/decorators';
 import { SessionData } from '@apps/platform/sessions/types';
 import { SessionGuard } from '@apps/platform/sessions/guards';
 import { AgentService } from '@apps/platform/agents/services';
 import { InjectAgentService } from '@apps/platform/agents/decorators';
-import { CreateAgentBodyDto, ListAgentsQueryDto } from '@apps/platform/agents/dto';
+import { CreateAgentBodyDto, ListAgentsQueryDto, UpdateAgentBodyDto } from '@apps/platform/agents/dto';
 
 @Controller('/agents')
 @UseGuards(SessionGuard)
@@ -28,13 +28,25 @@ export default class AgentController {
       teamId: body.teamId,
       role: body.role,
       model: body.model,
-      config: body.config,
+      twitterCookie: body.twitterCookie,
       modelApiKey: body.modelApiKey,
       description: body.description,
       createdById: session.userId,
       organizationId: session.organizationId,
       walletAddress: body.walletAddress,
       encryptedPrivateKey: body.encryptedPrivateKey,
+    });
+  }
+
+  @Put('/:id')
+  public updateAgent(@Session() session: SessionData, @Param('id') id: string, @Body() body: UpdateAgentBodyDto) {
+    return this.agentService.update(id, session.organizationId, {
+      name: body.name,
+      model: body.model,
+      modelApiKey: body.modelApiKey,
+      description: body.description,
+      twitterCookie: body.twitterCookie,
+      updatedById: session.userId,
     });
   }
 }

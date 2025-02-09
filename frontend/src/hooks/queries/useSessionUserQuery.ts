@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useSessionsApi } from '~/providers/ApiProvider';
+import { useSessionsApi } from '@/providers/ApiProvider';
 
 const useSessionUserQuery = () => {
   const sessionsApi = useSessionsApi();

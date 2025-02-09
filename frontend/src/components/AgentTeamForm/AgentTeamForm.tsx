@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { AgentTeam } from "~/api/AgentTeamsApi";
+import { FormEvent, ReactNode, useState } from 'react';
+import { tailwindClsx } from '@/utils';
 
 export interface AgentTeamFormData {
   name: string;
@@ -8,16 +8,27 @@ export interface AgentTeamFormData {
 }
 
 export interface AgentTeamFormProps {
-  existingAgentTeam?: AgentTeam;
+  className?: string;
+  innerContainerClassName?: string;
+  header?: ReactNode;
+  initialData?: AgentTeamFormData;
   onSubmit: (data: AgentTeamFormData) => void;
+  children: (data: AgentTeamFormData) => ReactNode;
 }
 
-const AgentTeamForm = ({ onSubmit }: AgentTeamFormProps) => {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [strategy, setStrategy] = useState('');
+const AgentTeamForm = ({
+  className,
+  innerContainerClassName,
+  header,
+  initialData,
+  onSubmit,
+  children,
+}: AgentTeamFormProps) => {
+  const [name, setName] = useState(initialData?.name || '');
+  const [description, setDescription] = useState(initialData?.description || '');
+  const [strategy, setStrategy] = useState(initialData?.strategy || '');
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
 
     onSubmit({
@@ -28,56 +39,61 @@ const AgentTeamForm = ({ onSubmit }: AgentTeamFormProps) => {
   };
 
   return (
-    <div className="w-full flex items-center justify-center">
-      <form onSubmit={handleSubmit} className="bg-gray-800 p-8 rounded shadow-md w-full max-w-md">
-        <div className="mb-4 w-full">
-          <label htmlFor="name" className="block text-gray-300 mb-2">
-            Name
+    <form
+      onSubmit={handleSubmit}
+      className={tailwindClsx('rounded-lg bg-gray-800 text-gray-100 overflow-hidden', className)}
+    >
+      {header}
+      <div className={tailwindClsx('space-y-6', innerContainerClassName)}>
+        <div>
+          <label htmlFor="teamName" className="block text-sm font-medium text-gray-400">
+            Team Name
           </label>
           <input
-            type="text"
-            id="name"
-            placeholder="Enter team name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
             required
-            className="w-full px-4 py-2 border border-gray-600 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            type="text"
+            id="teamName"
+            name="teamName"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
-        <div className="mb-4">
-          <label htmlFor="description" className="block text-gray-300 mb-2">
+        <div>
+          <label htmlFor="description" className="block text-sm font-medium text-gray-400">
             Description
           </label>
           <textarea
-            id="description"
-            placeholder="Enter team description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
             required
-            className="w-full px-4 py-2 border border-gray-600 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          ></textarea>
+            id="description"
+            name="description"
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            rows={3}
+            className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
         </div>
-        <div className="mb-6">
-          <label htmlFor="strategy" className="block text-gray-300 mb-2">
+        <div>
+          <label htmlFor="strategy" className="block text-sm font-medium text-gray-400">
             Strategy
           </label>
           <textarea
-            id="strategy"
-            placeholder="Enter team strategy"
-            value={strategy}
-            onChange={(e) => setStrategy(e.target.value)}
             required
-            className="w-full px-4 py-2 border border-gray-600 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          ></textarea>
+            id="strategy"
+            name="strategy"
+            value={strategy}
+            onChange={(event) => setStrategy(event.target.value)}
+            rows={3}
+            className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
         </div>
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200"
-        >
-          Create Team
-        </button>
-      </form>
-    </div>
+      </div>
+      {children({
+        name,
+        description,
+        strategy,
+      })}
+    </form>
   );
 };
 

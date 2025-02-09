@@ -18,10 +18,19 @@ interface CreateAgentTeamEntityParams {
   updatedBy?: string | null;
 }
 
+export interface UpdateAgentTeamEntityParams {
+  name?: string;
+  description?: string;
+  strategy?: string;
+  imageUrl?: string;
+  updatedBy?: string | null;
+}
+
 export interface AgentTeamRepository {
   findByIdAndOrganizationId(id: string, organizationId: string): Promise<AgentTeamEntity | null>;
   findManyByOrganizationId(organizationId: string): Promise<AgentTeamEntity[]>;
   createOne(params: CreateAgentTeamEntityParams): Promise<AgentTeamEntity>;
+  updateById(id: string, params: UpdateAgentTeamEntityParams): Promise<AgentTeamEntity | null>;
 }
 
 @Injectable()
@@ -72,5 +81,25 @@ export class MongoAgentTeamRepository implements AgentTeamRepository {
     });
 
     return new MongoAgentTeamEntity(team);
+  }
+
+  public async updateById(id: string, params: UpdateAgentTeamEntityParams) {
+    const team = await this.agentTeamModel
+      .findOneAndUpdate(
+        {
+          _id: new ObjectId(id),
+        },
+        {
+          $set: params,
+        },
+        {
+          new: true,
+          lean: true,
+          session: this.transactionsManager.getCurrentTransaction()?.getSession(),
+        },
+      )
+      .exec();
+
+    return team ? new MongoAgentTeamEntity(team) : null;
   }
 }

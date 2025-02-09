@@ -1,7 +1,7 @@
 export interface UserDto {
   id: string;
   organizationId: string;
-  email: string;
+  address: string;
   firstName?: string;
   lastName?: string;
 }

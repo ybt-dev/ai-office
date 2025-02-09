@@ -13,7 +13,7 @@ export interface AgentTeamDto {
   updatedById?: string | null;
 }
 
-export class CreateAgentTeamDto {
+export class CreateAgentTeamBodyDto {
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -24,4 +24,15 @@ export class CreateAgentTeamDto {
 
   @IsString()
   description: string;
+}
+
+export class UpdateAgentTeamBodyDto {
+  @IsString()
+  name: string;
+
+  @IsString()
+  description: string;
+
+  @IsString()
+  strategy: string;
 }

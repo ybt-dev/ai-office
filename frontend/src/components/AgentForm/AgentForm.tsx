@@ -1,124 +1,165 @@
-import { useState } from 'react';
-import { Agent, AgentRole } from "~/api/AgentsApi";
+import { FormEvent, ReactNode, useState } from 'react';
+import { AgentRole } from '@/api/AgentsApi';
+import { tailwindClsx } from '@/utils';
 
 export interface AgentFormData {
-  agentName: string;
-  agentDescription: string;
-  agentRole: AgentRole;
+  name: string;
+  role: AgentRole;
+  description: string;
   model: string;
   modelApiKey: string;
+  twitterCookie?: string;
 }
 
-export interface AgentFormProps {
-  existingAgent?: Agent;
-  onSubmit: (agentData: AgentFormData) => void;
-  actionName: string;
-  canEditRole?: boolean;
+interface AgentFormProps {
+  className?: string;
+  innerContainerClassName?: string;
+  header?: ReactNode;
+  initialData?: AgentFormData;
+  onSubmit: (data: AgentFormData) => void;
+  children: (data: AgentFormData) => ReactNode;
+  hideRoleInput?: boolean;
 }
 
-const AgentForm = ({ canEditRole, existingAgent, actionName, onSubmit }: AgentFormProps) => {
-  const [agentName, setAgentName] = useState(existingAgent?.name || '');
-  const [agentDescription, setAgentDescription] = useState(existingAgent?.description || '');
-  const [agentRole, setAgentRole] = useState<AgentRole>(existingAgent?.role || AgentRole.Producer);
-  const [model, setModel] = useState(existingAgent?.model || '');
-  const [modelApiKey, setModelApiKey] = useState(existingAgent?.modelApiKey || '');
+const AgentForm = ({
+  className,
+  innerContainerClassName,
+  header,
+  initialData,
+  onSubmit,
+  children,
+  hideRoleInput,
+}: AgentFormProps) => {
+  const [name, setName] = useState(initialData?.name || '');
+  const [role, setRole] = useState(initialData?.role || '');
+  const [description, setDescription] = useState(initialData?.description || '');
+  const [model, setModel] = useState(initialData?.model || '');
+  const [modelApiKey, setModelApiKey] = useState(initialData?.modelApiKey || '');
+  const [twitterCookie, setTwitterCookie] = useState(initialData?.twitterCookie || '');
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
 
     onSubmit({
-      agentName,
-      agentDescription,
-      agentRole,
+      name,
+      role: role as AgentRole,
+      description,
       model,
       modelApiKey,
+      twitterCookie,
     });
   };
 
   return (
-    <div className="w-full flex items-center justify-center">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-gray-800 p-8 rounded shadow-md w-full"
-      >
-        <div className="mb-4">
-          <label htmlFor="agentName" className="block text-gray-300 mb-2">
-            Agent Name
-          </label>
-          <input
-            type="text"
-            id="agentName"
-            placeholder="Enter agent name"
-            value={agentName}
-            onChange={(e) => setAgentName(e.target.value)}
-            required
-            className="w-full px-4 py-2 border border-gray-600 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+    <form
+      onSubmit={handleSubmit}
+      className={tailwindClsx('rounded-lg bg-gray-800 text-gray-100 overflow-hidden', className)}
+    >
+      {header}
+      <div className={tailwindClsx('space-y-4', innerContainerClassName)}>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-400">
+              Agent Name
+            </label>
+            <input
+              required
+              type="text"
+              id="name"
+              name="name"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+          {!hideRoleInput && (
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-400">
+                Agent Role
+              </label>
+              <input
+                required
+                type="text"
+                list="roleOptions"
+                id="role"
+                name="role"
+                value={role}
+                onChange={(event) => setRole(event.target.value)}
+                className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              <datalist id="roleOptions">
+                {Object.values(AgentRole).map((roleOption) => (
+                  <option key={roleOption} value={roleOption} />
+                ))}
+              </datalist>
+            </div>
+          )}
+          {role === AgentRole.Adviser || role === AgentRole.Influencer ? (
+            <div>
+              <label htmlFor="twitterCookie" className="block text-sm font-medium text-gray-400">
+                Twitter Cookie
+              </label>
+              <input
+                type="text"
+                id="twitterCookie"
+                name="twitterCookie"
+                value={twitterCookie}
+                onChange={(event) => setTwitterCookie(event.target.value)}
+                className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+          ) : null}
+          <div className="md:col-span-2">
+            <label htmlFor="description" className="block text-sm font-medium text-gray-400">
+              Agent Description
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              rows={3}
+              className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label htmlFor="model" className="block text-sm font-medium text-gray-400">
+              Model (AI model)
+            </label>
+            <input
+              required
+              type="text"
+              id="model"
+              name="model"
+              value={model}
+              onChange={(event) => setModel(event.target.value)}
+              className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label htmlFor="apiKey" className="block text-sm font-medium text-gray-400">
+              Model API Key
+            </label>
+            <input
+              required
+              type="password"
+              id="apiKey"
+              name="apiKey"
+              value={modelApiKey}
+              onChange={(event) => setModelApiKey(event.target.value)}
+              className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
         </div>
-        <div className="mb-4">
-          <label htmlFor="agentDescription" className="block text-gray-300 mb-2">
-            Agent Description
-          </label>
-          <textarea
-            id="agentDescription"
-            placeholder="Enter agent description"
-            value={agentDescription}
-            onChange={(e) => setAgentDescription(e.target.value)}
-            required
-            className="w-full px-4 py-2 border border-gray-600 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          ></textarea>
-        </div>
-        {canEditRole && <div className="mb-4">
-          <label htmlFor="agentRole" className="block text-gray-300 mb-2">
-            Agent Role
-          </label>
-          <select
-            id="agentRole"
-            value={agentRole}
-            onChange={(e) => setAgentRole(e.target.value as AgentRole)}
-            className="w-full px-4 py-2 border border-gray-600 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value={AgentRole.Producer}>Producer</option>
-            <option value={AgentRole.Influencer}>Influencer</option>
-            <option value={AgentRole.Adviser}>Advisor</option>
-          </select>
-        </div>}
-        <div className="mb-4">
-          <label htmlFor="model" className="block text-gray-300 mb-2">
-            Model (AI model)
-          </label>
-          <input
-            type="text"
-            id="model"
-            placeholder="Enter AI model"
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
-            required
-            className="w-full px-4 py-2 border border-gray-600 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="apiKey" className="block text-gray-300 mb-2">
-            Model API Key
-          </label>
-          <input
-            type="text"
-            id="apiKey"
-            placeholder="Enter API key"
-            value={modelApiKey}
-            onChange={(e) => setModelApiKey(e.target.value)}
-            required
-            className="w-full px-4 py-2 border border-gray-600 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200"
-        >
-          {actionName}
-        </button>
-      </form>
-    </div>
+        {children({
+          name,
+          role: role as AgentRole,
+          description,
+          model,
+          modelApiKey,
+        })}
+      </div>
+    </form>
   );
 };
 
