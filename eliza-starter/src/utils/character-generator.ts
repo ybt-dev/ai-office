@@ -1,24 +1,67 @@
-import { Character } from "@elizaos/core";
+import { Character, ModelProviderName } from "@elizaos/core";
 import { advertiser } from "../characters/advertiser.ts";
 import { influencer } from "../characters/influencer.ts";
 import { producer } from "../characters/producer.ts";
+import {AiOfficeCharacter} from "../agents/manager";
 
 type AgentRole =  "advertiser" | "influencer" | "producer";
 
-export function generateCharacter(id: string, name: string, role: AgentRole): Character {
-    const templates = {
-        advertiser,
-        influencer,
-        producer
-    };
+export interface AgentConfiguration {
+  id: string;
+  name: string;
+  role: AgentRole;
+  description: string;
+  model: string;
+  organizationId: string;
+  modelApiKey: string;
+  config: {
+    twitterCookie?: string;
+    twitterUsername?: string;
+  };
+}
 
-    if (!templates[role]) {
-        throw new Error("Invalid role");
+const AVAILABLE_TEMPLATES = {
+  advertiser,
+  influencer,
+  producer,
+};
+
+const getSecretsByModel = (model: string, modelApiKey: string) => {
+  switch (model) {
+    case ModelProviderName.OPENAI: {
+      return {
+        OPENAI_API_KEY: modelApiKey
+      };
     }
+    case ModelProviderName.OPENROUTER: {
+      return {
+        OPENROUTER: modelApiKey,
+      }
+    }
+    default: {
+      return {};
+    }
+  }
+};
 
-    return {
-        ...templates[role],
-        id: id as Character["id"],
-        name
-    };
+export function generateCharacter(agentConfig: AgentConfiguration): AiOfficeCharacter {
+  if (!AVAILABLE_TEMPLATES[agentConfig.role]) {
+    throw new Error("Invalid role");
+  }
+
+  return {
+    ...AVAILABLE_TEMPLATES[agentConfig.role],
+    organizationId: agentConfig.model,
+    role: agentConfig.role,
+    modelProvider: agentConfig.model as ModelProviderName,
+    id: agentConfig.id as Character['id'],
+    name: agentConfig.name,
+    settings: {
+      secrets: {
+        TWITTER_COOKIES: agentConfig.config.twitterCookie,
+        TWITTER_USERNAME: agentConfig.config.twitterUsername,
+        ...getSecretsByModel(agentConfig.model, agentConfig.modelApiKey),
+      },
+    },
+  };
 }

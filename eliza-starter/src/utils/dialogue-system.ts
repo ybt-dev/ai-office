@@ -1,6 +1,5 @@
 import {composeContext, elizaLogger, generateText, IAgentRuntime, Memory, ModelClass} from "@elizaos/core";
 import {agentsManager} from "../agents/manager/index.ts";
-import {initializeDatabase} from "../index.ts";
 
 const NOT_FOUND = "Request not found";
 
@@ -145,10 +144,8 @@ const extractRequestForProducer = (messageState: string) => {
 }
 
 const getListOfInteraction = async () => {
-    const { client } = initializeDatabase();
-    const database = client.db("ai-office");
-
-    return (await database.collection("agent_team_interactions").find().toArray());
+    // INTERACTION will come from event;
+    return [];
 }
 
 export const loopDBHandler = async () => {
