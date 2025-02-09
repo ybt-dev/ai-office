@@ -10,6 +10,7 @@ export interface EditAgentTeamFormProps {
 const EditAgentTeamForm = ({ agentTeam, onSubmit, onCancel }: EditAgentTeamFormProps) => {
   return (
     <AgentTeamForm
+      innerContainerClassName="p-6"
       initialData={{
         name: agentTeam.name,
         description: agentTeam.description,
@@ -18,7 +19,7 @@ const EditAgentTeamForm = ({ agentTeam, onSubmit, onCancel }: EditAgentTeamFormP
       onSubmit={onSubmit}
     >
       {() => (
-        <div className="flex justify-end space-x-4">
+        <div className="px-4 pb-4 flex justify-end space-x-4">
           <button
             type="button"
             onClick={onCancel}

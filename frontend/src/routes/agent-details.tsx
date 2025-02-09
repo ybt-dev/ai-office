@@ -26,6 +26,7 @@ const AgentDetails = () => {
       description: data.description,
       modelApiKey: data.modelApiKey,
       model: data.model,
+      twitterCookie: data.twitterCookie,
     });
 
     setIsEditMode(false);

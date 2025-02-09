@@ -32,6 +32,7 @@ const AgentTeamInteractionForm = ({ initialData, onSubmit, children }: AgentTeam
             Title
           </label>
           <input
+            required
             type="text"
             id="title"
             name="title"
@@ -42,9 +43,10 @@ const AgentTeamInteractionForm = ({ initialData, onSubmit, children }: AgentTeam
         </div>
         <div>
           <label htmlFor="requestContent" className="block text-sm font-medium text-gray-400">
-            Description
+            Content
           </label>
           <textarea
+            required
             id="requestContent"
             name="requestContent"
             value={requestContent}

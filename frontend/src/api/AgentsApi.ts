@@ -24,7 +24,7 @@ export interface CreateAgentParams {
   teamId: string;
   model: string;
   modelApiKey: string;
-  config: unknown;
+  twitterCookie?: string;
   description?: string;
 }
 
@@ -32,8 +32,8 @@ export interface UpdateAgentParams {
   name?: string;
   model?: string;
   modelApiKey?: string;
-  config?: unknown;
   description?: string;
+  twitterCookie?: string;
 }
 
 export interface AgentsApi {

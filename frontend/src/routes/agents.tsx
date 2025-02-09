@@ -1,4 +1,4 @@
-import {useState} from "react";
+import { useState} from "react";
 import { Plus } from "lucide-react"
 import { Outlet, useNavigate, useOutletContext, useParams } from "react-router";
 import { Agent } from "@/api/AgentsApi";
@@ -31,9 +31,11 @@ const Agents = () => {
       modelApiKey: data.modelApiKey,
       model: data.model,
       role: data.role,
-      config: {},
+      twitterCookie: data.twitterCookie,
       teamId,
     });
+
+    hideCreateAgentPopup();
   };
 
   const handleAgentClick = (agent: Agent) => {
@@ -41,7 +43,7 @@ const Agents = () => {
   };
 
   return (
-    <div className="w-full h-full text-white">
+    <div className="flex flex-col w-full h-full text-white">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-white">My Agents:</h1>
         <button
@@ -58,6 +60,11 @@ const Agents = () => {
         agents={agents ?? null}
         onAgentClick={handleAgentClick}
       />
+      {agents && !agents.length ? (
+        <div className="text-center text-gray-400 m-auto">
+          No agents found. Click the "New Agent" button to create one.
+        </div>
+      ) : null}
       <Outlet key={selectedAgentId} />
       <Popup title="Create New Agent" isOpen={displayCreateAgentPopup} onClose={hideCreateAgentPopup}>
         <CreateAgentForm onSubmit={handleCreateAgentSubmit} />

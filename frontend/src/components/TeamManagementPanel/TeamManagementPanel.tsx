@@ -5,7 +5,7 @@ import CategoriesList, { Category } from "@/components/TeamManagementPanel/Categ
 
 export interface TeamManagementPanelProps {
   agentTeamName: string;
-  selectedCategory: TeamCategoryId;
+  selectedCategoryId: TeamCategoryId;
   onSelectCategory: (categoryId: TeamCategoryId) => void;
   goBackButtonLink: string;
 }
@@ -26,7 +26,7 @@ const CATEGORIES: Category<TeamCategoryId>[] = [{
 
 const TeamManagementPanel = ({
   agentTeamName,
-  selectedCategory,
+  selectedCategoryId,
   onSelectCategory,
   goBackButtonLink,
 }: TeamManagementPanelProps) => {
@@ -38,8 +38,7 @@ const TeamManagementPanel = ({
       <nav className="flex-1 space-y-1 px-4 py-4">
         <CategoriesList<TeamCategoryId>
           categories={CATEGORIES}
-          selectedCategoryId={selectedCategory}
-          selectedCategory={selectedCategory}
+          selectedCategoryId={selectedCategoryId}
           onSelectCategory={onSelectCategory}
         />
       </nav>

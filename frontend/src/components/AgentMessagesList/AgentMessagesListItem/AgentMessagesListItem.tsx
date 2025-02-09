@@ -1,3 +1,6 @@
+import { memo } from "react";
+import { timeAgo } from "@/globals";
+
 export interface AgentMessagesListItemProps {
   messageId: string;
   senderName: string;
@@ -6,7 +9,7 @@ export interface AgentMessagesListItemProps {
   messageDate: string | Date;
 }
 
-const AgentMessagesListItem = ({
+const AgentMessagesListItem = memo(({
   senderName,
   senderAvatarUrl,
   messageContent,
@@ -22,12 +25,12 @@ const AgentMessagesListItem = ({
       <div className="flex-1">
         <div className="flex items-baseline mb-1">
           <span className="font-semibold text-white mr-2">{senderName}</span>
-          <span className="text-sm text-gray-500">{messageDate}</span>
+          <span className="text-sm text-gray-500">{timeAgo.format(new Date(messageDate))}</span>
         </div>
         <p className="text-gray-300 whitespace-pre-wrap">{messageContent}</p>
       </div>
     </div>
   );
-};
+});
 
 export default AgentMessagesListItem;

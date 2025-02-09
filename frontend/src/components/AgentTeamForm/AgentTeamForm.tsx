@@ -43,6 +43,7 @@ const AgentTeamForm = ({ className, innerContainerClassName, header, initialData
             Team Name
           </label>
           <input
+            required
             type="text"
             id="teamName"
             name="teamName"
@@ -56,6 +57,7 @@ const AgentTeamForm = ({ className, innerContainerClassName, header, initialData
             Description
           </label>
           <textarea
+            required
             id="description"
             name="description"
             value={description}
@@ -69,6 +71,7 @@ const AgentTeamForm = ({ className, innerContainerClassName, header, initialData
             Strategy
           </label>
           <textarea
+            required
             id="strategy"
             name="strategy"
             value={strategy}

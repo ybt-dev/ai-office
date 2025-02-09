@@ -20,20 +20,22 @@ const AgentTeamsPage = () => {
 
   const { mutateAsync: createAgentTeam } = useCreateAgentTeamMutation();
 
+  const showCreateAgentTeamPopup = () => {
+    setDisplayCreateAgentTeamPopup(true);
+  };
+
+  const hideCreateAgentTeamPopup = () => {
+    setDisplayCreateAgentTeamPopup(false);
+  };
+
   const handleSubmitCreateAgentForm = async (data: AgentTeamFormData) => {
     await createAgentTeam({
       description: data.description,
       name: data.name,
       strategy: data.strategy,
     });
-  };
 
-  const closeCreateAgentTeamPopup = () => {
-    setDisplayCreateAgentTeamPopup(false);
-  };
-
-  const showCreateAgentTeamPopup = () => {
-    setDisplayCreateAgentTeamPopup(true);
+    hideCreateAgentTeamPopup();
   };
 
   const handleEditAgentTeamClick = (agentTeam: AgentTeam) => {
@@ -41,7 +43,7 @@ const AgentTeamsPage = () => {
   };
 
   return (
-    <div className="min-h-screen p-8">
+    <div className="flex flex-col min-h-screen p-8">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-white">Agent Teams:</h1>
         <button
@@ -57,10 +59,14 @@ const AgentTeamsPage = () => {
         onEditAgentTeamClick={handleEditAgentTeamClick}
       />
 
+      {agentTeams && !agentTeams.length && (
+        <div className="text-center text-gray-400 m-auto">No agent teams found. Click create button to create one.</div>
+      )}
+
       <Popup
         title="Create New Team"
         isOpen={displayCreateAgentTeamPopup}
-        onClose={closeCreateAgentTeamPopup}
+        onClose={hideCreateAgentTeamPopup}
       >
         <CreateAgentTeamForm onSubmit={handleSubmitCreateAgentForm} />
       </Popup>

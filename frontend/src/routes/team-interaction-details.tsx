@@ -1,15 +1,30 @@
 import { Link, useParams } from "react-router";
+import {useMemo} from "react";
 import {ArrowLeft} from "lucide-react";
+import {Agent} from "@/api/AgentsApi";
 import useListLatestAgentMessagesQuery from "@/hooks/queries/useListLatestAgentMessagesQuery";
 import useAgentTeamInteractionByIdQuery from "@/hooks/queries/useAgentTeamInteractionByIdQuery";
 import AgentMessagesList from "@/components/AgentMessagesList/AgentMessagesList";
 import Skeleton from "@/components/Skeleton";
+import useListAgentsByTeamIdQuery from "@/hooks/queries/useListAgentsByTeamIdQuery";
 
 const TeamInteractionDetails = () => {
-  const { interactionId } = useParams<{ interactionId: string; }>();
+  const {
+    interactionId,
+    agentTeamId,
+  } = useParams<{ interactionId: string; agentTeamId: string; }>();
 
   const { data: messages } = useListLatestAgentMessagesQuery(interactionId || '');
+  const { data: agents } = useListAgentsByTeamIdQuery(agentTeamId || '');
   const { data: agentTeamInteraction } = useAgentTeamInteractionByIdQuery(interactionId || '');
+
+  const agentsPool = useMemo(() => {
+    return (agents || []).reduce((pool, agent) => {
+      pool[agent.id] = agent;
+
+      return pool;
+    }, {} as Record<string, Agent>);
+  }, [agents]);
 
   const renderMessageDetails = () => {
     if (!agentTeamInteraction) {
@@ -41,7 +56,13 @@ const TeamInteractionDetails = () => {
       <div className="flex flex-col gap-6 mb-4">
         {renderMessageDetails()}
       </div>
-      <AgentMessagesList messages={messages ?? null} />
+      <AgentMessagesList
+        agentsPool={agentsPool}
+        messages={messages ?? null}
+      />
+      {messages && !messages.length && (
+        <p className="text-white">No messages found.</p>
+      )}
     </div>
   );
 };
