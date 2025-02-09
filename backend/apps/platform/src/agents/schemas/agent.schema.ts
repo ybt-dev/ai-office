@@ -32,6 +32,12 @@ export class Agent {
   @Prop({ required: true, type: mongoose.Schema.Types.Mixed })
   config: AnyObject;
 
+  @Prop({ required: true, type: mongoose.Schema.Types.String })
+  walletAddress: string;
+
+  @Prop({ required: true, type: mongoose.Schema.Types.String })
+  encryptedPrivateKey: string;
+
   @Prop({ required: false, type: mongoose.Schema.Types.String })
   imageUrl?: string;
 

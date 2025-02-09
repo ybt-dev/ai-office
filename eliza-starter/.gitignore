@@ -1,6 +1,9 @@
 *.ts
 !index.ts
 !character.ts
+!src/**/*.ts
+pnpm-lock.yaml
+
 .env
 node_modules
 

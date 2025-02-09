@@ -17,7 +17,7 @@ export interface IFindAgentTeamFilter {
   roles?: AgentRole[];
 }
 
-interface CreateAgentEntityParams {
+export interface CreateAgentEntityParams {
   name: string;
   team: string;
   role: AgentRole;
@@ -29,6 +29,8 @@ interface CreateAgentEntityParams {
   imageUrl?: string;
   createdBy?: string | null;
   updatedBy?: string | null;
+  walletAddress: string;
+  encryptedPrivateKey: string;
 }
 
 export interface UpdateAgentEntityParams {
